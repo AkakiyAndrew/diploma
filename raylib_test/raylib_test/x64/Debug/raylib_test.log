@@ -1,0 +1,11 @@
+﻿  example_move_and_camera.cpp
+  main.cpp
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(53,57): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(58,92): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(68,82): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(85,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(86,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(91,94): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(96,94): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+  Создание кода...
+  raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\raylib_test\x64\Debug\raylib_test.exe
