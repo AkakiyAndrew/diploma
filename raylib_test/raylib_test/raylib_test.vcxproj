@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="example_camera.cpp" />
     <ClCompile Include="example_move_and_camera.cpp" />
+    <ClCompile Include="lab_2.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
