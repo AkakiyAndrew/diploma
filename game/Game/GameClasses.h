@@ -16,7 +16,7 @@ enum class Status
 	BUILDING,
 	ATTACKING,
 	GOES,
-	ATTACKING, //ондслюрэ опн яхярелс юрюйх х яжеохрэ я юмхлюжхеи
+	//ондслюрэ опн яхярелс юрюйх х яжеохрэ я юмхлюжхеи
 };
 
 enum class ActorType
