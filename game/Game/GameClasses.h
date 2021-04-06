@@ -1,0 +1,131 @@
+#pragma once
+#include "raylib.h"
+#include <string>
+
+enum class Side
+{
+	MACHINES,
+	INSECTS
+};
+
+enum class Status
+{
+	ONLINE,
+	OFFLINE,
+	CONSTRUCTION,
+	BUILDING,
+	ATTACKING,
+	GOES,
+	ATTACKING, //ПОДУМАТЬ ПРО СИСТЕМУ АТАКИ И СЦЕПИТЬ С АНИМАЦИЕЙ
+};
+
+enum class ActorType
+{
+	//Machines turrets
+	LIGHT_TURRET,
+	HEAVY_TURRET,
+	AIRDEFENSE_TURRET,
+
+	//Insects units
+	LIGHT_INSECT,
+	HEAVY_INSECT,
+	FLYING_INSECT,
+
+	//Machines buildings
+	CORE,
+	BASE,
+
+	//Insects buildings
+	HIVE,
+	TUMOR
+};
+
+enum class TerrainType
+{
+	MOUNTAIN,
+	SWAMP,
+	TREE,
+	LAKE,
+	PLAIN,
+	STONE,
+	SAND,
+	ASH,
+};
+
+class GameData
+{
+	TerrainType* mapTerrain;
+	int mapHeight;
+	int mapWidth;
+
+	//тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
+	//тут же и будут хранится карты урона и т.п.
+
+	//кол-во ресурсов
+
+	//тут же и хранить настройки?
+
+	void generateMap(int height, int width);
+	void saveToFile(std::string fileName);
+	void loadFromFile(std::string fileName);
+	//void loadSettings();
+
+	//оставить тут методы "приказов", а вызывать их извне в общем цикле?
+
+	//для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
+	void GameDraw(); 
+	void GameUpdate();
+
+};
+
+class GameActor {
+
+protected:
+	int currentHP;
+	int maxHP;
+	int size;
+	int armor;
+	int cost;
+	int buildCount;
+	int progress;
+	int ID;
+	int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
+	Vector2 position;
+	Side side;
+	std::string name;
+	Status status;
+	bool selectable; //удалить? все равно просматривать данные необходимо, а приказы отдавать не тут/сменить на selected, чтобы в Draw рисовать рамку, а в GUI хранить указатель на выбранного актера
+	Texture2D* sprite; //заменить на структуру анимации+текущего кадра? надо глянуть, как анимация реализована у других
+
+public:
+	 //???, вынести спрайты отдельно? да, вынести, в Draw использовать указатель на спрайт и его юзать, в конструкторе получать значение указателя по типу 
+	virtual void Draw() = 0;
+	virtual void Update() = 0; 
+	virtual void Destroy() = 0; //создать обломки/ошметки на карте, возможно даже не виртуальный, внутри использовать деструктор
+
+	GameActor(ActorType type) //принимать просто тип(может, еще и статус?), и выставлять стартовые значения, взятые из настроек игры, прямо тут?
+	{
+
+	}
+
+};
+
+
+
+class Building: public GameActor {
+
+private:
+	int expansionRange;
+
+public:
+	void Expand()
+	{
+		//для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
+		//спавнить за раз 2-4 тайла, каждому свой цикл проверок:
+		//проходить по спирали радиуса экспансии, проверяя является ли тайл пустым от слизи и имеется ли сосед со слизью
+
+		//убываение слизи: раз в n*m циклов проверять все тайлы слизи на наличие рядом источника слизи, если нет - проверять 
+
+	}
+
+};

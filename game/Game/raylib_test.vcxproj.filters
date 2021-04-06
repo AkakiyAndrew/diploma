@@ -24,9 +24,12 @@
     <ClCompile Include="example_move_and_camera.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="GameClasses.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameActors.h">
+    <ClInclude Include="GameClasses.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
