@@ -42,13 +42,13 @@ enum class ActorType
 
 enum class TerrainType
 {
-	MOUNTAIN,
-	SWAMP,
-	TREE,
 	LAKE,
-	PLAIN,
-	STONE,
+	SWAMP,
 	SAND,
+	PLAIN,
+	TREE,
+	STONE,
+	MOUNTAIN,
 	ASH,
 };
 

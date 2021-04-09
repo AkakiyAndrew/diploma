@@ -155,7 +155,7 @@ int main(void)
   /*  Vector2 corner = { cornerX, cornerY };
     Vector2 rectangleSize = { height * pixelsPerCell, width * pixelsPerCell };*/
 
-    unsigned char* pixels = new unsigned char[height * width];
+    Color* pixels = new Color[height * width];
 
     double frequency = 8;
     int octaves = 8;
@@ -163,24 +163,72 @@ int main(void)
     const siv::PerlinNoise perlin(12345);
     const double fx = width / frequency;
     const double fy = height / frequency;
-    
+    double noise;
+    Color tileColor;
+
     int index = 0;
+    
+    //Image preview = GenImageColor(width, height, WHITE);
+    
     for (int y = 0; y < height; ++y)
     {
         for (int x = 0; x < width; ++x)
         {
             index = width * y + x;
-            pixels[index] = static_cast<unsigned char>(perlin.accumulatedOctaveNoise2D_0_1(x / fx, y / fy, octaves) *255.);
+            noise = perlin.accumulatedOctaveNoise2D_0_1(x / fx, y / fy, octaves);
+
+            if (noise > 0.5)
+            {
+                if (noise > 0.6)
+                {
+                    if (noise > 0.7)
+                    {
+                        tileColor = BLACK;
+                    }
+                    else
+                    {
+                        tileColor = DARKGRAY;
+                    }
+                }
+                else
+                {
+                    tileColor = DARKGREEN;
+                }
+            }
+            else
+            {
+                if (noise > 0.4)
+                {
+                    if (noise > 0.45)
+                    {
+                        tileColor = YELLOW;
+                    }
+                    else
+                    {
+                        tileColor = BLUE;
+                    }
+                }
+                else
+                {
+                    tileColor = DARKBLUE;
+                }
+            }
+
+            pixels[index] = tileColor;
+            
         }
     }
+
+    //preview.data = pixels;
 
     Image preview = {
         pixels,
         width,
         height,
-        UNCOMPRESSED_GRAYSCALE,
-        1
+        1,
+        UNCOMPRESSED_R8G8B8A8
     };
+
     //UNCOMPRESSED_R8G8B8
     Texture2D texture = LoadTextureFromImage(preview);
 
