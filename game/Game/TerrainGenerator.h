@@ -13,6 +13,8 @@ private:
 	int width, height, seed, octave;
 	double frequency, fx, fy;
 
+	Color* palette;
+
 	float* levels;
 
 	double* heightMap;

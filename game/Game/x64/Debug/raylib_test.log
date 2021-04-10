@@ -1,5 +1,5 @@
 ﻿  TerrainGenerator.cpp
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(6,70): warning C4305: инициализация: усечение из "double" в "float"
-C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(17,34): warning C4838: Преобразование из "int" в "float" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(17,34): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(32,66): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(32,51): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe
