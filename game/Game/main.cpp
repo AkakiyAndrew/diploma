@@ -234,6 +234,8 @@ int main(void)
     //UNCOMPRESSED_R8G8B8
     Texture2D texture = LoadTextureFromImage(preview);
 
+    delete[] pixels;
+
     TerrainGenerator terrain{};
     
     //--------------------------------------------------------------------------------------
@@ -245,7 +247,7 @@ int main(void)
 
         // Background
         ClearBackground(DARKGRAY);
-        terrain.DrawInterface();
+        terrain.DrawInterface(); //выдавать на return указатель на сгенерированную местность
         //DrawTexture(texture, 0, 0, WHITE);
 
         EndDrawing();

@@ -10,14 +10,17 @@ class TerrainGenerator
 {
 private:
 	bool closed, generated;
-	int width, height, seed, octave;
+	int width, height, octaves;
+	unsigned int seed;
 	double frequency, fx, fy;
 
 	Color* palette;
 
 	float* levels;
 
-	double* heightMap;
+	double* noiseMap;
+	TerrainType* terrainMap;
+	Texture2D colorPreview;
 
 public:
 	TerrainGenerator(void);
