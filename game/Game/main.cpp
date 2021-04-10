@@ -234,8 +234,8 @@ int main(void)
     //UNCOMPRESSED_R8G8B8
     Texture2D texture = LoadTextureFromImage(preview);
 
-    TerrainGenerator terrain;
-
+    TerrainGenerator terrain{};
+    
     //--------------------------------------------------------------------------------------
 
     // Main game loop
@@ -246,7 +246,7 @@ int main(void)
         // Background
         ClearBackground(DARKGRAY);
         terrain.DrawInterface();
-        //DrawTexture(texture, 0, 0, WHITE);
+        DrawTexture(texture, 0, 0, WHITE);
 
         EndDrawing();
     }

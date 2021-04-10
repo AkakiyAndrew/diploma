@@ -11,16 +11,16 @@ class TerrainGenerator
 private:
 	bool closed, generated;
 	int width, height, seed, octave;
+	double frequency, fx, fy;
 
-	float levels[4] = { 0., 0.25, 0.75, 1. };
+	float* levels;
 
-	float lakeLevel, mountainLevel; //заменить на один массив с пределами (с учетом нижнего и верхнего пределов соответственно - 0. и 1.)
-
+	double* heightMap;
 
 public:
-	TerrainGenerator();
+	TerrainGenerator(void);
 	void RegenerateTerrain(); // создать новую карту высот шумом Перлина (распараллелить!)
-	void RerenderTerrain(); // вызывается при смене значения ползунков (проверить насколько быстро это происходит, распараллелить?)
+	void RerenderTerrain(); // вызывается при смене значения ползунков (проверить насколько быстро это происходит, распараллелить?), вызывать только если кнопка мыши отжата
 	void DrawInterface();
 	~TerrainGenerator();
 };
