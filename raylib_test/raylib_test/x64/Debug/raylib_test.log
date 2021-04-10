@@ -1,9 +1,14 @@
-﻿  lab_3.cpp
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(84,21): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(119,21): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(153,21): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(187,21): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(272,54): warning C4838: Преобразование из "int" в "float" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(272,54): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\lab_3.cpp(297,85): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+﻿  main.cpp
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(38,49): warning C4838: Преобразование из "int" в "float" требует сужающего преобразования.
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(38,49): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(38,72): warning C4838: Преобразование из "int" в "float" требует сужающего преобразования.
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(38,72): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(66,95): warning C4305: аргумент: усечение из "double" в "float"
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(66,59): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(66,47): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(67,100): warning C4305: аргумент: усечение из "double" в "float"
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(67,64): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(67,52): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(75,84): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(75,32): warning C4244: =: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\raylib_test\x64\Debug\raylib_test.exe

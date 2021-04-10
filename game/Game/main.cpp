@@ -1,11 +1,17 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define RAYGUI_IMPLEMENTATION
+
 #include "PerlinNoise.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+
+
 #include "raygui.h"
 #include "raylib.h"
+#include "TerrainGenerator.h"
 
 //int main(void)
 //{
@@ -160,15 +166,13 @@ int main(void)
     double frequency = 8;
     int octaves = 8;
 
-    const siv::PerlinNoise perlin(12345);
+    const siv::PerlinNoise perlin(48454);
     const double fx = width / frequency;
     const double fy = height / frequency;
     double noise;
     Color tileColor;
 
     int index = 0;
-    
-    //Image preview = GenImageColor(width, height, WHITE);
     
     for (int y = 0; y < height; ++y)
     {
@@ -219,8 +223,6 @@ int main(void)
         }
     }
 
-    //preview.data = pixels;
-
     Image preview = {
         pixels,
         width,
@@ -232,6 +234,7 @@ int main(void)
     //UNCOMPRESSED_R8G8B8
     Texture2D texture = LoadTextureFromImage(preview);
 
+    TerrainGenerator terrain;
 
     //--------------------------------------------------------------------------------------
 
@@ -242,8 +245,8 @@ int main(void)
 
         // Background
         ClearBackground(DARKGRAY);
-        
-        DrawTexture(texture, 0, 0, WHITE);
+        terrain.DrawInterface();
+        //DrawTexture(texture, 0, 0, WHITE);
 
         EndDrawing();
     }

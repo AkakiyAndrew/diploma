@@ -147,11 +147,12 @@
     <ClCompile Include="example_move_and_camera.cpp" />
     <ClCompile Include="GameClasses.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PerlinNoise.cpp" />
+    <ClCompile Include="TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h" />
     <ClInclude Include="PerlinNoise.h" />
+    <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,123 +1,93 @@
-//#include "raylib.h"
-//
-//int main(void)
-//{
-//    // Initialization
-//    //--------------------------------------------------------------------------------------
-//    const int screenWidth = 800;
-//    const int screenHeight = 600;
-//
-//    const int cornerX = 200;
-//    const int cornerY = 200;
-//
-//    const int pixelsPerCell = 32;
-//    const int numOfRows = 10;
-//    const int numOfColumns = 10;
-//
-//    int cellByX, cellByY;
-//
-//    bool obstacles[numOfRows][numOfColumns] = {};
-//
-//    bool buildMode = false;
-//    Vector2 corner = { cornerX, cornerY };
-//    Vector2 rectangleSize = { numOfRows * pixelsPerCell, numOfColumns * pixelsPerCell };
-//
-//    InitWindow(screenWidth, screenHeight, "raylib [core] simple map");
-//
-//    /*Camera2D camera = { 0 };
-//    camera.target = { screenWidth / 2, screenHeight / 2 };
-//    camera.offset = { screenWidth / 2, screenHeight / 2 };
-//    camera.rotation = 0.0f;
-//    camera.zoom = 1.0f;*/
-//    
-//    //пределы перемещения камеры: не более ~50 пикселей от камеры до края игрового поля
-//    
-//    //функция, выдающая "прямоугольник" с координатами углов клетки, в ответ на произвольные координаты юнита/постройки
-//
-//    Vector2 cursor = GetMousePosition();
-//
-//
-//    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
-//    //--------------------------------------------------------------------------------------
-//
-//    // Main game loop
-//    while (!WindowShouldClose())        // Detect window close button or ESC key
-//    {
-//        BeginDrawing();
-//        
-//        // Background
-//        ClearBackground(DARKGRAY);
-//        DrawRectangleV(corner, rectangleSize, RAYWHITE);
-//        for (int i = 1; i < numOfRows; i++)
-//        {
-//            DrawLine(cornerX, cornerY + 32 * i, cornerX + rectangleSize.x, cornerY + 32 * i, GREEN);
-//        }
-//
-//        for (int j = 1; j < numOfColumns; j++)
-//        {
-//            DrawLine(cornerX+pixelsPerCell*j, cornerY, cornerX + pixelsPerCell * j, cornerY+rectangleSize.y, GREEN);
-//        }
-//
-//        //drawing non-empty cells
-//        for (int i = 0; i < numOfRows; i++)
-//        {
-//            for (int j = 0; j < numOfColumns; j++)
-//            {
-//                if (obstacles[i][j])
-//                {
-//                    DrawRectangle(i * pixelsPerCell + cornerX, j * pixelsPerCell + corner.y, 32, 32, BLACK);
-//                }
-//            }
-//        }
-//
-//        if (IsKeyPressed(KEY_E))
-//        {
-//            if (buildMode) buildMode = false;
-//            else buildMode = true;
-//        }
-//
-//        if (buildMode)
-//        {
-//            // drawing cursor
-//            cursor = GetMousePosition();
-//            if (cursor.x > cornerX && cursor.x< cornerX + rectangleSize.x && cursor.y> cornerY && cursor.y < cornerY + rectangleSize.y)
-//            {
-//                cellByX = (cursor.x - cornerX) / pixelsPerCell;
-//                cellByY = (cursor.y - cornerY) / pixelsPerCell;
-//
-//                if (obstacles[cellByX][cellByY])
-//                {
-//                    //if build can't be placed
-//                    DrawRectangle(cellByX * pixelsPerCell + cornerX, cellByY * pixelsPerCell + corner.y, 32, 32, RED);
-//                }
-//                else
-//                {
-//                    //if there's no obstacle
-//                    DrawRectangle(cellByX * pixelsPerCell + cornerX, cellByY * pixelsPerCell + corner.y, 32, 32, GREEN);
-//                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-//                    {
-//                        obstacles[cellByX][cellByY] = true;
-//                        buildMode = false;
-//                    }
-//                }
-//            }
-//            DrawText("BUILD MODE ON", 540, 10, 20, RED);
-//        }
-//        else
-//        {
-//            DrawText("BUILD MODE OFF", 540, 10, 20, RED);
-//        }
-//        
-//        /*
-//        DrawRectangle(cursor.x, cursor.y, 32, 32, BLUE);*/
-//
-//        EndDrawing();
-//    }
-//
-//    // De-Initialization
-//    //--------------------------------------------------------------------------------------
-//    CloseWindow();        // Close window and OpenGL context
-//    //--------------------------------------------------------------------------------------
-//
-//    return 0;
-//}
+/*******************************************************************************************
+*
+*   raygui - Controls test
+*
+*   TEST CONTROLS:
+*       - GuiScrollPanel()
+*
+*   DEPENDENCIES:
+*       raylib 2.4  - Windowing/input management and drawing.
+*       raygui 2.0  - Immediate-mode GUI controls.
+*
+*   COMPILATION (Windows - MinGW):
+*       gcc -o $(NAME_PART).exe $(FILE_NAME) -I../../src -lraylib -lopengl32 -lgdi32 -std=c99
+*
+*   COMPILATION (Linux - gcc):
+*	gcc -o $(NAME_PART) $(FILE_NAME) -I../../src -lraylib -std=c99
+*
+*   LICENSE: zlib/libpng
+*
+*   Copyright (c) 2019 Vlad Adrian (@Demizdor) and Ramon Santamaria (@raysan5)
+*
+**********************************************************************************************/
+#define _CRT_SECURE_NO_WARNINGS
+#include <raylib.h>
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"                 // Required for GUI controls
+
+int main(void)
+{
+    // Initialization
+    //--------------------------------------------------------------------------------------
+    const int screenWidth = 800;
+    const int screenHeight = 450;
+
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - draw circle sector");
+
+    Vector2 center = { (GetScreenWidth() - 300) / 2, GetScreenHeight() / 2 };
+
+    float outerRadius = 180.0f;
+    float startAngle = 0.0f;
+    float endAngle = 180.0f;
+    int segments = 0;
+    int minSegments = 4;
+
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
+
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
+        // Update
+        //----------------------------------------------------------------------------------
+        // NOTE: All variables update happens inside GUI control functions
+        //----------------------------------------------------------------------------------
+
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        DrawLine(500, 0, 500, GetScreenHeight(), Fade(LIGHTGRAY, 0.6f));
+        DrawRectangle(500, 0, GetScreenWidth() - 500, GetScreenHeight(), Fade(LIGHTGRAY, 0.3f));
+
+        DrawCircleSector(center, outerRadius, startAngle, endAngle, segments, Fade(MAROON, 0.3));
+        DrawCircleSectorLines(center, outerRadius, startAngle, endAngle, segments, Fade(MAROON, 0.6));
+
+        // Draw GUI controls
+        //------------------------------------------------------------------------------
+        startAngle = GuiSliderBar(Rectangle { 600, 40, 120, 20 }, "StartAngle", NULL, startAngle, 0, 720);
+        endAngle = GuiSliderBar(Rectangle { 600, 70, 120, 20 }, "EndAngle", NULL, endAngle, 0, 720);
+
+        outerRadius = GuiSliderBar(Rectangle { 600, 140, 120, 20 }, "Radius", NULL, outerRadius, 0, 200);
+        segments = GuiSliderBar(Rectangle { 600, 170, 120, 20 }, "Segments", NULL, segments, 0, 100);
+        //------------------------------------------------------------------------------
+
+        minSegments = (int)ceilf((endAngle - startAngle) / 90);
+        DrawText(TextFormat("MODE: %s", (segments >= minSegments) ? "MANUAL" : "AUTO"), 600, 200, 10, (segments >= minSegments) ? MAROON : DARKGRAY);
+
+        DrawFPS(10, 10);
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------  
+    CloseWindow();        // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
+
+    return 0;
+}

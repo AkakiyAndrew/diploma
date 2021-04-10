@@ -1,4 +1,2 @@
-﻿  main.cpp
-C:\Users\Andrew\Desktop\Диплом\game\Game\main.cpp(150,18): warning C4101: cellByY: неиспользованная локальная переменная
-C:\Users\Andrew\Desktop\Диплом\game\Game\main.cpp(150,9): warning C4101: cellByX: неиспользованная локальная переменная
+﻿  TerrainGenerator.cpp
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe
