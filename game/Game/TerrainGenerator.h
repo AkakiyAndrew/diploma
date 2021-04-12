@@ -9,7 +9,7 @@
 class TerrainGenerator
 {
 private:
-	bool closed, generated;
+	bool closed, generated, rendered;
 	int width, height, octaves;
 	unsigned int seed;
 	double frequency, fx, fy;
