@@ -26,6 +26,8 @@ void TerrainGenerator::DrawInterface()
 		RerenderTerrain();
 	}
 
+	GuiLoadStyleDefault();
+
 	Rectangle position; //ползунки для изменения уровней
 	for (int i = 1; i < 7; i++) // 7 - т.к. 8 уровней -1
 	{
@@ -47,6 +49,11 @@ void TerrainGenerator::DrawInterface()
 		DrawRectangleRec(position, palette[i]);
 	}
 
+	//кнопка ререндеринга
+	if (GuiButton(Rectangle{ 600.f, 450.f, 70.f, 50.f }, "test"))
+		RerenderTerrain();
+
+	
 }
 
 void TerrainGenerator::RegenerateTerrain()
@@ -71,7 +78,7 @@ void TerrainGenerator::RerenderTerrain()
 
 	for (int i = 0; i < width * height; i++)
 	{
-		for (int j = 1; j < 7; j++)
+		for (int j = 1; j < 8; j++)
 		{
 			if (noiseMap[i] <= levels[j]) //исправить проблему с последним участком уровня - скалы
 			{
@@ -88,8 +95,12 @@ void TerrainGenerator::RerenderTerrain()
 		1,
 		UNCOMPRESSED_R8G8B8A8
 	};
+	
+	if(!generated)
+		UpdateTexture(colorPreview, pixels);
+	else
+		colorPreview = LoadTextureFromImage(image);
 
-	colorPreview = LoadTextureFromImage(image);
 	generated = true;
 	delete[] pixels;
 }
