@@ -11,16 +11,16 @@ class TerrainGenerator
 private:
 	bool closed, generated, rendered;
 	int width, height, octaves;
-	unsigned int seed;
+	int seed;
 	double frequency, fx, fy;
 
+	const char** levelNames;
 	Color* palette;
-
 	float* levels;
-
 	double* noiseMap;
 	TerrainType* terrainMap;
 	Texture2D colorPreview;
+	Texture2D grayPreview;
 
 public:
 	TerrainGenerator(void);
