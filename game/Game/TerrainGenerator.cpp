@@ -1,4 +1,5 @@
 #include "TerrainGenerator.h"
+#include <omp.h>
 
 //»—œ–¿¬»“‹ » ƒŒ¡¿¬»“‹ ÕŒ¬€≈  ŒÃÃ≈Õ“¿–»» (Ì‡ ËÌ„ÎË¯Â!)
 
@@ -18,7 +19,7 @@ void TerrainGenerator::DrawInterface()
 {
 	if (generated)
 	{
-		
+		//TODO: drawing according to screen size (not to exceed borders)
 		DrawTexture(colorPreview, 20, 20, WHITE);
 		DrawTexture(grayPreview, colorPreview.width+50, 20, WHITE);
 	}
@@ -28,7 +29,7 @@ void TerrainGenerator::DrawInterface()
 		RerenderTerrain();
 	}
 
-	//GuiLoadStyleDefault();
+
 
 	//REPLACE IN CONSTRUCTOR PARAMETERS(??)
 	Vector2 guiZeroPoint = { colorPreview.width * 2+150, 20 };
@@ -80,6 +81,8 @@ void TerrainGenerator::DrawInterface()
 		64.f
 	);
 
+	//TODO: add valueBoxes for width and height
+
 	//Rerender button
 	if (GuiButton(Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 300, 150.f, 50.f }, "Rerender"))
 		RerenderTerrain();
@@ -91,6 +94,8 @@ void TerrainGenerator::DrawInterface()
 		RerenderTerrain();
 	}
 
+	//TODO: Add regenerate animation(??)
+
 	//TODO: ADD HISTOGRAM BELOW MAP PREVIEWS
 }
 
@@ -99,9 +104,12 @@ void TerrainGenerator::RegenerateTerrain()
 	int index;
 	const siv::PerlinNoise perlin((unsigned int)seed);
 	
+	//TODO: regenerate according to chosen terrain size
+
 	fx = width / frequency;
 	fy = height / frequency;
 
+#pragma omp parallel for private(index)
 	for (int y = 0; y < height; ++y)
 	{
 		for (int x = 0; x < width; ++x)
@@ -118,12 +126,12 @@ void TerrainGenerator::RerenderTerrain()
 	Color* colorPixels = new Color[width * height];
 	unsigned char* grayPixels = new unsigned char[width * height];
 
+#pragma omp parallel for
 	for (int i = 0; i < width * height; i++)
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			unsigned char buf = (unsigned char)(noiseMap[i] * 255.);
-			grayPixels[i] = buf;
+			grayPixels[i] = (unsigned char)(noiseMap[i] * 255.);
 			if (noiseMap[i] <= levels[j+1])
 			{
 				colorPixels[i] = palette[j];
