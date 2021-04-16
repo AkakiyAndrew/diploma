@@ -5,8 +5,12 @@
 
 TerrainGenerator::TerrainGenerator()
 {
+	closed = false;
+
+	//TODO: make preset maps (empty map, for path finding etc.)
 	width = 512, height = 512, seed = 12345, octaves = 16;
 	frequency = 16.;
+	terrainMap = new TerrainType[width * height];
 								//	LAKE,	 SWAMP,	SAND,	PLAIN,	TREE,		STONE,	MOUNTAIN
 	levels = new float[] { 0.,		0.35,	  0.4,	0.45,	0.5,		0.6,	0.70,		1. };
 	palette = new Color[]{	DARKBLUE, BLUE,	YELLOW, GREEN,	DARKGREEN,	GRAY,	BLACK};
@@ -17,6 +21,8 @@ TerrainGenerator::TerrainGenerator()
 
 void TerrainGenerator::DrawInterface()
 {
+	closed = GuiButton(Rectangle{ 20.f, 20.f, 100.f, 50.f }, "Back") || IsKeyPressed(KEY_BACKSPACE);
+
 	if (generated)
 	{
 		//TODO: drawing according to screen size (not to exceed borders)
@@ -28,8 +34,6 @@ void TerrainGenerator::DrawInterface()
 		RegenerateTerrain();
 		RerenderTerrain();
 	}
-
-
 
 	//REPLACE IN CONSTRUCTOR PARAMETERS(??)
 	Vector2 guiZeroPoint = { colorPreview.width * 2+150, 20 };
@@ -52,7 +56,7 @@ void TerrainGenerator::DrawInterface()
 	}
 
 	//level distribution visualisation
-	
+	//TODO: solve problem with mountain visual
 	for (int i = 0; i < 8; i++)
 	{
 		position = { levels[i] * 240.f + guiZeroPoint.x-60, guiZeroPoint.y + 250, (levels[i + 1] - levels[i]) * 300, 30.f };
@@ -94,6 +98,8 @@ void TerrainGenerator::DrawInterface()
 		RerenderTerrain();
 	}
 
+	//TODO: add random seed button (with "refresh" icon)
+
 	//TODO: Add regenerate animation(??)
 
 	//TODO: ADD HISTOGRAM BELOW MAP PREVIEWS
@@ -104,7 +110,7 @@ void TerrainGenerator::RegenerateTerrain()
 	int index;
 	const siv::PerlinNoise perlin((unsigned int)seed);
 	
-	//TODO: regenerate according to chosen terrain size
+	//TODO: regenerate according to chosen terrain size (with pointers)
 
 	fx = width / frequency;
 	fy = height / frequency;
@@ -177,4 +183,9 @@ TerrainGenerator::~TerrainGenerator()
 	delete[] levels;
 	delete[] noiseMap;
 	delete[] palette;
+}
+
+Terrain TerrainGenerator::getMap()
+{
+	return Terrain{width, height, terrainMap};
 }

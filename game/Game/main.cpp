@@ -23,6 +23,8 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "raylib [core] map generation");
     SetTargetFPS(60);
 
+    GameState state = GameState::MAIN_MENU;
+    GameData gameData;
     TerrainGenerator terrain{};
     
     //--------------------------------------------------------------------------------------
@@ -31,10 +33,37 @@ int main(void)
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
         BeginDrawing();
+        ClearBackground(Color{ 150,150,150,255 });
+
+        switch (state)
+        {
+        case GameState::MAIN_MENU:
+            if (GuiButton(Rectangle{}, "Play") && gameData.isMapLoaded())
+                state = GameState::GAMEPLAY;
+            
+            break;
+        case GameState::TERRAIN_GENERATOR:
+            terrain.DrawInterface();
+            if (terrain.closed)
+            {
+                gameData.setTerrain(terrain.getMap());
+                state = GameState::MAIN_MENU;
+            }
+            break;
+        case GameState::GAMEPLAY:
+            gameData.GameUpdate();
+            gameData.GameDraw();
+            break;
+        case GameState::OPTIONS:
+            break;
+        default:
+            break;
+        }
+
 
         // Background
-        ClearBackground(Color{150,150,150,255});
-        terrain.DrawInterface(); //???????? ?? return ????????? ?? ??????????????? ?????????
+        
+        
         //DrawTexture(texture, 0, 0, WHITE);
 
         EndDrawing();

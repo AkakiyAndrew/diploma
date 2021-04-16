@@ -5,10 +5,14 @@
 
 class GameData
 {
-	TerrainType* mapTerrain;
+private:
+	TerrainType* mapTerrain = nullptr;
 	int mapHeight;
 	int mapWidth;
 
+	Camera2D camera = { 0 };
+	Vector2 cursor;
+	Vector2 screenSize;
 	//тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
 	//тут же и будут хранится карты урона и т.п.
 
@@ -16,14 +20,17 @@ class GameData
 
 	//тут же и хранить настройки?
 
-	void generateMap(int height, int width);
+	
 	void saveToFile(std::string fileName);
 	void loadFromFile(std::string fileName);
 	//void loadSettings();
 
 	//оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
+public:
 	//для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
+	void setTerrain(Terrain);
+	bool isMapLoaded();
 	void GameDraw(); 
 	void GameUpdate();
 

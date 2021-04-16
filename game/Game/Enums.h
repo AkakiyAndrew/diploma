@@ -49,3 +49,18 @@ enum class TerrainType
 	MOUNTAIN,
 	ASH,
 };
+
+enum class GameState
+{
+	MAIN_MENU,
+	TERRAIN_GENERATOR,
+	GAMEPLAY,
+	OPTIONS //??
+};
+
+struct Terrain
+{
+	unsigned int width;
+	unsigned int height;
+	TerrainType* map;
+};
