@@ -8,7 +8,7 @@ TerrainGenerator::TerrainGenerator()
 	closed = false;
 
 	//TODO: make preset maps (empty map, for path finding etc.)
-	width = 32, height = 32, seed = 12345, octaves = 16;
+	width = 512, height = 512, seed = 12345, octaves = 16;
 	frequency = 16.;
 
 	//TODO: replace memory allocation to regenerate/rerender

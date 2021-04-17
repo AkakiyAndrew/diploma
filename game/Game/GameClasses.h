@@ -15,6 +15,9 @@ private:
 	Vector2 cursor;
 	Vector2 screenSize;
 	Vector2 mapSize; //mapsize in pixels
+	Texture2D terrainTexture;
+	
+
 	//тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
 	//тут же и будут хранится карты урона и т.п.
 

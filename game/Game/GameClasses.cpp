@@ -1,42 +1,66 @@
 #include "GameClasses.h"
+#include <omp.h>
 
 GameData::GameData()
 {
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
 
-	camera.target = { 0, 0 };
-	camera.offset = { screenSize.x/2, screenSize.y/2 };
-	camera.rotation = 0.0f;
-	camera.zoom = 1.0f;
+    camera.target = { 0, 0 };
+    camera.offset = { screenSize.x/2, screenSize.y/2 };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
-    pixelsPerTile = 32;
+    pixelsPerTile = 16;
 }
 
 bool GameData::isMapLoaded()
 {
-	return this->mapTerrain != nullptr;
+    return this->mapTerrain != nullptr;
 }
 
 void GameData::setTerrain(Terrain terr)
 {
-	this->mapHeight = terr.height;
-	this->mapWidth = terr.width;
-	this->mapTerrain = terr.map;
+    this->mapHeight = terr.height;
+    this->mapWidth = terr.width;
+    this->mapTerrain = terr.map;
 
     mapSize.x = mapWidth * pixelsPerTile;
     mapSize.y = mapHeight * pixelsPerTile;
+
+    Image buf = GenImageColor(mapSize.x, mapSize.y, WHITE);
+
+    int index;
+    Color pallete[] = { DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
+
+
+    //TODO: check blending principle for generating texture
+#pragma omp parallel for private(index)
+    for (int i = 0; i < mapHeight; i++)
+    {
+        for (int j = 0; j < mapWidth; j++)
+        {
+            index = mapWidth * j + i;
+
+            ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
+        }
+    }
+
+    terrainTexture = LoadTextureFromImage(buf);
+
 }
 
 void GameData::GameUpdate()
 {
     if (IsKeyPressed(KEY_ESCAPE)) closed = true;
 
-	cursor = GetMousePosition();
+    cursor = GetMousePosition();
 
-    if ((cursor.x < screenSize.x / 4 && camera.target.x > 100)         || IsKeyDown(KEY_A)) camera.target.x -= 10;
-    if ((cursor.x > mapWidth - 50 && camera.target.x < mapWidth)       || IsKeyDown(KEY_D)) camera.target.x += 10;
-    if ((cursor.y < 50 && camera.target.y > 100)                       || IsKeyDown(KEY_W)) camera.target.y -= 10;
-    if ((cursor.y > mapHeight - 50 && camera.target.y < mapHeight)     || IsKeyDown(KEY_S)) camera.target.y += 10;
+    if ((cursor.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) && camera.target.x > 100)           camera.target.x -= 10/ camera.zoom;
+    if ((cursor.x > screenSize.x * 0.85f || IsKeyDown(KEY_D)) && camera.target.x < mapSize.x)     camera.target.x += 10/ camera.zoom;
+    if ((cursor.y < screenSize.y * 0.15f || IsKeyDown(KEY_W)) && camera.target.y > 100)           camera.target.y -= 10/ camera.zoom;
+    if ((cursor.y > screenSize.y * 0.85f || IsKeyDown(KEY_S)) && camera.target.y < mapSize.y)     camera.target.y += 10/ camera.zoom;
+
+    
 
     // Camera target shift
     //camera.target = { camera.target.x + 20, camera.target.y + 20 };
@@ -58,20 +82,17 @@ void GameData::GameUpdate()
 
 void GameData::GameDraw()
 {
-    BeginMode2D(camera);
-    
-    Color pallete[] = {	DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK};
+    Rectangle screen = {camera.target.x - camera.offset.x, camera.target.y - camera.offset.y, screenSize.x, screenSize.y };
 
+    BeginMode2D(camera);
     //draw terrain
-    int index;
-    for (int i = 0; i < mapHeight; i++)
-    {
-        for (int j = 0; j < mapWidth; j++)
-        {
-            index = mapWidth * j + i;
-            
-            DrawRectangleRec(Rectangle{ i * 32.f, j * 32.f, 32.f,32.f }, pallete[static_cast<int>(mapTerrain[index])]);
-        }
-    }
+    DrawTexture(terrainTexture, 0, 0, WHITE);
+
+    EndMode2D();
+
+    //DrawRectangleLinesEx(screen, 5, RED);
+    
+
+    
 
 }
