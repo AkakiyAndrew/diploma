@@ -1,159 +1,83 @@
-///*******************************************************************************************
-//*
-//*   raygui - Controls test
-//*
-//*   TEST CONTROLS:
-//*       - GuiScrollPanel()
-//*
-//*   DEPENDENCIES:
-//*       raylib 2.4  - Windowing/input management and drawing.
-//*       raygui 2.0  - Immediate-mode GUI controls.
-//*
-//*   COMPILATION (Windows - MinGW):
-//*       gcc -o $(NAME_PART).exe $(FILE_NAME) -I../../src -lraylib -lopengl32 -lgdi32 -std=c99
-//*
-//*   COMPILATION (Linux - gcc):
-//*	gcc -o $(NAME_PART) $(FILE_NAME) -I../../src -lraylib -std=c99
-//*
-//*   LICENSE: zlib/libpng
-//*
-//*   Copyright (c) 2019 Vlad Adrian (@Demizdor) and Ramon Santamaria (@raysan5)
-//*
-//**********************************************************************************************/
-//#define _CRT_SECURE_NO_WARNINGS
-//#include <raylib.h>
-//
-//#define RAYGUI_IMPLEMENTATION
-//#include "raygui.h"                 // Required for GUI controls
-//
-//int main(void)
-//{
-//    // Initialization
-//    //--------------------------------------------------------------------------------------
-//    const int screenWidth = 800;
-//    const int screenHeight = 450;
-//
-//    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - draw circle sector");
-//
-//    Vector2 center = { (GetScreenWidth() - 300) / 2, GetScreenHeight() / 2 };
-//
-//    float outerRadius = 180.0f;
-//    float startAngle = 0.0f;
-//    float endAngle = 180.0f;
-//    int segments = 0;
-//    int minSegments = 4;
-//
-//    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-//    //--------------------------------------------------------------------------------------
-//
-//    // Main game loop
-//    while (!WindowShouldClose())    // Detect window close button or ESC key
-//    {
-//        // Update
-//        //----------------------------------------------------------------------------------
-//        // NOTE: All variables update happens inside GUI control functions
-//        //----------------------------------------------------------------------------------
-//
-//        // Draw
-//        //----------------------------------------------------------------------------------
-//        BeginDrawing();
-//
-//        ClearBackground(RAYWHITE);
-//
-//        DrawLine(500, 0, 500, GetScreenHeight(), Fade(LIGHTGRAY, 0.6f));
-//        DrawRectangle(500, 0, GetScreenWidth() - 500, GetScreenHeight(), Fade(LIGHTGRAY, 0.3f));
-//
-//        DrawCircleSector(center, outerRadius, startAngle, endAngle, segments, Fade(MAROON, 0.3));
-//        DrawCircleSectorLines(center, outerRadius, startAngle, endAngle, segments, Fade(MAROON, 0.6));
-//
-//        // Draw GUI controls
-//        //------------------------------------------------------------------------------
-//        startAngle = GuiSliderBar(Rectangle { 600, 40, 120, 20 }, "StartAngle", NULL, startAngle, 0, 720);
-//        endAngle = GuiSliderBar(Rectangle { 600, 70, 120, 20 }, "EndAngle", NULL, endAngle, 0, 720);
-//
-//        outerRadius = GuiSliderBar(Rectangle { 600, 140, 120, 20 }, "Radius", NULL, outerRadius, 0, 200);
-//        segments = GuiSliderBar(Rectangle { 600, 170, 120, 20 }, "Segments", NULL, segments, 0, 100);
-//        //------------------------------------------------------------------------------
-//
-//        minSegments = (int)ceilf((endAngle - startAngle) / 90);
-//        DrawText(TextFormat("MODE: %s", (segments >= minSegments) ? "MANUAL" : "AUTO"), 600, 200, 10, (segments >= minSegments) ? MAROON : DARKGRAY);
-//
-//        DrawFPS(10, 10);
-//
-//        EndDrawing();
-//        //----------------------------------------------------------------------------------
-//    }
-//
-//    // De-Initialization
-//    //--------------------------------------------------------------------------------------  
-//    CloseWindow();        // Close window and OpenGL context
-//    //--------------------------------------------------------------------------------------
-//
-//    return 0;
-//}
-
-
-
-/*******************************************************************************************
-*
-*   raylib [textures] example - Texture loading and drawing a part defined by a rectangle
-*
-*   This example has been created using raylib 1.3 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2014 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-
 #include "raylib.h"
 
-#define MAX_FRAME_SPEED     15
-#define MIN_FRAME_SPEED      1
+#define MAX_BUILDINGS   100
 
-int main(void)
+int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [texture] example - texture rectangle");
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - 2d camera");
 
-    // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
-    Texture2D scarfy = LoadTexture("resources/scarfy.png");        // Texture loading
+    Rectangle player = { 400, 280, 40, 40 };
+    Rectangle buildings[MAX_BUILDINGS] = { 0 };
+    Color buildColors[MAX_BUILDINGS] = { 0 };
 
-    Vector2 position = { 350.0f, 280.0f };
-    Rectangle frameRec = { 0.0f, 0.0f, (float)scarfy.width / 6, (float)scarfy.height };
-    int currentFrame = 0;
+    int spacing = 0;
 
-    int framesCounter = 0;
-    int framesSpeed = 8;            // Number of spritesheet frames shown by second
+    for (int i = 0; i < MAX_BUILDINGS; i++)
+    {
+        buildings[i].width = GetRandomValue(50, 200);
+        buildings[i].height = GetRandomValue(100, 800);
+        buildings[i].y = screenHeight - 130 - buildings[i].height;
+        buildings[i].x = -6000 + spacing;
 
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+        spacing += buildings[i].width;
+
+        buildColors[i] = { (unsigned char)GetRandomValue(200, 240), (unsigned char)GetRandomValue(200, 240), (unsigned char)GetRandomValue(200, 250), 255 };
+    }
+
+    Camera2D camera = { 0 };
+    camera.target = { player.x + 20, player.y + 20 };
+    camera.offset = { screenWidth / 2, screenHeight / 2 };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    Vector2 cursor = GetMousePosition();
+
+
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose())        // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        framesCounter++;
 
-        if (framesCounter >= (60 / framesSpeed))
+        // Player movement
+        if (IsKeyDown(KEY_RIGHT)) player.x += 2;
+        else if (IsKeyDown(KEY_LEFT)) player.x -= 2;
+
+        // CUSTOM: MOVE VIA CURSOR POSITION
+        cursor = GetMousePosition();
+        if (cursor.x < screenWidth / 4) player.x -= 6;
+        else if (cursor.x > (screenWidth * 3) / 4) player.x += 6;
+
+        // Camera target follows player
+        camera.target = { player.x + 20, player.y + 20 };
+
+        // Camera rotation controls
+        if (IsKeyDown(KEY_A)) camera.rotation--;
+        else if (IsKeyDown(KEY_S)) camera.rotation++;
+
+        // Limit camera rotation to 80 degrees (-40 to 40)
+        if (camera.rotation > 40) camera.rotation = 40;
+        else if (camera.rotation < -40) camera.rotation = -40;
+
+        // Camera zoom controls
+        camera.zoom += ((float)GetMouseWheelMove() * 0.05f);
+
+        if (camera.zoom > 3.0f) camera.zoom = 3.0f;
+        else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+
+        // Camera reset (zoom and rotation)
+        if (IsKeyPressed(KEY_R))
         {
-            framesCounter = 0;
-            currentFrame++;
-
-            if (currentFrame > 5) currentFrame = 0;
-
-            frameRec.x = (float)currentFrame * (float)scarfy.width / 6;
+            camera.zoom = 1.0f;
+            camera.rotation = 0.0f;
         }
-
-        if (IsKeyPressed(KEY_RIGHT)) framesSpeed++;
-        else if (IsKeyPressed(KEY_LEFT)) framesSpeed--;
-
-        if (framesSpeed > MAX_FRAME_SPEED) framesSpeed = MAX_FRAME_SPEED;
-        else if (framesSpeed < MIN_FRAME_SPEED) framesSpeed = MIN_FRAME_SPEED;
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -162,23 +86,37 @@ int main(void)
 
         ClearBackground(RAYWHITE);
 
-        DrawTexture(scarfy, 15, 40, WHITE);
-        DrawRectangleLines(15, 40, scarfy.width, scarfy.height, LIME);
-        DrawRectangleLines(15 + (int)frameRec.x, 40 + (int)frameRec.y, (int)frameRec.width, (int)frameRec.height, RED);
+        BeginMode2D(camera);
 
-        DrawText("FRAME SPEED: ", 165, 210, 10, DARKGRAY);
-        DrawText(TextFormat("%02i FPS", framesSpeed), 575, 210, 10, DARKGRAY);
-        DrawText("PRESS RIGHT/LEFT KEYS to CHANGE SPEED!", 290, 240, 10, DARKGRAY);
+        DrawRectangle(-6000, 320, 13000, 8000, DARKGRAY);
 
-        for (int i = 0; i < MAX_FRAME_SPEED; i++)
-        {
-            if (i < framesSpeed) DrawRectangle(250 + 21 * i, 205, 20, 20, RED);
-            //DrawRectangleLines(250 + 21 * i, 205, 20, 20, MAROON);
-        }
+        for (int i = 0; i < MAX_BUILDINGS; i++) DrawRectangleRec(buildings[i], buildColors[i]);
 
-        DrawTextureRec(scarfy, frameRec, position, WHITE);  // Draw part of the texture
+        DrawRectangleRec(player, RED);
 
-        DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
+        DrawLine(camera.target.x, -screenHeight * 10, camera.target.x, screenHeight * 10, GREEN);
+        DrawLine(-screenWidth * 10, camera.target.y, screenWidth * 10, camera.target.y, GREEN);
+
+        EndMode2D();
+
+        DrawText("SCREEN AREA", 640, 10, 20, RED);
+        // CUSTOM: DRAW CURSOR POSITION
+        DrawText(TextFormat("Cursor position: %f,%f", cursor.x, cursor.y), 400, 30, 20, RED);
+
+        DrawRectangle(0, 0, screenWidth, 5, RED);
+        DrawRectangle(0, 5, 5, screenHeight - 10, RED);
+        DrawRectangle(screenWidth - 5, 5, 5, screenHeight - 10, RED);
+        DrawRectangle(0, screenHeight - 5, screenWidth, 5, RED);
+
+        DrawRectangle(10, 10, 250, 113, Fade(SKYBLUE, 0.5f));
+        DrawRectangleLines(10, 10, 250, 113, BLUE);
+
+        // окошко слева сверху
+        DrawText("Free 2d camera controls:", 20, 20, 10, BLACK);
+        DrawText("- Right/Left to move Offset", 40, 40, 10, DARKGRAY);
+        DrawText("- Mouse Wheel to Zoom in-out", 40, 60, 10, DARKGRAY);
+        DrawText("- A / S to Rotate", 40, 80, 10, DARKGRAY);
+        DrawText("- R to reset Zoom and Rotation", 40, 100, 10, DARKGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -186,11 +124,8 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadTexture(scarfy);       // Texture unloading
-
-    CloseWindow();                // Close window and OpenGL context
+    CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     return 0;
 }
-

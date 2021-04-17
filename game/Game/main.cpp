@@ -67,6 +67,7 @@ int main(void)
             if (gameData.closed)
             {
                 state = GameState::MAIN_MENU;
+                gameData.closed = false;
             }
 
             break;

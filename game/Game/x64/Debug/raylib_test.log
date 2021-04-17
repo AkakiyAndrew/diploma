@@ -1,6 +1,6 @@
 ﻿  GameClasses.cpp
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(26,26): warning C4244: =: преобразование "unsigned int" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(27,27): warning C4244: =: преобразование "unsigned int" в "float", возможна потеря данных
-  main.cpp
-  Создание кода...
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(27,26): warning C4244: =: преобразование "unsigned int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(28,27): warning C4244: =: преобразование "unsigned int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(30,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(30,38): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe
