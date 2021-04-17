@@ -22,6 +22,9 @@ int main(void)
     
     InitWindow(screenWidth, screenHeight, "raylib [core] map generation");
     SetTargetFPS(60);
+    SetExitKey(KEY_HOME); //releasing ESC-key for in-gameplay menu
+
+    bool gameClosed = false;
 
     GameState state = GameState::MAIN_MENU;
     GameData gameData;
@@ -30,17 +33,24 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose())        // Detect window close button or ESC key
+    while (!gameClosed)        // Detect window close button or ESC key
     {
         BeginDrawing();
         ClearBackground(Color{ 150,150,150,255 });
 
         switch (state)
         {
+            //TODO: same zeropoint-based visualisation
         case GameState::MAIN_MENU:
-            if (GuiButton(Rectangle{}, "Play") && gameData.isMapLoaded())
+            if (GuiButton(Rectangle{ screenWidth /2.f, 200, 100,50}, "Play") && gameData.isMapLoaded())
                 state = GameState::GAMEPLAY;
             
+            if (GuiButton(Rectangle{ screenWidth / 2.f, 300, 100,50 }, "Generate terrain"))
+                state = GameState::TERRAIN_GENERATOR;
+
+            if (GuiButton(Rectangle{ screenWidth / 2.f, 400, 100,50 }, "Exit"))
+                gameClosed = true;
+
             break;
         case GameState::TERRAIN_GENERATOR:
             terrain.DrawInterface();
@@ -53,6 +63,12 @@ int main(void)
         case GameState::GAMEPLAY:
             gameData.GameUpdate();
             gameData.GameDraw();
+
+            if (gameData.closed)
+            {
+                state = GameState::MAIN_MENU;
+            }
+
             break;
         case GameState::OPTIONS:
             break;
@@ -62,9 +78,6 @@ int main(void)
 
 
         // Background
-        
-        
-        //DrawTexture(texture, 0, 0, WHITE);
 
         EndDrawing();
     }

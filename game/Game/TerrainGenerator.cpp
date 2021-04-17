@@ -8,8 +8,10 @@ TerrainGenerator::TerrainGenerator()
 	closed = false;
 
 	//TODO: make preset maps (empty map, for path finding etc.)
-	width = 512, height = 512, seed = 12345, octaves = 16;
+	width = 32, height = 32, seed = 12345, octaves = 16;
 	frequency = 16.;
+
+	//TODO: replace memory allocation to regenerate/rerender
 	terrainMap = new TerrainType[width * height];
 								//	LAKE,	 SWAMP,	SAND,	PLAIN,	TREE,		STONE,	MOUNTAIN
 	levels = new float[] { 0.,		0.35,	  0.4,	0.45,	0.5,		0.6,	0.70,		1. };
@@ -26,8 +28,8 @@ void TerrainGenerator::DrawInterface()
 	if (generated)
 	{
 		//TODO: drawing according to screen size (not to exceed borders)
-		DrawTexture(colorPreview, 20, 20, WHITE);
-		DrawTexture(grayPreview, colorPreview.width+50, 20, WHITE);
+		DrawTexture(colorPreview, 50, 100, WHITE);
+		DrawTexture(grayPreview, colorPreview.width+50, 100, WHITE);
 	}
 	else
 	{
@@ -141,6 +143,7 @@ void TerrainGenerator::RerenderTerrain()
 			if (noiseMap[i] <= levels[j+1])
 			{
 				colorPixels[i] = palette[j];
+				terrainMap[i] = static_cast<TerrainType>(j); 
 				break;
 			}
 		}

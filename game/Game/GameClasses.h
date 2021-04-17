@@ -7,12 +7,14 @@ class GameData
 {
 private:
 	TerrainType* mapTerrain = nullptr;
-	int mapHeight;
+	int mapHeight; // num of tiles
 	int mapWidth;
+	unsigned int pixelsPerTile;
 
-	Camera2D camera = { 0 };
+	Camera2D camera = { 0 }; 
 	Vector2 cursor;
 	Vector2 screenSize;
+	Vector2 mapSize; //mapsize in pixels
 	//тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
 	//тут же и будут хранится карты урона и т.п.
 
@@ -28,12 +30,14 @@ private:
 	//оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
 public:
+	bool closed = false;
+
 	//для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
 	void setTerrain(Terrain);
 	bool isMapLoaded();
 	void GameDraw(); 
 	void GameUpdate();
-
+	GameData();
 };
 
 class GameActor {
