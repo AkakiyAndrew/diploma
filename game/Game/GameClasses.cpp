@@ -26,13 +26,7 @@ bool GameData::isMapLoaded()
 
 void GameData::setTerrain(Terrain terr)
 {
-    bool textureToUpdate = false;
-    if (this->mapTerrain != nullptr)
-    {
-        delete[] this->mapTerrain; //ALSO DELETE terr.map!!!
-        this->mapTerrain = nullptr;
-        textureToUpdate = true;
-    }
+    bool textureToUpdate = isMapLoaded();
     
     this->mapHeight = terr.height;
     this->mapWidth = terr.width;

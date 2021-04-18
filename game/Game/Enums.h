@@ -60,7 +60,7 @@ enum class GameState
 
 struct Terrain
 {
-	unsigned int width;
-	unsigned int height;
+	int width;
+	int height;
 	TerrainType* map;
 };

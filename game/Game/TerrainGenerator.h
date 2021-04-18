@@ -10,7 +10,7 @@ class TerrainGenerator
 {
 private:
 	bool rendered;
-	unsigned int width, height, octaves;
+	int width, height, octaves;
 	int seed;
 	double frequency, fx, fy;
 
@@ -21,6 +21,7 @@ private:
 	TerrainType* terrainMap = nullptr;
 	Texture2D colorPreview;
 	Texture2D grayPreview;
+	bool valueChanging[3];
 
 public:
 	bool closed;

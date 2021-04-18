@@ -1,4 +1,12 @@
-﻿  GameClasses.cpp
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(44,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(44,38): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+﻿  TerrainGenerator.cpp
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(11,68): warning C4305: инициализация: усечение из "double" в "float"
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(38,46): warning C4838: Преобразование из "double" в "float" требует сужающего преобразования.
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(38,46): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(63,72): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(63,57): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(71,17): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(67,27): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(80,9): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(119,45): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(119,29): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe

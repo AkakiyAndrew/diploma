@@ -20,7 +20,7 @@ TerrainGenerator::TerrainGenerator()
 
 void TerrainGenerator::DrawInterface()
 {
-    closed = GuiButton(Rectangle{ 20.f, 20.f, 100.f, 50.f }, "Back") || IsKeyPressed(KEY_BACKSPACE);
+    closed = GuiButton(Rectangle{ 20.f, 20.f, 100.f, 50.f }, "Back") || IsKeyPressed(KEY_ESCAPE);
 
     if (isGenerated())
     {
@@ -35,7 +35,7 @@ void TerrainGenerator::DrawInterface()
     }
 
     //REPLACE IN CONSTRUCTOR PARAMETERS(??)
-    Vector2 guiZeroPoint = { colorPreview.width * 2+150, 20 };
+    Vector2 guiZeroPoint = { GetScreenWidth()*0.85, 0 };
 
     //drawing levels sliders and retriving values from them
     Rectangle position;
@@ -64,10 +64,8 @@ void TerrainGenerator::DrawInterface()
         DrawRectangleRec(position, palette[i]);
     }
 
-    //numerable params
-    GuiValueBox(Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 390, 60, 30 }, "Generation seed:", &seed, 0, INT_MAX, true);
     octaves = GuiSliderBar(
-                Rectangle{ guiZeroPoint.x, guiZeroPoint.y+ 430, 120, 20},
+                Rectangle{ guiZeroPoint.x, guiZeroPoint.y+ 410, 120, 20},
                 "Octaves: 1",
                 "16",
                 octaves,
@@ -76,22 +74,55 @@ void TerrainGenerator::DrawInterface()
                 );
 
     frequency = GuiSliderBar(
-        Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 460, 120, 20 },
+        Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 440, 120, 20 },
         "Frequency: 1.0",
         "64.0",
         frequency,
         0.1f,
         64.f
     );
+    
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        position = { guiZeroPoint.x, guiZeroPoint.y + 370, 60, 30 };
+        if (CheckCollisionPointRec(GetMousePosition(), position))
+        {
+            valueChanging[0] = true;
+            valueChanging[1] = false;
+            valueChanging[2] = false;
+        }
+        position = { guiZeroPoint.x, guiZeroPoint.y + 470, 60, 30 };
+        if (CheckCollisionPointRec(GetMousePosition(), position))
+        {
+            valueChanging[0] = false;
+            valueChanging[1] = true;
+            valueChanging[2] = false;
+        }
+        position = { guiZeroPoint.x + 120, guiZeroPoint.y + 470, 60, 30 };
+        if (CheckCollisionPointRec(GetMousePosition(), position))
+        {
+            valueChanging[0] = false;
+            valueChanging[1] = false;
+            valueChanging[2] = true;
+        }
+    }
 
-    //TODO: add valueBoxes for width and height
+    //numerable params
+    position = { guiZeroPoint.x, guiZeroPoint.y + 370, 60, 30 };
+    GuiValueBox(position, "Generation seed:", &seed, 0, INT_MAX, valueChanging[0]);
+
+    position = { guiZeroPoint.x, guiZeroPoint.y + 470, 60, 30 };
+    GuiValueBox(position, "Width:", &width, 1, 4048, valueChanging[1]);
+
+    position = { guiZeroPoint.x + 120, guiZeroPoint.y + 470, 60, 30 };
+    GuiValueBox(position, "Height:", &height, 1, 4048, valueChanging[2]);
 
     //Rerender button
     if (GuiButton(Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 300, 150.f, 50.f }, "Rerender"))
         RerenderTerrain();
 
     //Regenerate button
-    if (GuiButton(Rectangle{ guiZeroPoint.x, guiZeroPoint.y+ 500, 150.f, 50.f }, "Regenerate"))
+    if (GuiButton(Rectangle{ guiZeroPoint.x, guiZeroPoint.y+ 510, 150.f, 50.f }, "Regenerate"))
     {
         RegenerateTerrain();
         RerenderTerrain();
