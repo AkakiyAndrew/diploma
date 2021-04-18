@@ -24,9 +24,15 @@ void TerrainGenerator::DrawInterface()
 
     if (isGenerated())
     {
-        //TODO: drawing according to screen size (not to exceed borders)
-        DrawTexture(colorPreview, 50, 100, WHITE);
-        DrawTexture(grayPreview, colorPreview.width+50, 100, WHITE);
+        DrawTextureEx(
+            colorPreview, 
+            Vector2{ 50,100 }, 
+            0, (GetScreenWidth() * 0.25f) / static_cast<float>(colorPreview.width),
+            WHITE);
+        DrawTextureEx(
+            grayPreview,
+            Vector2{ (GetScreenWidth() * 0.25f) + 100, 100 },
+            0, (GetScreenWidth() * 0.25f) / static_cast<float>(grayPreview.width), WHITE);
     }
     else
     {
