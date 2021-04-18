@@ -3,24 +3,54 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\raylib_test.vcxproj", "{6F933C76-4646-4866-A6A9-80A8185F637C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameProject", "Game\raylib_test.vcxproj", "{6F933C76-4646-4866-A6A9-80A8185F637C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "raylib", "..\raylib-master\projects\VS2019\raylib\raylib.vcxproj", "{E89D61AC-55DE-4482-AFD4-DF7242EBC859}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug.DLL|x64 = Debug.DLL|x64
+		Debug.DLL|x86 = Debug.DLL|x86
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release.DLL|x64 = Release.DLL|x64
+		Release.DLL|x86 = Release.DLL|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug.DLL|x64.ActiveCfg = Debug|x64
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug.DLL|x64.Build.0 = Debug|x64
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug.DLL|x86.ActiveCfg = Debug|Win32
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug.DLL|x86.Build.0 = Debug|Win32
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug|x64.ActiveCfg = Debug|x64
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug|x64.Build.0 = Debug|x64
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug|x86.ActiveCfg = Debug|Win32
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Debug|x86.Build.0 = Debug|Win32
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release.DLL|x64.ActiveCfg = Release|x64
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release.DLL|x64.Build.0 = Release|x64
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release.DLL|x86.ActiveCfg = Release|Win32
+		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release.DLL|x86.Build.0 = Release|Win32
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release|x64.ActiveCfg = Release|x64
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release|x64.Build.0 = Release|x64
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release|x86.ActiveCfg = Release|Win32
 		{6F933C76-4646-4866-A6A9-80A8185F637C}.Release|x86.Build.0 = Release|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug.DLL|x64.ActiveCfg = Debug.DLL|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug.DLL|x64.Build.0 = Debug.DLL|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug.DLL|x86.ActiveCfg = Debug.DLL|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug.DLL|x86.Build.0 = Debug.DLL|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug|x64.ActiveCfg = Debug|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug|x64.Build.0 = Debug|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug|x86.ActiveCfg = Debug|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Debug|x86.Build.0 = Debug|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release.DLL|x64.ActiveCfg = Release.DLL|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release.DLL|x64.Build.0 = Release.DLL|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release.DLL|x86.ActiveCfg = Release.DLL|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release.DLL|x86.Build.0 = Release.DLL|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release|x64.ActiveCfg = Release|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release|x64.Build.0 = Release|x64
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release|x86.ActiveCfg = Release|Win32
+		{E89D61AC-55DE-4482-AFD4-DF7242EBC859}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

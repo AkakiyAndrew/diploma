@@ -9,10 +9,14 @@ GameData::GameData()
     camera.offset = { screenSize.x/2, screenSize.y/2 };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
+    
+    //tileset loading
+    tileset = new Image[7];
 
-    pixelsPerTile = 16;
-
-    //TODO: texture file loading, units properties
+    const char* filenames[] = { "textures\\tileset\\LAKE.bmp","textures\\tileset\\SWAMP.bmp","textures\\tileset\\SAND.bmp","textures\\tileset\\PLAIN.bmp","textures\\tileset\\TREE.bmp","textures\\tileset\\STONE.bmp","textures\\tileset\\MOUNTAIN.bmp"};
+    for (int i = 0; i < 7; i++)
+        tileset[i] = LoadImage(filenames[i]);
+    //TODO: texture files loading, units properties
 }
 
 bool GameData::isMapLoaded()
@@ -22,6 +26,14 @@ bool GameData::isMapLoaded()
 
 void GameData::setTerrain(Terrain terr)
 {
+    bool textureToUpdate = false;
+    if (this->mapTerrain != nullptr)
+    {
+        delete[] this->mapTerrain; //ALSO DELETE terr.map!!!
+        this->mapTerrain = nullptr;
+        textureToUpdate = true;
+    }
+    
     this->mapHeight = terr.height;
     this->mapWidth = terr.width;
     this->mapTerrain = terr.map;
@@ -30,6 +42,8 @@ void GameData::setTerrain(Terrain terr)
     mapSize.y = mapHeight * pixelsPerTile;
 
     Image buf = GenImageColor(mapSize.x, mapSize.y, WHITE);
+    //TODO: Solve problem with format
+    //ImageFormat(&buf, UNCOMPRESSED_R8G8B8); 
 
     int index;
     Color pallete[] = { DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
@@ -42,13 +56,21 @@ void GameData::setTerrain(Terrain terr)
         for (int j = 0; j < mapWidth; j++)
         {
             index = mapWidth * j + i;
-
-            ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
+            ImageDraw(
+                &buf, 
+                tileset[static_cast<int>(mapTerrain[index])],
+                Rectangle{ 0,0, pixelsPerTile, pixelsPerTile },
+                Rectangle{ i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile },
+                WHITE);
+            //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
         }
     }
 
-    terrainTexture = LoadTextureFromImage(buf);
-
+    if (textureToUpdate)
+        UpdateTexture(terrainTexture, buf.data);
+    else
+        terrainTexture = LoadTextureFromImage(buf);
+    UnloadImage(buf);
 }
 
 void GameData::GameUpdate()
@@ -79,4 +101,19 @@ void GameData::GameDraw()
     DrawTexture(terrainTexture, 0, 0, WHITE);
 
     EndMode2D();
+}
+
+GameData::~GameData()
+{
+    //Unloading images and textures
+
+    for (int i = 0; i < 7; i++)
+        UnloadImage(tileset[i]);
+
+    if (isMapLoaded())
+    {
+        delete[] mapTerrain;
+        UnloadTexture(terrainTexture);
+    }
+        
 }

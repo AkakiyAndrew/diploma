@@ -9,7 +9,7 @@
 class TerrainGenerator
 {
 private:
-	bool generated, rendered;
+	bool rendered;
 	unsigned int width, height, octaves;
 	int seed;
 	double frequency, fx, fy;
@@ -18,13 +18,14 @@ private:
 	Color* palette;
 	float* levels;
 	double* noiseMap;
-	TerrainType* terrainMap;
+	TerrainType* terrainMap = nullptr;
 	Texture2D colorPreview;
 	Texture2D grayPreview;
 
 public:
 	bool closed;
 
+	bool isGenerated();
 	TerrainGenerator(void);
 	void RegenerateTerrain(); // создать новую карту высот шумом Перлина (распараллелить!)
 	void RerenderTerrain(); // вызывается при смене значения ползунков (проверить насколько быстро это происходит, распараллелить?), вызывать только если кнопка мыши отжата

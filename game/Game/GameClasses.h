@@ -7,9 +7,12 @@ class GameData
 {
 private:
 	TerrainType* mapTerrain = nullptr;
+	Image* tileset;
+
 	int mapHeight; // num of tiles
 	int mapWidth;
-	unsigned int pixelsPerTile;
+	const float pixelsPerTile = 16.f;
+	
 
 	Camera2D camera = { 0 }; 
 	Vector2 cursor;
@@ -41,6 +44,7 @@ public:
 	void GameDraw(); 
 	void GameUpdate();
 	GameData();
+	~GameData();
 };
 
 class GameActor {

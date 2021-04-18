@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Файлы ресурсов\Tiles">
+      <UniqueIdentifier>{712eb469-6b8b-4491-be23-53b477086a3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -44,5 +47,28 @@
     <ClInclude Include="Enums.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\tileset\LAKE.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\MOUNTAIN.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\PLAIN.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\SAND.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\STONE.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\SWAMP.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\TREE.bmp">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
   </ItemGroup>
 </Project>
