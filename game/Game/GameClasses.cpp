@@ -26,7 +26,8 @@ bool GameData::isMapLoaded()
 
 void GameData::setTerrain(Terrain terr)
 {
-    bool textureToUpdate = isMapLoaded();
+    if(isMapLoaded())
+        UnloadTexture(terrainTexture);
     
     this->mapHeight = terr.height;
     this->mapWidth = terr.width;
@@ -42,28 +43,24 @@ void GameData::setTerrain(Terrain terr)
     int index;
     Color pallete[] = { DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
 
-
     //TODO: check blending principle for generating texture
 #pragma omp parallel for private(index)
     for (int i = 0; i < mapHeight; i++)
     {
         for (int j = 0; j < mapWidth; j++)
         {
-            index = mapWidth * j + i;
+            index = mapWidth * i + j;
             ImageDraw(
                 &buf, 
                 tileset[static_cast<int>(mapTerrain[index])],
                 Rectangle{ 0,0, pixelsPerTile, pixelsPerTile },
-                Rectangle{ i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile },
+                Rectangle{ j * pixelsPerTile, i * pixelsPerTile, pixelsPerTile, pixelsPerTile },
                 WHITE);
             //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
         }
     }
 
-    if (textureToUpdate)
-        UpdateTexture(terrainTexture, buf.data);
-    else
-        terrainTexture = LoadTextureFromImage(buf);
+    terrainTexture = LoadTextureFromImage(buf);
     UnloadImage(buf);
 }
 

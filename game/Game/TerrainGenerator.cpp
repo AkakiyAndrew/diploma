@@ -12,7 +12,7 @@ TerrainGenerator::TerrainGenerator()
     palette = new Color[]{ DARKBLUE, BLUE,	YELLOW, GREEN,	DARKGREEN,	GRAY,	BLACK };
 
     //TODO: make preset maps (empty map, for path finding etc.)
-    width = 32, height = 32, seed = 12345, octaves = 16;
+    width = 2, height = 2, seed = 12345, octaves = 16;
     frequency = 16.;
 
     //TODO: replace memory allocation to regenerate/rerender
@@ -162,12 +162,11 @@ void TerrainGenerator::RegenerateTerrain()
 
 void TerrainGenerator::RerenderTerrain()
 {
-    bool textureToUpdate = false;
     if (isGenerated())
     {
+        UnloadTexture(colorPreview);
+        UnloadTexture(grayPreview);
         delete[] terrainMap;
-        terrainMap = nullptr;
-        textureToUpdate = true;
     }
     
     terrainMap = new TerrainType[width * height];
@@ -206,17 +205,9 @@ void TerrainGenerator::RerenderTerrain()
         1,
         UNCOMPRESSED_GRAYSCALE
     };
-    
-    if (!textureToUpdate)
-    {
-        colorPreview = LoadTextureFromImage(colorImage);
-        grayPreview = LoadTextureFromImage(grayImage);
-    }
-    else
-    {
-        UpdateTexture(colorPreview, colorPixels);
-        UpdateTexture(grayPreview, grayPixels);
-    }
+
+    colorPreview = LoadTextureFromImage(colorImage);
+    grayPreview = LoadTextureFromImage(grayImage);
 
     UnloadImage(colorImage);
     UnloadImage(grayImage);

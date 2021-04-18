@@ -7,6 +7,4 @@ C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(63,57): warn
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(71,17): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(67,27): warning C4244: =: преобразование "float" в "int", возможна потеря данных
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(80,9): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(119,45): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(119,29): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe
