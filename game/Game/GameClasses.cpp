@@ -1,6 +1,8 @@
 #include "GameClasses.h"
 #include <omp.h>
 
+//#define TILE_DRAWING
+
 GameData::GameData()
 {
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
@@ -15,7 +17,16 @@ GameData::GameData()
 
     const char* filenames[] = { "textures\\tileset\\LAKE.bmp","textures\\tileset\\SWAMP.bmp","textures\\tileset\\SAND.bmp","textures\\tileset\\PLAIN.bmp","textures\\tileset\\TREE.bmp","textures\\tileset\\STONE.bmp","textures\\tileset\\MOUNTAIN.bmp"};
     for (int i = 0; i < 7; i++)
+    {
         tileset[i] = LoadImage(filenames[i]);
+        ImageFormat(&tileset[i], UNCOMPRESSED_R5G6B5);
+    }
+
+    for (int i = 0; i < 7; i++)
+    {
+        tilesetTex[i] = LoadTextureFromImage(tileset[i]);
+    }
+
     //TODO: texture files loading, units properties
 }
 
@@ -26,22 +37,27 @@ bool GameData::isMapLoaded()
 
 void GameData::setTerrain(Terrain terr)
 {
-    if(isMapLoaded())
+    if (isMapLoaded())
         UnloadTexture(terrainTexture);
-    
+
     this->mapHeight = terr.height;
     this->mapWidth = terr.width;
     this->mapTerrain = terr.map;
 
     mapSize.x = mapWidth * pixelsPerTile;
     mapSize.y = mapHeight * pixelsPerTile;
+    int size = sizeof(unsigned short);
+    unsigned short *colorPixels = new unsigned short [mapSize.x * mapSize.y];
 
-    Image buf = GenImageColor(mapSize.x, mapSize.y, WHITE);
-    //TODO: Solve problem with format
-    //ImageFormat(&buf, UNCOMPRESSED_R8G8B8); 
+    Image buf = {
+        colorPixels,
+        mapSize.x,
+        mapSize.y,
+        1,
+        UNCOMPRESSED_R5G6B5
+    };
 
     int index;
-    Color pallete[] = { DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
 
     //TODO: check blending principle for generating texture
 #pragma omp parallel for private(index)
@@ -88,8 +104,28 @@ void GameData::GameDraw()
 
     BeginMode2D(camera);
 
-    //draw terrain
+#ifndef TILE_DRAWING
     DrawTexture(terrainTexture, 0, 0, WHITE);
+
+#else
+    //draw terrain
+    int index;
+    //TODO: DEFINE WHICH i, j, mapHeight AND mapWidth WE SHOULD DRAW DEPENDS ON CAMERA POSITION, ZOOM AND WINDOW SIZE
+    for (int i = 0; i < mapHeight; i++)
+    {
+        for (int j = 0; j < mapWidth; j++)
+        {
+            index = mapWidth * i + j;
+            DrawTexture(
+                tilesetTex[static_cast<int>(mapTerrain[index])],
+                j * pixelsPerTile,
+                i * pixelsPerTile,
+                WHITE);
+
+            //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
+        }
+    }
+#endif // !TILE_DRAWING
 
     EndMode2D();
 }
@@ -106,5 +142,10 @@ GameData::~GameData()
         delete[] mapTerrain;
         UnloadTexture(terrainTexture);
     }
-        
+    
+    for (int i = 0; i < 7; i++)
+    {
+        UnloadTexture(tilesetTex[i]);
+    }
+
 }

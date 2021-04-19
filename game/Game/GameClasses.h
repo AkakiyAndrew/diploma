@@ -8,6 +8,7 @@ class GameData
 private:
 	TerrainType* mapTerrain = nullptr;
 	Image* tileset;
+	Texture2D tilesetTex[7];
 
 	int mapHeight; // num of tiles
 	int mapWidth;
