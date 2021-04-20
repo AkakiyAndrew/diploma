@@ -46,7 +46,9 @@ void GameData::setTerrain(Terrain terr)
 
     mapSize.x = mapWidth * pixelsPerTile;
     mapSize.y = mapHeight * pixelsPerTile;
-    int size = sizeof(unsigned short);
+
+    //TODO: MAKE NEW FUNCTION TO REDRAW PREVIEW TEXTURE, CALL IT ONLY FEW TIMES IN UPDATE
+
     unsigned short *colorPixels = new unsigned short [mapSize.x * mapSize.y];
 
     Image buf = {
@@ -86,32 +88,39 @@ void GameData::GameUpdate()
 
     cursor = GetMousePosition();
 
-    if ((cursor.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) /*&& camera.target.x > 100*/)           camera.target.x -= 10/ camera.zoom;
-    if ((cursor.x > screenSize.x * 0.85f || IsKeyDown(KEY_D)) /*&& camera.target.x < mapSize.x*/)     camera.target.x += 10/ camera.zoom;
-    if ((cursor.y < screenSize.y * 0.15f || IsKeyDown(KEY_W)) /*&& camera.target.y > 100*/)           camera.target.y -= 10/ camera.zoom;
-    if ((cursor.y > screenSize.y * 0.85f || IsKeyDown(KEY_S)) /*&& camera.target.y < mapSize.y*/)     camera.target.y += 10/ camera.zoom;
+    // Camera shifting
+    if ((cursor.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) && camera.target.x > 100)           camera.target.x -= 10/ camera.zoom;
+    if ((cursor.x > screenSize.x * 0.85f || IsKeyDown(KEY_D)) && camera.target.x < mapSize.x)     camera.target.x += 10/ camera.zoom;
+    if ((cursor.y < screenSize.y * 0.15f || IsKeyDown(KEY_W)) && camera.target.y > 100)           camera.target.y -= 10/ camera.zoom;
+    if ((cursor.y > screenSize.y * 0.85f || IsKeyDown(KEY_S)) && camera.target.y < mapSize.y)     camera.target.y += 10/ camera.zoom;
 
     // Camera zoom controls
     camera.zoom += ((float)GetMouseWheelMove() * 0.2f);
-
     if (camera.zoom > 10.0f) camera.zoom = 10.0f;
     else if (camera.zoom < 0.1f) camera.zoom = 0.1f;
-}
 
-void GameData::GameDraw()
-{
+    // view borders calculation
     Vector2 buf1 = GetScreenToWorld2D(Vector2{ 0,0 }, camera);
     Vector2 buf2 = GetScreenToWorld2D(Vector2{ screenSize.x,screenSize.y }, camera);
-    
-    //Vector2 buf2 = GetScreenToWorld2D(Vector2{buf1.x+ screenSize.x,buf1.y + screenSize.y }, camera);
-
-    Rectangle screen = {
+    viewBorders = {
         buf1.x,
         buf1.y,
         buf2.x - buf1.x,
         buf2.y - buf1.y
     };
+    renderBorders[0] = (buf1.y / pixelsPerTile)-1;
+    renderBorders[1] = (buf1.x / pixelsPerTile)-1;
+    renderBorders[2] = (buf2.y / pixelsPerTile)+1;
+    renderBorders[3] = (buf2.x / pixelsPerTile)+1;
 
+    if (renderBorders[0] < 0) renderBorders[0] = 0;
+    if (renderBorders[1] < 0) renderBorders[1] = 0;
+    if (renderBorders[2] > mapHeight) renderBorders[2] = mapHeight;
+    if (renderBorders[3] > mapWidth) renderBorders[3] = mapWidth;
+}
+
+void GameData::GameDraw()
+{
     BeginMode2D(camera);
 
     DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
@@ -120,20 +129,17 @@ void GameData::GameDraw()
     DrawTexture(terrainTexture, 0, 0, WHITE);
 #else
     //draw terrain
-    int index;
-    //TODO: DEFINE WHICH i, j, mapHeight AND mapWidth WE SHOULD DRAW DEPENDS ON CAMERA POSITION, ZOOM AND WINDOW SIZE
 
     DrawRectangleLinesEx(
-        screen,
+        viewBorders,
         5,
         RED
         );
 
-    DrawRectangle(buf2.x, buf2.y, 32, 32, DARKBLUE);
-
-    for (int i = 0; i < mapHeight; i++)
+    int index;
+    for (int i = renderBorders[0]; i < renderBorders[2]; i++)
     {
-        for (int j = 0; j < mapWidth; j++)
+        for (int j = renderBorders[1]; j < renderBorders[3]; j++)
         {
             index = mapWidth * i + j;
             DrawTexture(
@@ -141,15 +147,24 @@ void GameData::GameDraw()
                 j * pixelsPerTile,
                 i * pixelsPerTile,
                 WHITE);
-
-            //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
         }
     }
+
+    //for (int i = 0; i < mapHeight; i++)
+    //{
+    //    for (int j = 0; j < mapWidth; j++)
+    //    {
+    //        index = mapWidth * i + j;
+    //        DrawTexture(
+    //            tilesetTex[static_cast<int>(mapTerrain[index])],
+    //            j * pixelsPerTile,
+    //            i * pixelsPerTile,
+    //            WHITE);
+    //        //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
+    //    }
+    //}
 #endif // !TILE_DRAWING
     EndMode2D();
-
-    DrawText(FormatText("%f, %f", buf1.x, buf1.y), 20.f, 20.f, 20, BLUE);
-    DrawText(FormatText("%f, %f", buf2.x, buf2.y), 1200.f, 550.f, 20, BLUE);
 }
 
 GameData::~GameData()

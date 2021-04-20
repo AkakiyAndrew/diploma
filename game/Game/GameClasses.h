@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <string>
 #include "Enums.h"
+#include <algorithm>
 
 class GameData
 {
@@ -19,6 +20,8 @@ private:
 	Vector2 cursor;
 	Vector2 screenSize;
 	Vector2 mapSize; //mapsize in pixels
+	Rectangle viewBorders;
+	int renderBorders[4]; //indices: top horiz, left vert, bottom horiz, right vert
 	Texture2D terrainTexture;
 	
 
