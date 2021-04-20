@@ -1,13 +1,13 @@
 #include "GameClasses.h"
 #include <omp.h>
 
-//#define TILE_DRAWING
+#define TILE_DRAWING
 
 GameData::GameData()
 {
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
 
-    camera.target = { 0, 0 };
+    camera.target = { screenSize.x/2, screenSize.y/2 };
     camera.offset = { screenSize.x/2, screenSize.y/2 };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
@@ -86,10 +86,10 @@ void GameData::GameUpdate()
 
     cursor = GetMousePosition();
 
-    if ((cursor.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) && camera.target.x > 100)           camera.target.x -= 10/ camera.zoom;
-    if ((cursor.x > screenSize.x * 0.85f || IsKeyDown(KEY_D)) && camera.target.x < mapSize.x)     camera.target.x += 10/ camera.zoom;
-    if ((cursor.y < screenSize.y * 0.15f || IsKeyDown(KEY_W)) && camera.target.y > 100)           camera.target.y -= 10/ camera.zoom;
-    if ((cursor.y > screenSize.y * 0.85f || IsKeyDown(KEY_S)) && camera.target.y < mapSize.y)     camera.target.y += 10/ camera.zoom;
+    if ((cursor.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) /*&& camera.target.x > 100*/)           camera.target.x -= 10/ camera.zoom;
+    if ((cursor.x > screenSize.x * 0.85f || IsKeyDown(KEY_D)) /*&& camera.target.x < mapSize.x*/)     camera.target.x += 10/ camera.zoom;
+    if ((cursor.y < screenSize.y * 0.15f || IsKeyDown(KEY_W)) /*&& camera.target.y > 100*/)           camera.target.y -= 10/ camera.zoom;
+    if ((cursor.y > screenSize.y * 0.85f || IsKeyDown(KEY_S)) /*&& camera.target.y < mapSize.y*/)     camera.target.y += 10/ camera.zoom;
 
     // Camera zoom controls
     camera.zoom += ((float)GetMouseWheelMove() * 0.2f);
@@ -100,17 +100,37 @@ void GameData::GameUpdate()
 
 void GameData::GameDraw()
 {
-    Rectangle screen = {camera.target.x - camera.offset.x, camera.target.y - camera.offset.y, screenSize.x, screenSize.y };
+    Vector2 buf1 = GetScreenToWorld2D(Vector2{ 0,0 }, camera);
+    Vector2 buf2 = GetScreenToWorld2D(Vector2{ screenSize.x,screenSize.y }, camera);
+    
+    //Vector2 buf2 = GetScreenToWorld2D(Vector2{buf1.x+ screenSize.x,buf1.y + screenSize.y }, camera);
+
+    Rectangle screen = {
+        buf1.x,
+        buf1.y,
+        buf2.x - buf1.x,
+        buf2.y - buf1.y
+    };
 
     BeginMode2D(camera);
 
+    DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
+
 #ifndef TILE_DRAWING
     DrawTexture(terrainTexture, 0, 0, WHITE);
-
 #else
     //draw terrain
     int index;
     //TODO: DEFINE WHICH i, j, mapHeight AND mapWidth WE SHOULD DRAW DEPENDS ON CAMERA POSITION, ZOOM AND WINDOW SIZE
+
+    DrawRectangleLinesEx(
+        screen,
+        5,
+        RED
+        );
+
+    DrawRectangle(buf2.x, buf2.y, 32, 32, DARKBLUE);
+
     for (int i = 0; i < mapHeight; i++)
     {
         for (int j = 0; j < mapWidth; j++)
@@ -126,8 +146,10 @@ void GameData::GameDraw()
         }
     }
 #endif // !TILE_DRAWING
-
     EndMode2D();
+
+    DrawText(FormatText("%f, %f", buf1.x, buf1.y), 20.f, 20.f, 20, BLUE);
+    DrawText(FormatText("%f, %f", buf2.x, buf2.y), 1200.f, 550.f, 20, BLUE);
 }
 
 GameData::~GameData()

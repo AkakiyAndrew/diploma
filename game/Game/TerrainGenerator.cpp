@@ -12,7 +12,7 @@ TerrainGenerator::TerrainGenerator()
     palette = new Color[]{ DARKBLUE, BLUE,	YELLOW, GREEN,	DARKGREEN,	GRAY,	BLACK };
 
     //TODO: make preset maps (empty map, for path finding etc.)
-    width = 2, height = 2, seed = 12345, octaves = 16;
+    width = 128, height = 128, seed = 12345, octaves = 16;
     frequency = 16.;
 
     //TODO: replace memory allocation to regenerate/rerender
