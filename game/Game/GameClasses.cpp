@@ -12,6 +12,8 @@ GameData::GameData()
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
     
+    palette = new Color[]{ DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
+
     //tileset loading
     tileset = new Image[7];
 
@@ -48,7 +50,7 @@ void GameData::setTerrain(Terrain terr)
     mapSize.y = mapHeight * pixelsPerTile;
 
     //TODO: MAKE NEW FUNCTION TO REDRAW PREVIEW TEXTURE, CALL IT ONLY FEW TIMES IN UPDATE
-
+#ifndef TILE_DRAWING
     unsigned short *colorPixels = new unsigned short [mapSize.x * mapSize.y];
 
     Image buf = {
@@ -74,9 +76,26 @@ void GameData::setTerrain(Terrain terr)
                 Rectangle{ 0,0, pixelsPerTile, pixelsPerTile },
                 Rectangle{ j * pixelsPerTile, i * pixelsPerTile, pixelsPerTile, pixelsPerTile },
                 WHITE);
-            //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
         }
     }
+#else
+    Color* colorPixels = new Color[mapHeight*mapWidth];
+
+    Image buf = {
+        colorPixels,
+        mapWidth,
+        mapHeight,
+        1,
+        UNCOMPRESSED_R8G8B8A8
+    };
+
+    //#pragma omp parallel for
+    for (int i = 0; i < mapHeight * mapWidth; i++)
+    {
+        colorPixels[i] = palette[static_cast<int>(mapTerrain[i])];
+    }
+
+#endif
 
     terrainTexture = LoadTextureFromImage(buf);
     UnloadImage(buf);
@@ -123,12 +142,38 @@ void GameData::GameDraw()
 {
     BeginMode2D(camera);
 
-    DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
+    //draw terrain
 
 #ifndef TILE_DRAWING
-    DrawTexture(terrainTexture, 0, 0, WHITE);
+    DrawTextureEx(
+        terrainTexture,
+        Vector2{ 0.f, 0.f },
+        0.f, pixelsPerTile, WHITE);
 #else
-    //draw terrain
+
+    if (camera.zoom < 0.5) //low-detailed map
+    {
+        DrawTextureEx(
+            terrainTexture,
+            Vector2{ 0.f, 0.f },
+            0.f, pixelsPerTile, WHITE);
+    }
+    else
+    {                    //full-detailed map
+        int index;
+        for (int i = renderBorders[0]; i < renderBorders[2]; i++)
+        {
+            for (int j = renderBorders[1]; j < renderBorders[3]; j++)
+            {
+                index = mapWidth * i + j;
+                DrawTexture(
+                    tilesetTex[static_cast<int>(mapTerrain[index])],
+                    j * pixelsPerTile,
+                    i * pixelsPerTile,
+                    WHITE);
+            }
+        }
+    }
 
     DrawRectangleLinesEx(
         viewBorders,
@@ -136,35 +181,12 @@ void GameData::GameDraw()
         RED
         );
 
-    int index;
-    for (int i = renderBorders[0]; i < renderBorders[2]; i++)
-    {
-        for (int j = renderBorders[1]; j < renderBorders[3]; j++)
-        {
-            index = mapWidth * i + j;
-            DrawTexture(
-                tilesetTex[static_cast<int>(mapTerrain[index])],
-                j * pixelsPerTile,
-                i * pixelsPerTile,
-                WHITE);
-        }
-    }
+    DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
+#endif
 
-    //for (int i = 0; i < mapHeight; i++)
-    //{
-    //    for (int j = 0; j < mapWidth; j++)
-    //    {
-    //        index = mapWidth * i + j;
-    //        DrawTexture(
-    //            tilesetTex[static_cast<int>(mapTerrain[index])],
-    //            j * pixelsPerTile,
-    //            i * pixelsPerTile,
-    //            WHITE);
-    //        //ImageDrawRectangle(&buf, i * pixelsPerTile, j * pixelsPerTile, pixelsPerTile, pixelsPerTile, pallete[static_cast<int>(mapTerrain[index])]);
-    //    }
-    //}
-#endif // !TILE_DRAWING
     EndMode2D();
+
+    DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
 }
 
 GameData::~GameData()
@@ -185,4 +207,5 @@ GameData::~GameData()
         UnloadTexture(tilesetTex[i]);
     }
 
+    delete[] palette;
 }

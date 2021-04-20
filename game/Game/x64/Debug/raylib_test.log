@@ -1,15 +1,10 @@
 ﻿  GameClasses.cpp
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(50,65): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(54,16): warning C4838: Преобразование из "float" в "int" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(54,16): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(55,16): warning C4838: Преобразование из "float" в "int" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(55,16): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(109,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(110,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(111,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(112,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(125,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(125,32): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(148,19): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(147,19): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(130,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(131,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(132,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(133,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(172,23): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(171,23): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(184,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(184,32): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe

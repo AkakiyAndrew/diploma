@@ -10,6 +10,8 @@ private:
 	TerrainType* mapTerrain = nullptr;
 	Image* tileset;
 	Texture2D tilesetTex[7];
+	Texture2D terrainTexture;
+	Color* palette;
 
 	int mapHeight; // num of tiles
 	int mapWidth;
@@ -22,7 +24,7 @@ private:
 	Vector2 mapSize; //mapsize in pixels
 	Rectangle viewBorders;
 	int renderBorders[4]; //indices: top horiz, left vert, bottom horiz, right vert
-	Texture2D terrainTexture;
+
 	
 
 	//тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
