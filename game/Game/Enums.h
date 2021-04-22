@@ -19,6 +19,9 @@ enum class Status
 
 enum class ActorType
 {
+	//for wantToBuild
+	ACTOR_NULL,
+
 	//Machines turrets
 	LIGHT_TURRET,
 	HEAVY_TURRET,
@@ -63,4 +66,10 @@ struct Terrain
 	int width;
 	int height;
 	TerrainType* map;
+};
+
+struct TileIndex
+{
+	int x;
+	int y;
 };

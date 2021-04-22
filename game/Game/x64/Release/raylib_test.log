@@ -1,17 +1,12 @@
 ﻿  GameClasses.cpp
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(50,65): warning C4244: инициализация: преобразование "float" в "size_t", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(54,16): warning C4838: Преобразование из "float" в "int" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(54,16): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(55,16): warning C4838: Преобразование из "float" в "int" требует сужающего преобразования.
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(55,16): warning C4244: инициализация: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(109,31): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(110,31): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(111,31): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(112,31): warning C4244: =: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(121,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(121,32): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(144,19): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(143,19): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(143,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(144,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(145,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(146,48): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(185,23): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(184,23): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(197,49): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\game\Game\GameClasses.cpp(197,32): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   TerrainGenerator.cpp
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(11,68): warning C4305: инициализация: усечение из "double" в "float"
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(44,46): warning C4838: Преобразование из "double" в "float" требует сужающего преобразования.
@@ -23,8 +18,8 @@ C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(73,27): warn
 C:\Users\Andrew\Desktop\Диплом\game\Game\TerrainGenerator.cpp(86,9): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
   main.cpp
   Создание кода
-  15 of 810 functions ( 1.9%) were compiled, the rest were copied from previous compilation.
+  7 of 806 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    18 functions had inline decision re-evaluated but remain unchanged
+    14 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Release\GameProject.exe

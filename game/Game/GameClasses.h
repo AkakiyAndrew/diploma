@@ -3,28 +3,34 @@
 #include <string>
 #include "Enums.h"
 #include <algorithm>
+#include <vector>
 
 class GameData
 {
 private:
+	//TODO: make this array two-dimensional
 	TerrainType* mapTerrain = nullptr;
 	Image* tileset;
 	Texture2D tilesetTex[7];
 	Texture2D terrainTexture;
 	Color* palette;
 
+	unsigned char** mapExpansionCreep = nullptr;
+
 	int mapHeight; // num of tiles
 	int mapWidth;
 	const float pixelsPerTile = 16.f;
 	
-
 	Camera2D camera = { 0 }; 
-	Vector2 cursor;
+	Vector2 mousePosition;
+	Vector2 mouseWorldPosition;
+	TileIndex mouseIndex;
 	Vector2 screenSize;
 	Vector2 mapSize; //mapsize in pixels
 	Rectangle viewBorders;
 	int renderBorders[4]; //indices: top horiz, left vert, bottom horiz, right vert
 
+	ActorType wantToBuild = ActorType::ACTOR_NULL;
 	
 
 	//тут будут хранитс€ ссылки на актеров (вз€ть какой-то контейнер из STL)
@@ -33,7 +39,7 @@ private:
 	//кол-во ресурсов
 
 	//тут же и хранить настройки?
-
+	std::vector<TileIndex>tilesCircleIntersecting(Vector2 center, unsigned int radius);
 	
 	void saveToFile(std::string fileName);
 	void loadFromFile(std::string fileName);
@@ -43,6 +49,8 @@ private:
 
 public:
 	bool closed = false;
+
+	void addActor(ActorType type, Status state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
 
 	//дл€ вызова обновлений и отрисовки по всем актерам, вычислени€ экономических тайлов и т.п.
 	void setTerrain(Terrain);
@@ -85,8 +93,6 @@ public:
 
 };
 
-
-
 class Building: public GameActor {
 
 private:
@@ -100,7 +106,6 @@ public:
 		//проходить по спирали радиуса экспансии, провер€€ €вл€етс€ ли тайл пустым от слизи и имеетс€ ли сосед со слизью
 
 		//убываение слизи: раз в n*m циклов провер€ть все тайлы слизи на наличие р€дом источника слизи, если нет - провер€ть 
-
 	}
 
 };
