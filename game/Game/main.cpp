@@ -17,7 +17,7 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1400;
+    const int screenWidth = 1700;
     const int screenHeight = 600;
     
     int* test = nullptr;

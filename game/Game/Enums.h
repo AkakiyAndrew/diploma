@@ -6,7 +6,7 @@ enum class Side
 	INSECTS
 };
 
-enum class Status
+enum class State
 {
 	ONLINE,
 	OFFLINE,
@@ -14,6 +14,7 @@ enum class Status
 	BUILDING,
 	ATTACKING,
 	GOES,
+	IDLE,
 	//ондслюрэ опн яхярелс юрюйх х яжеохрэ я юмхлюжхеи
 };
 

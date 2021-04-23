@@ -116,16 +116,19 @@ std::vector<TileIndex> GameData::tilesCircleIntersecting(Vector2 center, unsigne
 {
     std::vector<TileIndex> result;
     TileIndex upLeftCorner = { std::clamp<int>(center.x - radius, 0, center.x), std::clamp<int>(center.y - radius, 0, center.y) };
-    TileIndex downRightCorner = { std::clamp<int>(center.x + radius, center.x, this->mapWidth), std::clamp<int>(center.y + radius, center.y, this->mapHeight) };
-
-    for (int i = upLeftCorner.x; i < downRightCorner.x; i++)
+    TileIndex downRightCorner = { std::clamp<int>(center.x + radius, center.x, this->mapWidth-1), std::clamp<int>(center.y + radius, center.y, this->mapHeight-1) };
+    //reducing up limit `cause of max index of maps (not the actual indices)
+    
+    for (int y = upLeftCorner.y; y <= downRightCorner.y; y++)
     {
-        for (int j = upLeftCorner.y; j < downRightCorner.y; j++)
+        for (int x = upLeftCorner.x; x <= downRightCorner.x; x++)
         {
-            result.push_back(TileIndex{i,j});
+            if (CheckCollisionPointCircle(Vector2{static_cast<float>(x), static_cast<float>(y) }, center, radius))
+            result.push_back(TileIndex{x,y});
+            //TODO: optimize this crap (and make parallel computaton?)
         }
     }
-    //CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius)
+    
 
     return result;
 }
@@ -136,7 +139,7 @@ void GameData::GameUpdate()
     
     mousePosition = GetMousePosition();
     mouseWorldPosition = GetScreenToWorld2D(mousePosition, camera);
-    mouseIndex = { std::clamp<int>(mouseWorldPosition.x/pixelsPerTile, 0, this->mapWidth), std::clamp<int>(mouseWorldPosition.y / pixelsPerTile, 0, this->mapHeight) };
+    mouseIndex = { std::clamp<int>(mouseWorldPosition.x/pixelsPerTile, 0, this->mapWidth-1), std::clamp<int>(mouseWorldPosition.y / pixelsPerTile, 0, this->mapHeight-1) };
 
     // Camera shifting
     if ((mousePosition.x < screenSize.x * 0.15f || IsKeyDown(KEY_A)) && camera.target.x > 100)           camera.target.x -= 10 / camera.zoom;
@@ -182,7 +185,7 @@ void GameData::GameDraw()
         0.f, pixelsPerTile, WHITE);
 #else
 
-    if (camera.zoom < 0.7) //low-detailed map
+    if (camera.zoom < 1.f) //low-detailed map
     {
         DrawTextureEx(
             terrainTexture,
@@ -212,7 +215,7 @@ void GameData::GameDraw()
         RED
     );
 
-    DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
+    //DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
 #endif
 
     if (this->wantToBuild != ActorType::ACTOR_NULL)
@@ -239,14 +242,15 @@ void GameData::GameDraw()
         }
     }
 
-    
+    //for (TileIndex tile : tilesCircleIntersecting(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, 30))
+    //{
+    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
+    //}
 
-    for (TileIndex tile : tilesCircleIntersecting(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, 4))
-    {
-        DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
-    }
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
+
+    DrawFPS(20, 50);
 }
 
 GameData::~GameData()
