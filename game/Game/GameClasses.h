@@ -15,10 +15,10 @@ private:
     Texture2D terrainTexture;
     Color* palette;
 
-    unsigned char** mapExpansionCreep = nullptr;
+    unsigned int radius = 1;
 
-    int mapHeight; // num of tiles
-    int mapWidth;
+    int mapHeight; // num of tile rows
+    int mapWidth; // num of tile columns
     const float pixelsPerTile = 16.f;
     
     Camera2D camera = { 0 }; 
@@ -39,18 +39,20 @@ private:
     //кол-во ресурсов
 
     //тут же и хранить настройки?
-    std::vector<TileIndex>tilesCircleIntersecting(Vector2 center, unsigned int radius);
     
-    void saveToFile(std::string fileName);
-    void loadFromFile(std::string fileName);
     //void loadSettings();
 
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
 public:
-    bool closed = false;
+    unsigned short timeCount; //for Update()
 
-    void addActor(ActorType type, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
+    unsigned char** mapExpansionCreep = nullptr;
+    TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
+    bool closed = false;
+    std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
+    std::vector<TileIndex>tilesInPerimeterCircle(Vector2 center, unsigned int radius);
+    void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
 
     //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
     void setTerrain(Terrain);
@@ -59,12 +61,15 @@ public:
     void GameUpdate();
     GameData();
     ~GameData();
+
+    void saveToFile(std::string fileName);
+    void loadFromFile(std::string fileName);
 };
 
 class GameActor {
 protected:
-    const Texture2D* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
-    unsigned int animationFrame; //current animation 
+    Texture2D* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
+    unsigned short animationFrame; //current animation 
 
     int progress; //for construction? or just use state in Update
     Vector2 position;
@@ -74,18 +79,20 @@ protected:
     bool selectable; //удалить? все равно просматривать данные необходимо, а приказы отдавать не тут/сменить на selected, чтобы в Draw рисовать рамку, а в GUI хранить указатель на выбранного актера
 
 public:
-    const GameData* game;
+    GameData* game;
+    const ActorType type;
     int ID; //private?
-    const Side side;
+    Side side;
     std::string name;
 
-    const int maxHP;
-    const int size;
-    const int armor;
-    const int cost;
+    //make consts?
+    int maxHP;
+    int size;
+    int armor;
+    int cost;
 
-    const int buildCount;
-    const int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
+    //int buildCount; //just tune buildRate in cores and base
+    int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
     
     virtual void Draw() = 0;
     virtual void Update() = 0; 
@@ -108,7 +115,32 @@ public:
         else
             this->HP += amount;
     } 
-    
+
+    //when spawning new unit, use GameData unit settings and ActorType for seting mapHP, size, etc. State defines currentHP and, maybe, something else
+    GameActor(GameData *ptr, ActorType type, Vector2 pos, State state)
+        :game(ptr), type(type), position(pos), state(state)
+    {
+        switch (type)
+        {
+        case ActorType::LIGHT_TURRET:
+            //add seting properties here
+        case ActorType::HEAVY_TURRET:
+            //and here
+        case ActorType::AIRDEFENSE_TURRET:
+            //and everywhere
+        case ActorType::CORE:
+        case ActorType::BASE:
+            side = Side::MACHINES;
+            break;
+        case ActorType::LIGHT_INSECT:
+        case ActorType::HEAVY_INSECT:
+        case ActorType::FLYING_INSECT:
+        case ActorType::HIVE:
+        case ActorType::TUMOR:
+            side = Side::INSECTS;
+            break;
+        }
+    }
 
     //GameActor(ActorType type) //принимать просто тип(может, еще и статус?), и выставлять стартовые значения, взятые из настроек игры, прямо тут?
     //{
@@ -121,14 +153,24 @@ class Building: public GameActor {
 
 private:
     int expansionRange;
+    bool expanded; //true, if all tiles around this building is filled by expansion
 
 public:
+    Building(GameData* ptr, ActorType type, Vector2 pos, State state);
     void Expand();
-        //для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
-        //спавнить за раз 2-4 тайла, каждому свой цикл проверок:
-        //проходить по спирали радиуса экспансии, проверяя является ли тайл пустым от слизи и имеется ли сосед со слизью
 
-        //убываение слизи: раз в n*m циклов проверять все тайлы слизи на наличие рядом источника слизи, если нет - проверять 
+    //для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
+    //спавнить за раз 2-4 тайла, каждому свой цикл проверок:
+    //проходить по спирали радиуса экспансии, проверяя является ли тайл пустым от слизи и имеется ли сосед со слизью
+
+    //убываение слизи: раз в n*m циклов проверять все тайлы слизи на наличие рядом источника слизи, если нет - проверять 
+};
+
+class Tumor : public Building
+{
+    void Update();
+    void Draw();
+    Tumor();
 };
 
 class Constructor : public Building
@@ -149,4 +191,10 @@ class Constructor : public Building
         //seeking for target to repair must be in Update()!
     }
 
+};
+
+class Core : public Constructor
+{
+    void Update();
+    void Draw();
 };

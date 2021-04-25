@@ -112,7 +112,7 @@ void GameData::setTerrain(Terrain terr)
     UnloadImage(buf);
 }
 
-std::vector<TileIndex> GameData::tilesCircleIntersecting(Vector2 center, unsigned int radius)
+std::vector<TileIndex> GameData::tilesInsideCircle(Vector2 center, unsigned int radius)
 {
     std::vector<TileIndex> result;
     TileIndex upLeftCorner = { std::clamp<int>(center.x - radius, 0, center.x), std::clamp<int>(center.y - radius, 0, center.y) };
@@ -133,8 +133,92 @@ std::vector<TileIndex> GameData::tilesCircleIntersecting(Vector2 center, unsigne
     return result;
 }
 
+std::vector<TileIndex> GameData::tilesInPerimeterCircle(Vector2 center, unsigned int radius)
+{
+    std::vector<TileIndex> buf;
+    int x_centre = center.x, y_centre = center.y;
+    int x = radius, y = 0;
+
+    // Printing the initial point on the axes 
+    // after translation
+    
+
+    // When radius is zero only a single
+    // point will be printed
+    if (radius > 0)
+    {
+        /*buf.push_back(TileIndex{ x + x_centre, -y + y_centre });
+        buf.push_back(TileIndex{ y + x_centre,  x + y_centre });
+        buf.push_back(TileIndex{ -y + x_centre, x + y_centre });*/
+        buf.push_back(TileIndex{ x + x_centre, y_centre });  //right
+        buf.push_back(TileIndex{ x_centre, -x + y_centre }); //up
+        buf.push_back(TileIndex{ x_centre, x + y_centre });  //down
+        buf.push_back(TileIndex{ -x + x_centre,  y_centre });//left
+    }
+
+    // Initialising the value of P
+    int P = 1 - radius;
+    while (x > y)
+    {
+        y++;
+
+        // Mid-point is inside or on the perimeter
+        if (P <= 0)
+            P = P + 2 * y + 1;
+        // Mid-point is outside the perimeter
+        else
+        {
+            x--;
+            P = P + 2 * y - 2 * x + 1;
+        }
+
+        // All the perimeter points have already been printed
+        if (x < y)
+            break;
+
+        // Printing the generated point and its reflection
+        // in the other octants after translation
+        buf.push_back(TileIndex{ x + x_centre, y + y_centre });
+        buf.push_back(TileIndex{ -x + x_centre, y + y_centre });
+        buf.push_back(TileIndex{ x + x_centre , -y + y_centre });
+        buf.push_back(TileIndex{ -x + x_centre , -y + y_centre });
+
+        // If the generated point is on the line x = y then 
+        // the perimeter points have already been printed
+        if (x != y)
+        {
+            buf.push_back(TileIndex{ y + x_centre , x + y_centre });
+            buf.push_back(TileIndex{ -y + x_centre , x + y_centre });
+            buf.push_back(TileIndex{ y + x_centre , -x + y_centre });
+            buf.push_back(TileIndex{ -y + x_centre , -x + y_centre });
+        }
+    }
+
+    std::vector<TileIndex> result;
+
+    for (int i = 0; i < buf.size(); i++)
+    {
+        //checking to not cross the border, if all right - add TileIndex to result vector
+        if (!(buf[i].x < 0 ||
+            buf[i].x>this->mapWidth - 1 ||
+            buf[i].y < 0 ||
+            buf[i].y>this->mapHeight - 1))
+        {
+            result.push_back(buf[i]);
+        }
+        //TODO: consider using result.erase()
+    }
+
+    return result;
+}
+
 void GameData::GameUpdate()
 {
+    if (timeCount != 60)
+        timeCount++;
+    else
+        timeCount = 0;
+
     if (IsKeyPressed(KEY_ESCAPE)) closed = true;
     
     mousePosition = GetMousePosition();
@@ -170,6 +254,19 @@ void GameData::GameUpdate()
     if (renderBorders[1] < 0) renderBorders[1] = 0;
     if (renderBorders[2] > mapHeight) renderBorders[2] = mapHeight;
     if (renderBorders[3] > mapWidth) renderBorders[3] = mapWidth;
+
+    if (IsKeyPressed(KEY_ONE))
+        radius = 1;
+    if (IsKeyPressed(KEY_TWO))
+        radius = 2;
+    if (IsKeyPressed(KEY_THREE))
+        radius = 3;
+    if (IsKeyPressed(KEY_FOUR))
+        radius = 4;
+    if (IsKeyPressed(KEY_FIVE))
+        radius = 5;
+    if (IsKeyPressed(KEY_SIX))
+        radius = 6;
 }
 
 void GameData::GameDraw()
@@ -242,10 +339,10 @@ void GameData::GameDraw()
         }
     }
 
-    //for (TileIndex tile : tilesCircleIntersecting(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, 30))
-    //{
-    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
-    //}
+    for (TileIndex tile : tilesInPerimeterCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
+    {
+        DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
+    }
 
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
