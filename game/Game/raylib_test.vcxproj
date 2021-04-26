@@ -156,6 +156,7 @@
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />
+    <ClCompile Include="Tumor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enums.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\tileset\CREEP.png" />
     <Image Include="textures\tileset\LAKE.bmp" />
     <Image Include="textures\tileset\MOUNTAIN.bmp" />
     <Image Include="textures\tileset\PLAIN.bmp" />
@@ -171,10 +173,6 @@
     <Image Include="textures\tileset\STONE.bmp" />
     <Image Include="textures\tileset\SWAMP.bmp" />
     <Image Include="textures\tileset\TREE.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

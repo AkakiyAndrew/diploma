@@ -73,4 +73,6 @@ struct TileIndex
 {
 	int x;
 	int y;
+
+	operator Vector2() { return Vector2{ static_cast<float>(x), static_cast<float>(y) }; };
 };

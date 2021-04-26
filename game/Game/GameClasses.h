@@ -4,6 +4,9 @@
 #include "Enums.h"
 #include <algorithm>
 #include <vector>
+//#include <memory>
+
+class GameActor;
 
 class GameData
 {
@@ -11,15 +14,13 @@ private:
     //TODO: make this array two-dimensional
     TerrainType* mapTerrain = nullptr;
     Image* tileset;
-    Texture2D tilesetTex[7];
+    Texture2D tilesetTex[8];
     Texture2D terrainTexture;
     Color* palette;
-
-    unsigned int radius = 1;
+    std::vector<GameActor*> unitsList;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
-    const float pixelsPerTile = 16.f;
     
     Camera2D camera = { 0 }; 
     Vector2 mousePosition;
@@ -47,11 +48,15 @@ private:
 public:
     unsigned short timeCount; //for Update()
 
+    unsigned int radius = 1;
+    const float pixelsPerTile = 16.f;
+
     unsigned char** mapExpansionCreep = nullptr;
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
     bool closed = false;
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
-    std::vector<TileIndex>tilesInPerimeterCircle(Vector2 center, unsigned int radius);
+    std::vector<TileIndex>tilesInsideCircleOrdered(TileIndex center, int radius);
+    std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
 
     //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
@@ -137,23 +142,20 @@ public:
         case ActorType::FLYING_INSECT:
         case ActorType::HIVE:
         case ActorType::TUMOR:
+            size = 8;
             side = Side::INSECTS;
             break;
         }
     }
-
-    //GameActor(ActorType type) //принимать просто тип(может, еще и статус?), и выставлять стартовые значения, взятые из настроек игры, прямо тут?
-    //{
-
-    //}
-
 };
 
 class Building: public GameActor {
 
 private:
+    TileIndex positionIndex;
     int expansionRange;
     bool expanded; //true, if all tiles around this building is filled by expansion
+    std::vector<TileIndex> expansionIndices;
 
 public:
     Building(GameData* ptr, ActorType type, Vector2 pos, State state);
@@ -168,9 +170,11 @@ public:
 
 class Tumor : public Building
 {
+public:
     void Update();
     void Draw();
-    Tumor();
+    void Destroy();
+    Tumor(GameData* ptr, ActorType type, Vector2 pos, State state);
 };
 
 class Constructor : public Building

@@ -15,16 +15,25 @@ GameData::GameData()
     palette = new Color[]{ DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
 
     //tileset loading
-    tileset = new Image[7];
+    tileset = new Image[8];
 
-    const char* filenames[] = { "textures\\tileset\\LAKE.bmp","textures\\tileset\\SWAMP.bmp","textures\\tileset\\SAND.bmp","textures\\tileset\\PLAIN.bmp","textures\\tileset\\TREE.bmp","textures\\tileset\\STONE.bmp","textures\\tileset\\MOUNTAIN.bmp" };
-    for (int i = 0; i < 7; i++)
+    const char* filenames[] = { 
+        "textures\\tileset\\LAKE.bmp",
+        "textures\\tileset\\SWAMP.bmp",
+        "textures\\tileset\\SAND.bmp",
+        "textures\\tileset\\PLAIN.bmp",
+        "textures\\tileset\\TREE.bmp",
+        "textures\\tileset\\STONE.bmp",
+        "textures\\tileset\\MOUNTAIN.bmp",
+        "textures\\tileset\\CREEP.png" };
+
+    for (int i = 0; i < 8; i++)
     {
         tileset[i] = LoadImage(filenames[i]);
         ImageFormat(&tileset[i], UNCOMPRESSED_R5G6B5);
     }
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
     {
         tilesetTex[i] = LoadTextureFromImage(tileset[i]);
     }
@@ -128,12 +137,43 @@ std::vector<TileIndex> GameData::tilesInsideCircle(Vector2 center, unsigned int 
             //TODO: optimize this crap (and make parallel computaton?)
         }
     }
-    
 
     return result;
 }
 
-std::vector<TileIndex> GameData::tilesInPerimeterCircle(Vector2 center, unsigned int radius)
+std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int radius)
+{
+    std::vector<TileIndex> result;
+
+    
+
+    for (int r = 1; r <= radius; r++)
+    {
+        
+        for (int x = center.x + 1;x<center.x + r;x++)
+        {
+            for (int y = center.y - r; y < center.y + r; y++) //REVERSE
+            {
+                if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, r))
+                {
+                    //adding this and opposite tiles
+                    result.push_back(TileIndex{ x,y }); // up-right
+                    result.push_back(TileIndex{ center.x + (center.x - x), y }); //up-left
+                    result.push_back(TileIndex{ x, center.y + (center.y - y) }); //down-right
+                    result.push_back(TileIndex{ center.x + (center.x - x), center.y + (center.y - y) }); //down-left
+                }
+            }
+        }
+        result.push_back(TileIndex{ center.x, center.y - r }); //up
+        result.push_back(TileIndex{ center.x, center.y + r }); //down
+        result.push_back(TileIndex{ center.x + r, center.y }); //right
+        result.push_back(TileIndex{ center.x - r, center.y });//left
+    }
+
+    return result;
+}
+
+std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
 {
     std::vector<TileIndex> buf;
     int x_centre = center.x, y_centre = center.y;
@@ -147,9 +187,6 @@ std::vector<TileIndex> GameData::tilesInPerimeterCircle(Vector2 center, unsigned
     // point will be printed
     if (radius > 0)
     {
-        /*buf.push_back(TileIndex{ x + x_centre, -y + y_centre });
-        buf.push_back(TileIndex{ y + x_centre,  x + y_centre });
-        buf.push_back(TileIndex{ -y + x_centre, x + y_centre });*/
         buf.push_back(TileIndex{ x + x_centre, y_centre });  //right
         buf.push_back(TileIndex{ x_centre, -x + y_centre }); //up
         buf.push_back(TileIndex{ x_centre, x + y_centre });  //down
@@ -162,19 +199,30 @@ std::vector<TileIndex> GameData::tilesInPerimeterCircle(Vector2 center, unsigned
     {
         y++;
 
+        //// Mid-point is inside or on the perimeter
+        //if (P <= 0)
+        //    P = P + 2 * y + 1;
+        //// Mid-point is outside the perimeter
+        //else
+        //{
+        //    x--;
+        //    P = P + 2 * y - 2 * x + 1;
+        //}
+
         // Mid-point is inside or on the perimeter
-        if (P <= 0)
-            P = P + 2 * y + 1;
-        // Mid-point is outside the perimeter
+        if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, radius))
+        {
+            //x++;
+            P = P + 2 * y - 2 * x + 1;
+        }
         else
         {
             x--;
-            P = P + 2 * y - 2 * x + 1;
         }
 
         // All the perimeter points have already been printed
-        if (x < y)
-            break;
+        /*if (x < y)
+            break;*/
 
         // Printing the generated point and its reflection
         // in the other octants after translation
@@ -267,6 +315,61 @@ void GameData::GameUpdate()
         radius = 5;
     if (IsKeyPressed(KEY_SIX))
         radius = 6;
+
+    if (IsKeyPressed(KEY_E))
+        if(wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::TUMOR;
+        else
+            wantToBuild = ActorType::ACTOR_NULL;
+
+    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
+    {
+        //right-click to clear
+        wantToBuild = ActorType::ACTOR_NULL;
+    }
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
+    {
+        switch (wantToBuild)
+        {
+        case ActorType::LIGHT_TURRET:
+            break;
+        case ActorType::HEAVY_TURRET:
+            break;
+        case ActorType::AIRDEFENSE_TURRET:
+            break;
+        case ActorType::LIGHT_INSECT:
+            break;
+        case ActorType::HEAVY_INSECT:
+            break;
+        case ActorType::FLYING_INSECT:
+            break;
+        case ActorType::CORE:
+            break;
+        case ActorType::BASE:
+            break;
+        case ActorType::HIVE:
+            break;
+        case ActorType::TUMOR:
+            unitsList.push_back(
+                new Tumor(
+                    this, 
+                    ActorType::TUMOR,
+                    Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
+                    State::ONLINE)
+            );
+            wantToBuild = ActorType::ACTOR_NULL;
+            break;
+        default:
+            break;
+        }
+    }
+
+    for (GameActor* actor : this->unitsList)
+    {
+        actor->Update();
+    }
+
 }
 
 void GameData::GameDraw()
@@ -297,11 +400,22 @@ void GameData::GameDraw()
             for (int j = renderBorders[1]; j < renderBorders[3]; j++)
             {
                 index = mapWidth * i + j;
-                DrawTexture(
-                    tilesetTex[static_cast<int>(mapTerrain[index])],
-                    j * pixelsPerTile,
-                    i * pixelsPerTile,
-                    WHITE);
+                if (mapExpansionCreep[j][i] == 2)
+                {
+                    DrawTexture(
+                        tilesetTex[7],
+                        j * pixelsPerTile,
+                        i * pixelsPerTile,
+                        WHITE);
+                }
+                else
+                {
+                    DrawTexture(
+                        tilesetTex[static_cast<int>(mapTerrain[index])],
+                        j * pixelsPerTile,
+                        i * pixelsPerTile,
+                        WHITE);
+                }
             }
         }
     }
@@ -335,14 +449,24 @@ void GameData::GameDraw()
         case ActorType::HIVE:
         case ActorType::TUMOR:
             //draw blue circle of expansion
+            for (TileIndex tile : tilesInsideCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
+            {
+                DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
+            }
             break;
         }
     }
 
-    for (TileIndex tile : tilesInPerimeterCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
+    for (GameActor* actor : this->unitsList)
     {
-        DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
+        //TODO: checking, is actor inside of screen rectangle (render it or not)
+        actor->Draw();
     }
+
+    //for (TileIndex tile : tilesInPerimeterCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
+    //{
+    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
+    //}
 
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
