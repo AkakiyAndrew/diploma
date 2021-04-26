@@ -145,8 +145,6 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
 {
     std::vector<TileIndex> result;
 
-    
-
     for (int r = 1; r <= radius; r++)
     {
         
@@ -170,95 +168,107 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
         result.push_back(TileIndex{ center.x - r, center.y });//left
     }
 
-    return result;
-}
-
-std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
-{
-    std::vector<TileIndex> buf;
-    int x_centre = center.x, y_centre = center.y;
-    int x = radius, y = 0;
-
-    // Printing the initial point on the axes 
-    // after translation
-    
-
-    // When radius is zero only a single
-    // point will be printed
-    if (radius > 0)
+    std::vector<TileIndex>::iterator iter;
+    for (iter = result.begin(); iter != result.end(); ) 
     {
-        buf.push_back(TileIndex{ x + x_centre, y_centre });  //right
-        buf.push_back(TileIndex{ x_centre, -x + y_centre }); //up
-        buf.push_back(TileIndex{ x_centre, x + y_centre });  //down
-        buf.push_back(TileIndex{ -x + x_centre,  y_centre });//left
-    }
-
-    // Initialising the value of P
-    int P = 1 - radius;
-    while (x > y)
-    {
-        y++;
-
-        //// Mid-point is inside or on the perimeter
-        //if (P <= 0)
-        //    P = P + 2 * y + 1;
-        //// Mid-point is outside the perimeter
-        //else
-        //{
-        //    x--;
-        //    P = P + 2 * y - 2 * x + 1;
-        //}
-
-        // Mid-point is inside or on the perimeter
-        if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, radius))
-        {
-            //x++;
-            P = P + 2 * y - 2 * x + 1;
-        }
+        if ((*iter).x < 0 ||
+            (*iter).x>this->mapWidth - 1 ||
+            (*iter).y < 0 ||
+            (*iter).y>this->mapHeight - 1)
+            iter = result.erase(iter);
         else
-        {
-            x--;
-        }
-
-        // All the perimeter points have already been printed
-        /*if (x < y)
-            break;*/
-
-        // Printing the generated point and its reflection
-        // in the other octants after translation
-        buf.push_back(TileIndex{ x + x_centre, y + y_centre });
-        buf.push_back(TileIndex{ -x + x_centre, y + y_centre });
-        buf.push_back(TileIndex{ x + x_centre , -y + y_centre });
-        buf.push_back(TileIndex{ -x + x_centre , -y + y_centre });
-
-        // If the generated point is on the line x = y then 
-        // the perimeter points have already been printed
-        if (x != y)
-        {
-            buf.push_back(TileIndex{ y + x_centre , x + y_centre });
-            buf.push_back(TileIndex{ -y + x_centre , x + y_centre });
-            buf.push_back(TileIndex{ y + x_centre , -x + y_centre });
-            buf.push_back(TileIndex{ -y + x_centre , -x + y_centre });
-        }
-    }
-
-    std::vector<TileIndex> result;
-
-    for (int i = 0; i < buf.size(); i++)
-    {
-        //checking to not cross the border, if all right - add TileIndex to result vector
-        if (!(buf[i].x < 0 ||
-            buf[i].x>this->mapWidth - 1 ||
-            buf[i].y < 0 ||
-            buf[i].y>this->mapHeight - 1))
-        {
-            result.push_back(buf[i]);
-        }
-        //TODO: consider using result.erase()
+            iter++;
     }
 
     return result;
 }
+
+//std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
+//{
+//    std::vector<TileIndex> buf;
+//    int x_centre = center.x, y_centre = center.y;
+//    int x = radius, y = 0;
+//
+//    // Printing the initial point on the axes 
+//    // after translation
+//    
+//
+//    // When radius is zero only a single
+//    // point will be printed
+//    if (radius > 0)
+//    {
+//        buf.push_back(TileIndex{ x + x_centre, y_centre });  //right
+//        buf.push_back(TileIndex{ x_centre, -x + y_centre }); //up
+//        buf.push_back(TileIndex{ x_centre, x + y_centre });  //down
+//        buf.push_back(TileIndex{ -x + x_centre,  y_centre });//left
+//    }
+//
+//    // Initialising the value of P
+//    int P = 1 - radius;
+//    while (x > y)
+//    {
+//        y++;
+//
+//        //// Mid-point is inside or on the perimeter
+//        //if (P <= 0)
+//        //    P = P + 2 * y + 1;
+//        //// Mid-point is outside the perimeter
+//        //else
+//        //{
+//        //    x--;
+//        //    P = P + 2 * y - 2 * x + 1;
+//        //}
+//
+//        // Mid-point is inside or on the perimeter
+//        if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, radius))
+//        {
+//            //x++;
+//            P = P + 2 * y - 2 * x + 1;
+//        }
+//        else
+//        {
+//            x--;
+//        }
+//
+//        // All the perimeter points have already been printed
+//        /*if (x < y)
+//            break;*/
+//
+//        // Printing the generated point and its reflection
+//        // in the other octants after translation
+//        buf.push_back(TileIndex{ x + x_centre, y + y_centre });
+//        buf.push_back(TileIndex{ -x + x_centre, y + y_centre });
+//        buf.push_back(TileIndex{ x + x_centre , -y + y_centre });
+//        buf.push_back(TileIndex{ -x + x_centre , -y + y_centre });
+//
+//        // If the generated point is on the line x = y then 
+//        // the perimeter points have already been printed
+//        if (x != y)
+//        {
+//            buf.push_back(TileIndex{ y + x_centre , x + y_centre });
+//            buf.push_back(TileIndex{ -y + x_centre , x + y_centre });
+//            buf.push_back(TileIndex{ y + x_centre , -x + y_centre });
+//            buf.push_back(TileIndex{ -y + x_centre , -x + y_centre });
+//        }
+//    }
+//
+//    std::vector<TileIndex> result;
+//
+//    for (int i = 0; i < buf.size(); i++)
+//    {
+//        //checking to not cross the border, if all right - add TileIndex to result vector
+//        if (!(buf[i].x < 0 ||
+//            buf[i].x>this->mapWidth - 1 ||
+//            buf[i].y < 0 ||
+//            buf[i].y>this->mapHeight - 1))
+//        {
+//            result.push_back(buf[i]);
+//        }
+//        //TODO: consider using result.erase()
+//    }
+//
+//    return result;
+//}
 
 void GameData::GameUpdate()
 {
@@ -315,6 +325,8 @@ void GameData::GameUpdate()
         radius = 5;
     if (IsKeyPressed(KEY_SIX))
         radius = 6;
+    if (IsKeyPressed(KEY_SEVEN))
+        radius = 12;
 
     if (IsKeyPressed(KEY_E))
         if(wantToBuild == ActorType::ACTOR_NULL)
