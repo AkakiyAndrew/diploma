@@ -2,7 +2,7 @@
 
 void Tumor::Update()
 {
-	if (this->game->timeCount == 0) // expand every 1 s
+	if (this->game->timeCount %2 == 0) // expand every 1 s
 	{
 		Expand();
 	}

@@ -152,7 +152,7 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
         
         for (int x = center.x + 1;x<center.x + r;x++)
         {
-            for (int y = center.y - r; y < center.y + r; y++) //REVERSE
+            for (int y = center.y; y > center.y - r; y--) //REVERSE int y = center.y - r; y < center.y + r; y++
             {
                 if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, r))
                 {
