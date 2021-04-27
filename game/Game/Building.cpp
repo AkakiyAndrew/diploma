@@ -7,6 +7,8 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     expansionRange = ptr->radius; // TODO: placeholder, remove later
     positionIndex = TileIndex{static_cast<int>(pos.x / ptr->pixelsPerTile), static_cast<int>(pos.y / ptr->pixelsPerTile) };
 
+    expansionIndices = this->game->tilesInsideCircleOrdered(this->positionIndex, expansionRange);
+
     //create creep or zerolayer on position when spawned
     if(type == ActorType::TUMOR)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = 2;
@@ -16,11 +18,7 @@ void Building::Expand()
 {
     if (!this->expanded)
     {
-        std::vector<TileIndex> buf;
-    
-
-        buf = this->game->tilesInsideCircleOrdered(this->positionIndex, expansionRange);
-        for (TileIndex tile : buf)
+        for (TileIndex tile : expansionIndices)
         {
             if (this->side == Side::INSECTS)
             {

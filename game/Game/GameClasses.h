@@ -105,7 +105,7 @@ public:
 
     int getHP() { return this->HP; }
     Vector2 getPosition() { return this->position; }
-    void Hit(int damage)
+    void Hit(int damage, ActorType hitBy)
     {
         damage -= armor;
         this->HP -= damage;

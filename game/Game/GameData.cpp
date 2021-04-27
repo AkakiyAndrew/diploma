@@ -387,7 +387,7 @@ void GameData::GameUpdate()
 void GameData::GameDraw()
 {
     BeginMode2D(camera);
-
+    //TODO: test 
     //draw terrain
 
 #ifndef TILE_DRAWING
