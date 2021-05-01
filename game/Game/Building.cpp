@@ -18,6 +18,7 @@ void Building::Expand()
 {
     if (!this->expanded)
     {
+        //TODO: further optimization - remove expanded tile from vector, on Destroy call recalculate it again to set mapExpansionCreep
         for (TileIndex tile : expansionIndices)
         {
             if (this->side == Side::INSECTS)

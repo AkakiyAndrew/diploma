@@ -59,9 +59,13 @@ public:
     std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
 
-    //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
+    //recalculate state of expansion tiles
+    void recalculateExpansion(Side side); 
+    
     void setTerrain(Terrain);
     bool isMapLoaded();
+
+    //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
     void GameDraw(); 
     void GameUpdate();
     GameData();
