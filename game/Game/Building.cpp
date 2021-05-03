@@ -9,6 +9,8 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
 
     expansionIndices = this->game->tilesInsideCircleOrdered(this->positionIndex, expansionRange);
 
+    markExpandArea();
+
     //create creep or zerolayer on position when spawned
     if(type == ActorType::TUMOR)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = 2;
@@ -55,8 +57,6 @@ void Building::markExpandArea()
 
 Building::~Building()
 {
-    this->game->removeActor(this->ID);
-
     for (TileIndex tile : expansionIndices)
     {
         if (this->side == Side::INSECTS)

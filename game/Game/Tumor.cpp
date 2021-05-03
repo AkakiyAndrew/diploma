@@ -19,5 +19,4 @@ Tumor::Tumor(GameData* ptr, ActorType type, Vector2 pos, State state)
 
 void Tumor::Destroy()
 {
-	//this->~Building();
 }

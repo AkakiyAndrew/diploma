@@ -48,12 +48,18 @@ bool GameData::isMapLoaded()
 
 void GameData::clearMap()
 {
+    std::vector<unsigned int> IDs;
+
     for (GameActor *actor : this->unitsList)
     {
-        actor->Destroy();
-        delete actor;
+        IDs.push_back(actor->ID);
     }
-    unitsList.clear();
+    
+    for (unsigned int ID : IDs)
+    {
+        removeActor(ID);
+    }
+
 }
 
 TerrainType GameData::getTerrainType(int x, int y)
@@ -84,6 +90,7 @@ void GameData::setTerrain(Terrain terr)
     mapExpansionCreep = new unsigned char* [mapHeight];
     for (int i = 0; i < mapHeight; i++)
         mapExpansionCreep[i] = new unsigned char[mapWidth];
+
     //expansion pre-calculation
     for (int i = 0; i < mapHeight; i++)
     {
@@ -258,13 +265,33 @@ void GameData::recalculateExpansion(Side side)
     }
 }
 
+GameActor* GameData::getActorInTile(int x, int y)
+{
+    GameActor* result = nullptr;
+    Vector2 pos;
+    for (GameActor* actor : unitsList)
+    {
+        pos = actor->getPosition();
+        Vector2 test = { pos.x / pixelsPerTile, pos.y / pixelsPerTile };
+        if (static_cast<int>(pos.x / pixelsPerTile) == x && static_cast<int>(pos.y / pixelsPerTile) == y)
+        {
+            result = actor;
+        }
+    }
+    return result;
+}
+
 void GameData::removeActor(unsigned int ID)
 {
     std::vector<GameActor*>::iterator iter;
+    GameActor* buf = nullptr;
     for (iter = unitsList.begin(); iter != unitsList.end(); )
     {
         if ((*iter)->ID == ID)
+        {
+            buf = *iter;
             iter = unitsList.erase(iter);
+        }
         else
             iter++;
     }
@@ -277,6 +304,9 @@ void GameData::removeActor(unsigned int ID)
         else
             expandIter++;
     }
+
+    if(buf!=nullptr)
+        delete buf;
 }
 
 //std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
@@ -433,6 +463,15 @@ void GameData::GameUpdate()
     if (IsKeyPressed(KEY_C))
         clearMap();
 
+    if (IsKeyPressed(KEY_R))
+        if (wantToRemove)
+            wantToRemove = false;
+        else
+        {
+            wantToBuild = ActorType::ACTOR_NULL;
+            wantToRemove = true;
+        }
+
     if (IsKeyPressed(KEY_F2))
         if (showingCreepStates)
             showingCreepStates = false;
@@ -493,8 +532,16 @@ void GameData::GameUpdate()
         actor->Update();
     }
 
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
+    {
+        GameActor *buf = getActorInTile(mouseIndex.x, mouseIndex.y);
+        if(buf!=nullptr)
+            removeActor(buf->ID);
+        wantToRemove = false;
+    }
+
     //expansion fading
-    if (timeCount % 4 == 0)
+    if (timeCount  == 0)
     {
         std::vector<TileIndex>buf;
         //INSECTS
@@ -509,8 +556,7 @@ void GameData::GameUpdate()
                 }
             }
         }
-        
-        //WTF?!
+
         for (TileIndex tile : buf)
             mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
         //TODO: do same for MACHINES
@@ -603,6 +649,11 @@ void GameData::GameDraw()
             }
             break;
         }
+    }
+
+    if (wantToRemove)
+    {
+        DrawRectangle(mouseIndex.x * pixelsPerTile, mouseIndex.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(RED, 0.3f));
     }
 
     for (GameActor* actor : this->unitsList)

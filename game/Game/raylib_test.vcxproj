@@ -150,8 +150,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
-    <ClCompile Include="example_camera.cpp" />
-    <ClCompile Include="example_move_and_camera.cpp" />
     <ClCompile Include="GameClasses.cpp" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="main.cpp" />

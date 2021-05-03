@@ -34,7 +34,7 @@ private:
     int renderBorders[4]; //indices: top horiz, left vert, bottom horiz, right vert
 
     ActorType wantToBuild = ActorType::ACTOR_NULL;
-    
+    bool wantToRemove = false;
 
     //INTERFACE
     bool showingCreepStates = false;
@@ -66,6 +66,9 @@ public:
     
     //return num of adjoined expansion tiles 
     int numOfExpansionTileAdjoin(int x, int y, Side side);
+
+    //returns pointer to actor in coordinates
+    GameActor* getActorInTile(int x, int y);
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
