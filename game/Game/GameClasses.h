@@ -34,6 +34,9 @@ private:
     ActorType wantToBuild = ActorType::ACTOR_NULL;
     
 
+    //INTERFACE
+    bool showingCreepStates = false;
+
     //тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
     //тут же и будут хранится карты урона и т.п.
 
@@ -56,7 +59,10 @@ public:
     bool closed = false;
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
     std::vector<TileIndex>tilesInsideCircleOrdered(TileIndex center, int radius);
-    std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
+    //std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
+    //return true, if one of adjoined tile is expanded 
+    bool isExpansionTileAdjoin(int x, int y, Side side);
+
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
 
     //recalculate state of expansion tiles
@@ -64,6 +70,7 @@ public:
     
     void setTerrain(Terrain);
     bool isMapLoaded();
+    void clearMap();
 
     //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
     void GameDraw(); 
@@ -106,6 +113,9 @@ public:
     virtual void Draw() = 0;
     virtual void Update() = 0; 
     virtual void Destroy() = 0; //создать обломки/ошметки на карте, возможно даже не виртуальный, внутри использовать деструктор и/или удалять из вектора-хранилища данных игры
+    ~GameActor() 
+    {
+    }
 
     int getHP() { return this->HP; }
     Vector2 getPosition() { return this->position; }

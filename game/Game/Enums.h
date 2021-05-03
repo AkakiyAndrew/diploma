@@ -54,6 +54,14 @@ enum class TerrainType
 	ASH,
 };
 
+enum ExpandState
+{
+	UNAVAILABLE,
+	AVAILABLE,
+	EXPANDED,
+	EXPANDED_WITHOUT_SOURCE,
+};
+
 enum class GameState
 {
 	MAIN_MENU,

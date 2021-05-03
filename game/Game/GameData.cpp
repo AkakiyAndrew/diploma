@@ -46,8 +46,24 @@ bool GameData::isMapLoaded()
     return this->mapTerrain != nullptr;
 }
 
+void GameData::clearMap()
+{
+    for (GameActor *actor : this->unitsList)
+    {
+        actor->Destroy();
+        actor->~GameActor();
+    }
+    unitsList.clear();
+}
+
+TerrainType GameData::getTerrainType(int x, int y)
+{
+    return mapTerrain[y * mapWidth + x];
+}
+
 void GameData::setTerrain(Terrain terr)
 {
+    //TODO: MAKE NEW FUNCTION TO REDRAW PREVIEW TEXTURE, CALL IT ONLY FEW TIMES IN UPDATE
     if (isMapLoaded())
     {
         UnloadTexture(terrainTexture);
@@ -68,8 +84,35 @@ void GameData::setTerrain(Terrain terr)
     mapExpansionCreep = new unsigned char* [mapHeight];
     for (int i = 0; i < mapHeight; i++)
         mapExpansionCreep[i] = new unsigned char[mapWidth];
+    //expansion pre-calculation
+    for (int i = 0; i < mapHeight; i++)
+    {
+        for (int j = 0; j < mapWidth; j++)
+        {
+            switch (getTerrainType(i, j))
+            {
+            //if cant expand in this tile
+            case TerrainType::LAKE:
+            case TerrainType::SWAMP:
+            case TerrainType::MOUNTAIN:
+                mapExpansionCreep[i][j] = 0;
+                break;
+            //if expansion can be provide
+            case TerrainType::SAND:
+            case TerrainType::PLAIN:
+            case TerrainType::TREE:
+            case TerrainType::STONE:
+            case TerrainType::ASH:
+                mapExpansionCreep[i][j] = 1;
+                break;
+            //just in case
+            default:
+                mapExpansionCreep[i][j] = 0;
+                break;
+            }
+        }
+    }
 
-    //TODO: MAKE NEW FUNCTION TO REDRAW PREVIEW TEXTURE, CALL IT ONLY FEW TIMES IN UPDATE
 #ifndef TILE_DRAWING
     unsigned short* colorPixels = new unsigned short[mapSize.x * mapSize.y];
 
@@ -181,6 +224,29 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
     }
 
     return result;
+}
+
+bool GameData::isExpansionTileAdjoin(int x, int y, Side side)
+{
+    if (side == Side::INSECTS)
+    {
+        if (x - 1 >= 0) //left
+            if (mapExpansionCreep[x - 1][y] == ExpandState::EXPANDED || mapExpansionCreep[x - 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                return true;
+        if (y - 1 >= 0) //up
+            if (mapExpansionCreep[x][y - 1] == ExpandState::EXPANDED || mapExpansionCreep[x][y - 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                return true;
+        if (x + 1 < this->mapWidth) //right
+            if (mapExpansionCreep[x + 1][y] == ExpandState::EXPANDED || mapExpansionCreep[x + 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                return true;
+        if (y + 1 < this->mapHeight) //down
+            if (mapExpansionCreep[x][y + 1] == ExpandState::EXPANDED || mapExpansionCreep[x][y + 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                return true;
+
+        return false;
+    }
+    //TODO: make checking for MACHINES side
+    
 }
 
 //std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
@@ -334,6 +400,15 @@ void GameData::GameUpdate()
         else
             wantToBuild = ActorType::ACTOR_NULL;
 
+    if (IsKeyPressed(KEY_C))
+        clearMap();
+
+    if (IsKeyPressed(KEY_F2))
+        if (showingCreepStates)
+            showingCreepStates = false;
+        else
+            showingCreepStates = true;
+
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
     {
         //right-click to clear
@@ -381,7 +456,6 @@ void GameData::GameUpdate()
     {
         actor->Update();
     }
-
 }
 
 void GameData::GameDraw()
@@ -428,6 +502,9 @@ void GameData::GameDraw()
                         i * pixelsPerTile,
                         WHITE);
                 }
+
+                if (showingCreepStates)
+                    DrawText(FormatText("%d", mapExpansionCreep[j][i]), j * pixelsPerTile + pixelsPerTile / 3, i * pixelsPerTile + pixelsPerTile / 3, 14, RED);
             }
         }
     }
