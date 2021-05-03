@@ -51,7 +51,7 @@ void GameData::clearMap()
     for (GameActor *actor : this->unitsList)
     {
         actor->Destroy();
-        actor->~GameActor();
+        delete actor;
     }
     unitsList.clear();
 }
@@ -226,27 +226,57 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
     return result;
 }
 
-bool GameData::isExpansionTileAdjoin(int x, int y, Side side)
+int GameData::numOfExpansionTileAdjoin(int x, int y, Side side)
 {
+    int result = 0;
     if (side == Side::INSECTS)
     {
         if (x - 1 >= 0) //left
             if (mapExpansionCreep[x - 1][y] == ExpandState::EXPANDED || mapExpansionCreep[x - 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                return true;
+                result++;
         if (y - 1 >= 0) //up
             if (mapExpansionCreep[x][y - 1] == ExpandState::EXPANDED || mapExpansionCreep[x][y - 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                return true;
+                result++;
         if (x + 1 < this->mapWidth) //right
             if (mapExpansionCreep[x + 1][y] == ExpandState::EXPANDED || mapExpansionCreep[x + 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                return true;
+                result++;
         if (y + 1 < this->mapHeight) //down
             if (mapExpansionCreep[x][y + 1] == ExpandState::EXPANDED || mapExpansionCreep[x][y + 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                return true;
-
-        return false;
+                result++;
     }
+    return result;
     //TODO: make checking for MACHINES side
     
+}
+
+void GameData::recalculateExpansion(Side side)
+{
+    for (Building* actor : this->expansionUnitsList)
+    {
+        if(actor->side==side)
+            actor->markExpandArea();
+    }
+}
+
+void GameData::removeActor(unsigned int ID)
+{
+    std::vector<GameActor*>::iterator iter;
+    for (iter = unitsList.begin(); iter != unitsList.end(); )
+    {
+        if ((*iter)->ID == ID)
+            iter = unitsList.erase(iter);
+        else
+            iter++;
+    }
+
+    std::vector<Building*>::iterator expandIter;
+    for (expandIter = expansionUnitsList.begin(); expandIter != expansionUnitsList.end(); )
+    {
+        if ((*expandIter)->ID == ID)
+            expandIter = expansionUnitsList.erase(expandIter);
+        else
+            expandIter++;
+    }
 }
 
 //std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
@@ -415,6 +445,7 @@ void GameData::GameUpdate()
         wantToBuild = ActorType::ACTOR_NULL;
     }
 
+    //TODO: replace to separate method
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
     {
         switch (wantToBuild)
@@ -438,12 +469,17 @@ void GameData::GameUpdate()
         case ActorType::HIVE:
             break;
         case ActorType::TUMOR:
+            Building* buf;
+            buf = new Tumor(
+                this,
+                ActorType::TUMOR,
+                Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
+                State::ONLINE);
             unitsList.push_back(
-                new Tumor(
-                    this, 
-                    ActorType::TUMOR,
-                    Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
-                    State::ONLINE)
+                buf
+            );
+            expansionUnitsList.push_back(
+                buf
             );
             wantToBuild = ActorType::ACTOR_NULL;
             break;
@@ -455,6 +491,29 @@ void GameData::GameUpdate()
     for (GameActor* actor : this->unitsList)
     {
         actor->Update();
+    }
+
+    //expansion fading
+    if (timeCount % 4 == 0)
+    {
+        std::vector<TileIndex>buf;
+        //INSECTS
+        for (int i = 0; i < mapHeight; i++)
+        {
+            for (int j = 0; j < mapWidth; j++)
+            {
+                if (mapExpansionCreep[i][j] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                {
+                    if (numOfExpansionTileAdjoin(i, j, Side::INSECTS) < 3)
+                        buf.push_back(TileIndex{ i,j });
+                }
+            }
+        }
+        
+        //WTF?!
+        for (TileIndex tile : buf)
+            mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
+        //TODO: do same for MACHINES
     }
 }
 
@@ -486,7 +545,7 @@ void GameData::GameDraw()
             for (int j = renderBorders[1]; j < renderBorders[3]; j++)
             {
                 index = mapWidth * i + j;
-                if (mapExpansionCreep[j][i] == 2)
+                if (mapExpansionCreep[j][i] == ExpandState::EXPANDED || mapExpansionCreep[j][i] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
                     DrawTexture(
                         tilesetTex[7],

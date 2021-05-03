@@ -12,18 +12,6 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     //create creep or zerolayer on position when spawned
     if(type == ActorType::TUMOR)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = 2;
-
-    for (TileIndex tile : expansionIndices)
-    {
-        if (this->side == Side::INSECTS)
-        {
-            if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-            {
-                game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
-            }
-        }
-        //TODO: add MACHINES-side expansion
-    }
 }
 
 void Building::Expand()
@@ -37,7 +25,7 @@ void Building::Expand()
             {
                 if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::AVAILABLE)
                 {
-                    if (game->isExpansionTileAdjoin(tile.x, tile.y, this->side))
+                    if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side)>0)
                     {
                         game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
                         return;
@@ -48,6 +36,41 @@ void Building::Expand()
         }
         this->expanded = true;
     }
+}
+
+void Building::markExpandArea()
+{
+    for (TileIndex tile : expansionIndices)
+    {
+        if (this->side == Side::INSECTS)
+        {
+            if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+            {
+                game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
+            }
+        }
+        //TODO: add MACHINES-side expansion
+    }
+}
+
+Building::~Building()
+{
+    this->game->removeActor(this->ID);
+
+    for (TileIndex tile : expansionIndices)
+    {
+        if (this->side == Side::INSECTS)
+        {
+            if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::EXPANDED)
+            {
+                game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+            }
+        }
+        //TODO: add MACHINES-side expansion
+    }
+    game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+    //TODO: possible optimizaton - recalculate expansion in specific range (with getActorsInRadius method or kinda like that)
+    this->game->recalculateExpansion(this->side);
 }
 
 //для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)

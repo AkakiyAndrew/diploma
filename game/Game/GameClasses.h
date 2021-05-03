@@ -7,6 +7,7 @@
 //#include <memory>
 
 class GameActor;
+class Building;
 
 class GameData
 {
@@ -18,6 +19,7 @@ private:
     Texture2D terrainTexture;
     Color* palette;
     std::vector<GameActor*> unitsList;
+    std::vector<Building*> expansionUnitsList;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -50,6 +52,7 @@ private:
 
 public:
     unsigned short timeCount; //for Update()
+    unsigned int lastID = 0;
 
     unsigned int radius = 1;
     const float pixelsPerTile = 16.f;
@@ -60,10 +63,12 @@ public:
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
     std::vector<TileIndex>tilesInsideCircleOrdered(TileIndex center, int radius);
     //std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
-    //return true, if one of adjoined tile is expanded 
-    bool isExpansionTileAdjoin(int x, int y, Side side);
+    
+    //return num of adjoined expansion tiles 
+    int numOfExpansionTileAdjoin(int x, int y, Side side);
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
+    void removeActor(unsigned int ID);
 
     //recalculate state of expansion tiles
     void recalculateExpansion(Side side); 
@@ -97,7 +102,7 @@ protected:
 public:
     GameData* game;
     const ActorType type;
-    int ID; //private?
+    unsigned int ID; //private?
     Side side;
     std::string name;
 
@@ -113,8 +118,8 @@ public:
     virtual void Draw() = 0;
     virtual void Update() = 0; 
     virtual void Destroy() = 0; //создать обломки/ошметки на карте, возможно даже не виртуальный, внутри использовать деструктор и/или удал€ть из вектора-хранилища данных игры
-    ~GameActor() 
-    {
+    virtual ~GameActor() 
+    {        
     }
 
     int getHP() { return this->HP; }
@@ -160,6 +165,8 @@ public:
             side = Side::INSECTS;
             break;
         }
+        this->ID = this->game->lastID;
+        this->game->lastID++;
     }
 };
 
@@ -173,8 +180,9 @@ private:
 
 public:
     Building(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void markExpandArea();
     void Expand();
-
+    virtual ~Building() = 0;
     //дл€ опухолей: провер€ет, есть ли в области expansionRange свободное место от слизи (учитыва€ карту экспансии)
     //спавнить за раз 2-4 тайла, каждому свой цикл проверок:
     //проходить по спирали радиуса экспансии, провер€€ €вл€етс€ ли тайл пустым от слизи и имеетс€ ли сосед со слизью
