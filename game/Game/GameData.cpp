@@ -25,7 +25,8 @@ GameData::GameData()
         "textures\\tileset\\TREE.bmp",
         "textures\\tileset\\STONE.bmp",
         "textures\\tileset\\MOUNTAIN.bmp",
-        "textures\\tileset\\CREEP.png" };
+        "textures\\tileset\\CREEP.png"
+    };
 
     for (int i = 0; i < 8; i++)
     {
@@ -38,6 +39,12 @@ GameData::GameData()
         tilesetTex[i] = LoadTextureFromImage(tileset[i]);
     }
 
+    for (int i = 0; i < 7; i++)
+        UnloadImage(tileset[i]);
+
+    Image creep = LoadImage("textures\\source\\creep_1.png");
+    creepTexture = LoadTextureFromImage(creep);
+    UnloadImage(creep);
     //TODO: texture files loading, units properties
 }
 
@@ -253,7 +260,28 @@ int GameData::numOfExpansionTileAdjoin(int x, int y, Side side)
     }
     return result;
     //TODO: make checking for MACHINES side
-    
+}
+
+int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
+{
+    int result = 0;
+    if (side == Side::INSECTS)
+    {
+        if (x - 1 >= 0) //left
+            if (mapExpansionCreep[x - 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                result++;
+        if (y - 1 >= 0) //up
+            if (mapExpansionCreep[x][y - 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                result++;
+        if (x + 1 < this->mapWidth) //right
+            if (mapExpansionCreep[x + 1][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                result++;
+        if (y + 1 < this->mapHeight) //down
+            if (mapExpansionCreep[x][y + 1] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                result++;
+    }
+    return result;
+    //TODO: make checking for MACHINES side
 }
 
 void GameData::recalculateExpansion(Side side)
@@ -551,7 +579,7 @@ void GameData::GameUpdate()
             {
                 if (mapExpansionCreep[i][j] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
-                    if (numOfExpansionTileAdjoin(i, j, Side::INSECTS) < 3)
+                    if (numOfExpansionTileAdjoinFading(i, j, Side::INSECTS) < 3)
                         buf.push_back(TileIndex{ i,j });
                 }
             }
@@ -593,11 +621,21 @@ void GameData::GameDraw()
                 index = mapWidth * i + j;
                 if (mapExpansionCreep[j][i] == ExpandState::EXPANDED || mapExpansionCreep[j][i] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
-                    DrawTexture(
+                    float x = static_cast<float>(j % (creepTexture.width / static_cast<int>(pixelsPerTile)));
+                    float y = static_cast<float>(i % (creepTexture.height / static_cast<int>(pixelsPerTile)));
+                    Rectangle test = { x * pixelsPerTile, y* pixelsPerTile, pixelsPerTile, pixelsPerTile };
+                    
+                    DrawTextureRec(
+                        creepTexture,
+                        test,
+                        Vector2{ j * pixelsPerTile, i * pixelsPerTile, },
+                        WHITE);
+
+ /*                   DrawTexture(
                         tilesetTex[7],
                         j * pixelsPerTile,
                         i * pixelsPerTile,
-                        WHITE);
+                        WHITE);*/
                 }
                 else
                 {
@@ -662,11 +700,6 @@ void GameData::GameDraw()
         actor->Draw();
     }
 
-    //for (TileIndex tile : tilesInPerimeterCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
-    //{
-    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, RED);
-    //}
-
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
 
@@ -677,14 +710,13 @@ GameData::~GameData()
 {
     //Unloading images and textures
 
-    for (int i = 0; i < 7; i++)
-        UnloadImage(tileset[i]);
-
     if (isMapLoaded())
     {
         delete[] mapTerrain;
         UnloadTexture(terrainTexture);
     }
+
+    UnloadTexture(creepTexture);
 
     for (int i = 0; i < 7; i++)
     {

@@ -17,6 +17,7 @@ private:
     Image* tileset;
     Texture2D tilesetTex[8];
     Texture2D terrainTexture;
+    Texture2D creepTexture;
     Color* palette;
     std::vector<GameActor*> unitsList;
     std::vector<Building*> expansionUnitsList;
@@ -65,7 +66,8 @@ public:
     //std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
     
     //return num of adjoined expansion tiles 
-    int numOfExpansionTileAdjoin(int x, int y, Side side);
+    int numOfExpansionTileAdjoin(int x, int y, Side side); 
+    int numOfExpansionTileAdjoinFading(int x, int y, Side side);
 
     //returns pointer to actor in coordinates
     GameActor* getActorInTile(int x, int y);

@@ -42,6 +42,7 @@ void Building::Expand()
 
 void Building::markExpandArea()
 {
+    this->expanded = false;
     for (TileIndex tile : expansionIndices)
     {
         if (this->side == Side::INSECTS)
