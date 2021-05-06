@@ -1,9 +1,7 @@
 #pragma once
-#include "raylib.h"
-#include <string>
+
 #include "Enums.h"
-#include <algorithm>
-#include <vector>
+
 //#include <memory>
 
 class GameActor;
@@ -44,11 +42,9 @@ private:
     //тут же и будут хранится карты урона и т.п.
 
     //кол-во ресурсов
-
-    //тут же и хранить настройки?
+    //тут же и хранить настройки
     
-    //void loadSettings();
-
+    //void loadActorsAttributes();
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
 public:
@@ -57,6 +53,10 @@ public:
 
     unsigned int radius = 1;
     const float pixelsPerTile = 16.f;
+
+    //attributes for GameActor constructor
+    std::map<ActorType, std::map<std::string, int>> genericAttributes;
+    std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
 
     unsigned char** mapExpansionCreep = nullptr;
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
@@ -97,11 +97,11 @@ protected:
     Texture2D* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
     unsigned short animationFrame; //current animation 
 
-    int progress; //for construction? or just use state in Update
     Vector2 position;
     State state;
-    int HP;
     
+    int HP;
+    int progress; //for construction? or just use state in Update
     bool selectable; //удалить? все равно просматривать данные необходимо, а приказы отдавать не тут/сменить на selected, чтобы в Draw рисовать рамку, а в GUI хранить указатель на выбранного актера
 
 public:
@@ -149,6 +149,11 @@ public:
     GameActor(GameData *ptr, ActorType type, Vector2 pos, State state)
         :game(ptr), type(type), position(pos), state(state)
     {
+        size = ptr->genericAttributes[type]["size"];
+        maxHP = ptr->genericAttributes[type]["maxHP"];
+        cost = ptr->genericAttributes[type]["cost"];
+        sightRange = ptr->genericAttributes[type]["sightRange"];
+
         switch (type)
         {
         case ActorType::LIGHT_TURRET:
@@ -166,7 +171,7 @@ public:
         case ActorType::FLYING_INSECT:
         case ActorType::HIVE:
         case ActorType::TUMOR:
-            size = 8;
+
             side = Side::INSECTS;
             break;
         }
@@ -228,4 +233,33 @@ class Core : public Constructor
 {
     void Update();
     void Draw();
+};
+
+class Militaty : public GameActor
+{
+protected:
+    const int seekRange;
+    const int attackRange;
+    const int speed;
+    const int damage;
+    const int reloadCount;
+    const int angle;
+    const int rotationSpeed;
+    //int type
+    GameActor* target;
+    ActorType targetPriority;
+
+    Militaty();
+    ~Militaty();
+
+    void Attack();
+    void SeekForEnemy();
+    void Move();
+    void Reload();
+    void Targeting();
+};
+
+class LightInsect : public Militaty
+{
+
 };

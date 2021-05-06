@@ -46,6 +46,19 @@ GameData::GameData()
     creepTexture = LoadTextureFromImage(creep);
     UnloadImage(creep);
     //TODO: texture files loading, units properties
+
+    //GENERIC ACTORS ATTRIBUTES
+    genericAttributes[ActorType::TUMOR] = std::map<std::string, int>{
+        {"maxHP", 100},
+        {"size", 1},
+        {"cost", 2},
+        {"sightRange", 2}
+    };
+
+    //BUILDING ACTORS ATTRIBUTES
+    buildingsAttributes[ActorType::TUMOR] = std::map<std::string, int>{
+        {"expansionRange", 16},
+    };
 }
 
 bool GameData::isMapLoaded()
@@ -109,7 +122,7 @@ void GameData::setTerrain(Terrain terr)
             case TerrainType::LAKE:
             case TerrainType::SWAMP:
             case TerrainType::MOUNTAIN:
-                mapExpansionCreep[i][j] = 0;
+                mapExpansionCreep[i][j] = ExpandState::UNAVAILABLE;
                 break;
             //if expansion can be provide
             case TerrainType::SAND:
@@ -117,11 +130,11 @@ void GameData::setTerrain(Terrain terr)
             case TerrainType::TREE:
             case TerrainType::STONE:
             case TerrainType::ASH:
-                mapExpansionCreep[i][j] = 1;
+                mapExpansionCreep[i][j] = ExpandState::AVAILABLE;
                 break;
             //just in case
             default:
-                mapExpansionCreep[i][j] = 0;
+                mapExpansionCreep[i][j] = ExpandState::UNAVAILABLE;
                 break;
             }
         }
@@ -619,6 +632,8 @@ void GameData::GameDraw()
             for (int j = renderBorders[1]; j < renderBorders[3]; j++)
             {
                 index = mapWidth * i + j;
+
+                //ACCESS VIOLATION
                 if (mapExpansionCreep[j][i] == ExpandState::EXPANDED || mapExpansionCreep[j][i] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
                     float x = static_cast<float>(j % (creepTexture.width / static_cast<int>(pixelsPerTile)));

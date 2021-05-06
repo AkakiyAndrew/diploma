@@ -1,5 +1,11 @@
 #pragma once
 
+#include "raylib.h"
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <map>
+
 enum class Side
 {
 	MACHINES,

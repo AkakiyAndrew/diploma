@@ -9,7 +9,7 @@ void Tumor::Update()
 }
 void Tumor::Draw()
 {
-	DrawCircle(position.x, position.y, size, RED);
+	DrawCircle(position.x, position.y, size*game->pixelsPerTile, RED);
 }
 
 Tumor::Tumor(GameData* ptr, ActorType type, Vector2 pos, State state) 
