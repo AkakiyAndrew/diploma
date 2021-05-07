@@ -94,8 +94,8 @@ void GameData::setTerrain(Terrain terr)
     {
         UnloadTexture(terrainTexture);
 
-        for (int i = 0; i < mapHeight; i++)
-                delete[] mapExpansionCreep[i];
+        for (int x = 0; x < mapWidth; x++)
+                delete[] mapExpansionCreep[x];
         delete[] mapExpansionCreep;
     }
 
@@ -107,22 +107,22 @@ void GameData::setTerrain(Terrain terr)
     mapSize.y = mapHeight * pixelsPerTile;
 
     //expansion maps memory allocation
-    mapExpansionCreep = new unsigned char* [mapHeight];
-    for (int i = 0; i < mapHeight; i++)
-        mapExpansionCreep[i] = new unsigned char[mapWidth];
+    mapExpansionCreep = new unsigned char* [mapWidth];
+    for (int x = 0; x < mapWidth; x++)
+        mapExpansionCreep[x] = new unsigned char[mapHeight];
 
     //expansion pre-calculation
-    for (int i = 0; i < mapHeight; i++)
+    for (int x = 0; x < mapWidth; x++)
     {
-        for (int j = 0; j < mapWidth; j++)
+        for (int y = 0; y < mapHeight; y++)
         {
-            switch (getTerrainType(i, j))
+            switch (getTerrainType(x, y))
             {
             //if cant expand in this tile
             case TerrainType::LAKE:
             case TerrainType::SWAMP:
             case TerrainType::MOUNTAIN:
-                mapExpansionCreep[i][j] = ExpandState::UNAVAILABLE;
+                mapExpansionCreep[x][y] = ExpandState::UNAVAILABLE;
                 break;
             //if expansion can be provide
             case TerrainType::SAND:
@@ -130,11 +130,11 @@ void GameData::setTerrain(Terrain terr)
             case TerrainType::TREE:
             case TerrainType::STONE:
             case TerrainType::ASH:
-                mapExpansionCreep[i][j] = ExpandState::AVAILABLE;
+                mapExpansionCreep[x][y] = ExpandState::AVAILABLE;
                 break;
             //just in case
             default:
-                mapExpansionCreep[i][j] = ExpandState::UNAVAILABLE;
+                mapExpansionCreep[x][y] = ExpandState::UNAVAILABLE;
                 break;
             }
         }
@@ -586,14 +586,14 @@ void GameData::GameUpdate()
     {
         std::vector<TileIndex>buf;
         //INSECTS
-        for (int i = 0; i < mapHeight; i++)
+        for (int x = 0; x < mapWidth; x++)
         {
-            for (int j = 0; j < mapWidth; j++)
+            for (int y = 0; y < mapHeight; y++)
             {
-                if (mapExpansionCreep[i][j] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                if (mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
-                    if (numOfExpansionTileAdjoinFading(i, j, Side::INSECTS) < 3)
-                        buf.push_back(TileIndex{ i,j });
+                    if (numOfExpansionTileAdjoinFading(x, y, Side::INSECTS) < 4)
+                        buf.push_back(TileIndex{ x,y });
                 }
             }
         }
@@ -627,42 +627,40 @@ void GameData::GameDraw()
     else
     {                    //full-detailed map
         int index;
-        for (int i = renderBorders[0]; i < renderBorders[2]; i++)
+        for (int x = renderBorders[1]; x < renderBorders[3]; x++) //columns
         {
-            for (int j = renderBorders[1]; j < renderBorders[3]; j++)
+            for (int y = renderBorders[0]; y < renderBorders[2]; y++) //rows
             {
-                index = mapWidth * i + j;
+                index = mapWidth * y + x;
 
                 //ACCESS VIOLATION
-                if (mapExpansionCreep[j][i] == ExpandState::EXPANDED || mapExpansionCreep[j][i] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                if (mapExpansionCreep[x][y] == ExpandState::EXPANDED || mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                 {
-                    float x = static_cast<float>(j % (creepTexture.width / static_cast<int>(pixelsPerTile)));
-                    float y = static_cast<float>(i % (creepTexture.height / static_cast<int>(pixelsPerTile)));
-                    Rectangle test = { x * pixelsPerTile, y* pixelsPerTile, pixelsPerTile, pixelsPerTile };
+                    float x_exp = static_cast<float>(x % (creepTexture.width / static_cast<int>(pixelsPerTile)));
+                    float y_exp = static_cast<float>(y % (creepTexture.height / static_cast<int>(pixelsPerTile)));
+                    Rectangle buf = { 
+                        x_exp* pixelsPerTile,
+                        y_exp* pixelsPerTile,
+                        pixelsPerTile,
+                        pixelsPerTile };
                     
                     DrawTextureRec(
                         creepTexture,
-                        test,
-                        Vector2{ j * pixelsPerTile, i * pixelsPerTile, },
+                        buf,
+                        Vector2{ x * pixelsPerTile, y * pixelsPerTile, },
                         WHITE);
-
- /*                   DrawTexture(
-                        tilesetTex[7],
-                        j * pixelsPerTile,
-                        i * pixelsPerTile,
-                        WHITE);*/
                 }
                 else
                 {
                     DrawTexture(
                         tilesetTex[static_cast<int>(mapTerrain[index])],
-                        j * pixelsPerTile,
-                        i * pixelsPerTile,
+                        x * pixelsPerTile,
+                        y * pixelsPerTile,
                         WHITE);
                 }
 
                 if (showingCreepStates)
-                    DrawText(FormatText("%d", mapExpansionCreep[j][i]), j * pixelsPerTile + pixelsPerTile / 3, i * pixelsPerTile + pixelsPerTile / 3, 14, RED);
+                    DrawText(FormatText("%d", mapExpansionCreep[x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 14, RED);
             }
         }
     }
@@ -742,8 +740,8 @@ GameData::~GameData()
 
     if (isMapLoaded())
     {
-        for (int i = 0; i < mapHeight; i++)
-                delete[] mapExpansionCreep[i];
+        for (int x = 0; x < mapWidth; x++)
+                delete[] mapExpansionCreep[x];
         delete[] mapExpansionCreep;
     }
 

@@ -1,5 +1,4 @@
-﻿  Building.cpp
-  GameData.cpp
+﻿  GameData.cpp
 C:\Users\Andrew\Desktop\Диплом\game\Game\GameData.cpp(197,76): warning C4244: аргумент: преобразование "float" в "const _Ty", возможна потеря данных
           with
           [
@@ -68,5 +67,4 @@ C:\Users\Andrew\Desktop\Диплом\game\Game\GameData.cpp(707,98): warning C42
 C:\Users\Andrew\Desktop\Диплом\game\Game\GameData.cpp(707,83): warning C4244: аргумент: преобразование "const float" в "int", возможна потеря данных
 C:\Users\Andrew\Desktop\Диплом\game\Game\GameData.cpp(707,66): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
 C:\Users\Andrew\Desktop\Диплом\game\Game\GameData.cpp(707,36): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-  Создание кода...
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\game\x64\Debug\GameProject.exe
