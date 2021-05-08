@@ -1,5 +1,4 @@
 #include "GameClasses.h"
-#include <omp.h>
 
 #define TILE_DRAWING
 
@@ -89,14 +88,36 @@ TerrainType GameData::getTerrainType(int x, int y)
 
 void GameData::setTerrain(Terrain terr)
 {
+    //TODO: make check for existence of path from Base to Hive (if not - create it)
     //TODO: MAKE NEW FUNCTION TO REDRAW PREVIEW TEXTURE, CALL IT ONLY FEW TIMES IN UPDATE
     if (isMapLoaded())
     {
         UnloadTexture(terrainTexture);
 
+        //expansion
         for (int x = 0; x < mapWidth; x++)
                 delete[] mapExpansionCreep[x];
         delete[] mapExpansionCreep;
+
+        //pathfinding
+        ActorType types[] = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+        std::vector<std::string> matrices = { "mapsHeat", "mapsTerrainMod", "mapsDamage" };
+
+        for (ActorType type : types)
+        {
+            //support matrices
+            for (std::string matrixName : matrices)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                    delete[] mapsPathfinding[type][matrixName][x];
+                delete[] mapsPathfinding[type][matrixName];
+            }
+
+            //vector matrix
+            for (int x = 0; x < mapWidth; x++)
+                delete[] vectorFields[type][x];
+            delete[] vectorFields[type];
+        }
     }
 
     this->mapHeight = terr.height;
@@ -136,6 +157,124 @@ void GameData::setTerrain(Terrain terr)
             default:
                 mapExpansionCreep[x][y] = ExpandState::UNAVAILABLE;
                 break;
+            }
+        }
+    }
+
+    //vector pathfinding matrix allocation
+    //LIGHT INSECT
+
+    ActorType types[] = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+    std::vector<std::string> matrices = { "mapsHeat", "mapsTerrainMod", "mapsDamage" };
+
+    for (ActorType type : types)
+    {
+        //memory allocation, support matrices
+        for (std::string matrixName : matrices)
+        {
+            mapsPathfinding[type][matrixName] = new float* [mapWidth];
+            for (int x = 0; x < mapWidth; x++)
+                mapsPathfinding[type][matrixName][x] = new float[mapHeight];
+        }
+        //vector matrices
+        vectorFields[type] = new Vector2* [mapWidth];
+        for (int x = 0; x < mapWidth; x++)
+            vectorFields[type][x] = new Vector2[mapHeight];
+
+
+        //vectors and heat map nullification
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                mapsPathfinding[type]["mapsHeat"][x][y] = 0.f;
+            }
+        }
+
+        //terrain speed modifier, individual for each Insect's unit type
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                if (type == ActorType::LIGHT_INSECT)
+                {
+                    switch (getTerrainType(x, y))
+                    {
+                        //cant walk in this tile
+                    case TerrainType::LAKE:
+                    case TerrainType::MOUNTAIN:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        break;
+                        //can, but much slower
+                    case TerrainType::SWAMP:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.5f;
+                        break;
+                    case TerrainType::SAND:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.8f;
+                        break;
+                    case TerrainType::PLAIN:
+                    case TerrainType::TREE:
+                    case TerrainType::STONE:
+                    case TerrainType::ASH:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        break;
+                        //just in case
+                    default:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        break;
+                    }
+                }
+
+                if (type == ActorType::HEAVY_INSECT)
+                {
+                    switch (getTerrainType(x, y))
+                    {
+                        //cant walk in this tile
+                    case TerrainType::MOUNTAIN:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        break;
+                        //can, but much slower
+                    case TerrainType::LAKE:
+                    case TerrainType::SWAMP:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.5f;
+                        break;
+                    case TerrainType::SAND:
+                    case TerrainType::TREE:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.7f;
+                        break;
+                    case TerrainType::PLAIN:
+                    case TerrainType::STONE:
+                    case TerrainType::ASH:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        break;
+                        //just in case
+                    default:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        break;
+                    }
+                }
+
+                if (type == ActorType::FLYING_INSECT)
+                {
+                    switch (getTerrainType(x, y))
+                    {
+                        //can fly through any tile:
+                    case TerrainType::LAKE:
+                    case TerrainType::MOUNTAIN:
+                    case TerrainType::SWAMP:
+                    case TerrainType::SAND:
+                    case TerrainType::PLAIN:
+                    case TerrainType::TREE:
+                    case TerrainType::STONE:
+                    case TerrainType::ASH:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        break;
+                        //just in case
+                    default:
+                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -189,6 +328,11 @@ void GameData::setTerrain(Terrain terr)
 
     terrainTexture = LoadTextureFromImage(buf);
     UnloadImage(buf);
+
+    calculateVectorPathfinding(
+        TileIndex{ 0,0 },
+        ActorType::LIGHT_INSECT
+    );
 }
 
 std::vector<TileIndex> GameData::tilesInsideCircle(Vector2 center, unsigned int radius)
@@ -295,6 +439,60 @@ int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
     }
     return result;
     //TODO: make checking for MACHINES side
+}
+
+std::vector<TileIndex> GameData::getNeighbors(int x, int y)
+{
+    std::vector<TileIndex> result;
+
+    if (x - 1 >= 0)             //left
+        result.push_back(TileIndex{ x - 1, y });
+    if (y - 1 >= 0)             //up
+        result.push_back(TileIndex{ x, y - 1 });
+    if (x + 1 < this->mapWidth) //right
+        result.push_back(TileIndex{ x + 1, y });
+    if (y + 1 < this->mapHeight) //down
+        result.push_back(TileIndex{ x, y + 1 });
+
+    return result;
+}
+
+void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
+{
+    //HEATMAP CALCULATION
+    mapsPathfinding[actorType]["mapsHeat"][target.x][target.y] = 1.f; //initial target point
+
+    std::vector<TileIndex> toCheck = { target };
+    std::vector<TileIndex> checking;
+    float previous = 1.f;
+
+    for(int i = 0; i<toCheck.size(); i++)
+    {
+        previous = mapsPathfinding[actorType]["mapsHeat"][toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
+        checking = getNeighbors(toCheck[i].x, toCheck[i].y);
+        for (TileIndex tile : checking)
+        {
+            //if its not obstacle and value not set:
+            if (mapsPathfinding[actorType]["mapsTerrainMod"][tile.x][tile.y] != -1 && mapsPathfinding[actorType]["mapsHeat"][tile.x][tile.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapsPathfinding[actorType]["mapsHeat"][tile.x][tile.y] = previous + (1 / mapsPathfinding[actorType]["mapsTerrainMod"][tile.x][tile.y]);
+                //add this tile for further checking
+                toCheck.push_back(tile);
+            }
+        }
+    }
+
+    //VECTOR MAP CALCULATION
+
+    for (int x = 0; x < mapWidth; x++)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+
+        }
+    }
 }
 
 void GameData::recalculateExpansion(Side side)
@@ -617,7 +815,7 @@ void GameData::GameDraw()
         0.f, pixelsPerTile, WHITE);
 #else
 
-    if (camera.zoom < 1.f) //low-detailed map
+    if (camera.zoom < 1.f && !IsKeyDown(KEY_T)) //low-detailed map
     {
         DrawTextureEx(
             terrainTexture,
@@ -661,6 +859,9 @@ void GameData::GameDraw()
 
                 if (showingCreepStates)
                     DrawText(FormatText("%d", mapExpansionCreep[x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 14, RED);
+            
+                if(IsKeyDown(KEY_F4))
+                    DrawText(FormatText("%.1f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
             }
         }
     }
@@ -715,6 +916,7 @@ void GameData::GameDraw()
 
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
+    DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 80, 20, RED);
 
     DrawFPS(20, 50);
 }
@@ -727,6 +929,27 @@ GameData::~GameData()
     {
         delete[] mapTerrain;
         UnloadTexture(terrainTexture);
+
+        for (int x = 0; x < mapWidth; x++)
+            delete[] mapExpansionCreep[x];
+        delete[] mapExpansionCreep;
+
+        ActorType types[] = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+        std::vector<std::string> matrices = { "mapsHeat", "mapsTerrainMod", "mapsDamage" };
+        for (ActorType type : types)
+        {
+            for (std::string matrixName : matrices)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                    delete[] mapsPathfinding[type][matrixName][x];
+                delete[] mapsPathfinding[type][matrixName];
+            }
+
+            //vector matrix
+            for (int x = 0; x < mapWidth; x++)
+                delete[] vectorFields[type][x];
+            delete[] vectorFields[type];
+        }
     }
 
     UnloadTexture(creepTexture);
@@ -737,12 +960,4 @@ GameData::~GameData()
     }
 
     delete[] palette;
-
-    if (isMapLoaded())
-    {
-        for (int x = 0; x < mapWidth; x++)
-                delete[] mapExpansionCreep[x];
-        delete[] mapExpansionCreep;
-    }
-
 }

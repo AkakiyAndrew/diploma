@@ -58,6 +58,14 @@ public:
     std::map<ActorType, std::map<std::string, int>> genericAttributes;
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
 
+    //VECTOR PATHFINDING
+    //have inside mapsVector, mapsHeat, mapsTerrainMod, mapsDamage
+    std::map<ActorType, std::map<std::string, float**>> mapsPathfinding;
+    std::map<ActorType, Vector2**> vectorFields;
+
+    //mapVector - target mapVector to calculate, mapTerrainMod - speed modification by terrain type, mapDamage - modification by receiving/dealing damage 
+    void calculateVectorPathfinding(TileIndex target, ActorType actorType);
+
     unsigned char** mapExpansionCreep = nullptr;
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
     bool closed = false;
@@ -68,6 +76,9 @@ public:
     //return num of adjoined expansion tiles 
     int numOfExpansionTileAdjoin(int x, int y, Side side); 
     int numOfExpansionTileAdjoinFading(int x, int y, Side side);
+    
+    //returns vector of 
+    std::vector<TileIndex> getNeighbors(int x, int y);
 
     //returns pointer to actor in coordinates
     GameActor* getActorInTile(int x, int y);

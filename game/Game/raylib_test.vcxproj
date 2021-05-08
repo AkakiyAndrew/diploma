@@ -138,6 +138,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\raylib-master\src;$(ProjectDir)\..\..\raygui-master\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
