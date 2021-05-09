@@ -59,6 +59,7 @@ public:
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
 
     //VECTOR PATHFINDING
+    NeighborsIndex** neighborsIndices = nullptr;
     //have inside mapsVector, mapsHeat, mapsTerrainMod, mapsDamage
     std::map<ActorType, std::map<std::string, float**>> mapsPathfinding;
     std::map<ActorType, Vector2**> vectorFields;
@@ -78,7 +79,7 @@ public:
     int numOfExpansionTileAdjoinFading(int x, int y, Side side);
     
     //returns vector of 
-    std::vector<TileIndex> getNeighbors(int x, int y);
+    NeighborsIndex getNeighbors(int x, int y);
 
     //returns pointer to actor in coordinates
     GameActor* getActorInTile(int x, int y);

@@ -118,6 +118,11 @@ void GameData::setTerrain(Terrain terr)
                 delete[] vectorFields[type][x];
             delete[] vectorFields[type];
         }
+
+        //neighbors matrix
+        for (int x = 0; x < mapWidth; x++)
+            delete[] neighborsIndices[x];
+        delete[] neighborsIndices;
     }
 
     this->mapHeight = terr.height;
@@ -161,9 +166,16 @@ void GameData::setTerrain(Terrain terr)
         }
     }
 
-    //vector pathfinding matrix allocation
-    //LIGHT INSECT
+    //tiles neighbors allocation and pre-calculation
+    neighborsIndices = new NeighborsIndex * [mapWidth];
+    for (int x = 0; x < mapWidth; x++)
+        neighborsIndices[x] = new NeighborsIndex[mapHeight];
 
+    for (int x = 0; x < mapWidth; x++)
+        for (int y = 0; y < mapHeight; y++)
+            neighborsIndices[x][y] = getNeighbors(x, y);
+
+    //vector pathfinding matrix allocation
     ActorType types[] = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
     std::vector<std::string> matrices = { "mapsHeat", "mapsTerrainMod", "mapsDamage" };
 
@@ -431,23 +443,18 @@ int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
     //TODO: make checking for MACHINES side
 }
 
-std::vector<TileIndex> GameData::getNeighbors(int x, int y)
+NeighborsIndex GameData::getNeighbors(int x, int y)
 {
-    std::vector<TileIndex> result = {
-    {-1,-1}, //left
-    {-1,-1}, //up
-    {-1,-1}, //right
-    {-1,-1} //down
-    };
+    NeighborsIndex result;
 
     if (x - 1 >= 0)             //left
-        result[0] = { x - 1, y };
+        result.left = { x - 1, y };
     if (y - 1 >= 0)             //up
-        result[1] = { x, y - 1 };
+        result.up = { x, y - 1 };
     if (x + 1 < this->mapWidth) //right
-        result[2] = { x + 1, y };
+        result.right = { x + 1, y };
     if (y + 1 < this->mapHeight) //down
-        result[3] = { x, y + 1 };
+        result.down = { x, y + 1 };
 
     return result;
 }
@@ -471,27 +478,64 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     mapHeat[target.x][target.y] = 1.f; //initial target point
 
     std::vector<TileIndex> toCheck = { target };
-    std::vector<TileIndex> checking;
+    NeighborsIndex checking;
     float previous = 1.f;
 
     for(int i = 0; i<toCheck.size(); i++)
     {
         previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
-        checking = getNeighbors(toCheck[i].x, toCheck[i].y);
-        for (TileIndex tile : checking)
+        checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
+
+        //left
+        if (checking.left.x != -1 && checking.left.y != -1) //if index valid
         {
-            //if index valid
-            if (tile.x != -1 && tile.y != -1)
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.left.x][checking.left.y] != -1 && mapHeat[checking.left.x][checking.left.y] == 0.f)
             {
-                //if its not obstacle and value not set:
-                if (mapTerrainMod[tile.x][tile.y] != -1 && mapHeat[tile.x][tile.y] == 0.f)
-                {
-                    //TODO: ADD CONSIDERING MAP DAMAGE
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]);
-                    //add this tile for further checking
-                    toCheck.push_back(tile);
-                }
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.left);
+            }
+        }
+        //up
+        if (checking.up.x != -1 && checking.up.y != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.up.x][checking.up.y] != -1 && mapHeat[checking.up.x][checking.up.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.up);
+            }
+        }
+        //right
+        if (checking.right.x != -1 && checking.right.y != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.right.x][checking.right.y] != -1 && mapHeat[checking.right.x][checking.right.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.right);
+            }
+        }
+        //down
+        if (checking.down.x != -1 && checking.down.y != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.down.x][checking.down.y] != -1 && mapHeat[checking.down.x][checking.down.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.down);
             }
         }
     }
@@ -968,6 +1012,11 @@ GameData::~GameData()
                 delete[] vectorFields[type][x];
             delete[] vectorFields[type];
         }
+
+        //neightbors matrix
+        for (int x = 0; x < mapWidth; x++)
+            delete[] neighborsIndices[x];
+        delete[] neighborsIndices;
     }
 
     UnloadTexture(creepTexture);
