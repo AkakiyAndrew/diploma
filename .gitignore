@@ -1,6 +1,7 @@
 /game/.vs/
 /game/x64/Debug/*
 /game/x64/Release/*
+/game/Game/x64/*
 !/game/x64/Debug/GameProject.exe
 !/game/x64/Debug/raylib.dll
 /raylib_test/.vs/

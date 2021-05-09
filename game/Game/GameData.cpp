@@ -181,16 +181,6 @@ void GameData::setTerrain(Terrain terr)
         for (int x = 0; x < mapWidth; x++)
             vectorFields[type][x] = new Vector2[mapHeight];
 
-
-        //vectors and heat map nullification
-        for (int x = 0; x < mapWidth; x++)
-        {
-            for (int y = 0; y < mapHeight; y++)
-            {
-                mapsPathfinding[type]["mapsHeat"][x][y] = 0.f;
-            }
-        }
-
         //terrain speed modifier, individual for each Insect's unit type
         for (int x = 0; x < mapWidth; x++)
         {
@@ -443,24 +433,42 @@ int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
 
 std::vector<TileIndex> GameData::getNeighbors(int x, int y)
 {
-    std::vector<TileIndex> result;
+    std::vector<TileIndex> result = {
+    {-1,-1}, //left
+    {-1,-1}, //up
+    {-1,-1}, //right
+    {-1,-1} //down
+    };
 
     if (x - 1 >= 0)             //left
-        result.push_back(TileIndex{ x - 1, y });
+        result[0] = { x - 1, y };
     if (y - 1 >= 0)             //up
-        result.push_back(TileIndex{ x, y - 1 });
+        result[1] = { x, y - 1 };
     if (x + 1 < this->mapWidth) //right
-        result.push_back(TileIndex{ x + 1, y });
+        result[2] = { x + 1, y };
     if (y + 1 < this->mapHeight) //down
-        result.push_back(TileIndex{ x, y + 1 });
+        result[3] = { x, y + 1 };
 
     return result;
 }
 
 void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
+    float** mapHeat = mapsPathfinding[actorType]["mapsHeat"];
+    float** mapTerrainMod = mapsPathfinding[actorType]["mapsTerrainMod"];
+    Vector2** mapVector;
+
+    //heat map nullification
+    for (int x = 0; x < mapWidth; x++)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            mapHeat[x][y] = 0.f;
+        }
+    }
+
     //HEATMAP CALCULATION
-    mapsPathfinding[actorType]["mapsHeat"][target.x][target.y] = 1.f; //initial target point
+    mapHeat[target.x][target.y] = 1.f; //initial target point
 
     std::vector<TileIndex> toCheck = { target };
     std::vector<TileIndex> checking;
@@ -468,31 +476,35 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 
     for(int i = 0; i<toCheck.size(); i++)
     {
-        previous = mapsPathfinding[actorType]["mapsHeat"][toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
+        previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
         checking = getNeighbors(toCheck[i].x, toCheck[i].y);
         for (TileIndex tile : checking)
         {
-            //if its not obstacle and value not set:
-            if (mapsPathfinding[actorType]["mapsTerrainMod"][tile.x][tile.y] != -1 && mapsPathfinding[actorType]["mapsHeat"][tile.x][tile.y] == 0.f)
+            //if index valid
+            if (tile.x != -1 && tile.y != -1)
             {
-                //TODO: ADD CONSIDERING MAP DAMAGE
-                //set value, according to terrain speed modification and damage map
-                mapsPathfinding[actorType]["mapsHeat"][tile.x][tile.y] = previous + (1 / mapsPathfinding[actorType]["mapsTerrainMod"][tile.x][tile.y]);
-                //add this tile for further checking
-                toCheck.push_back(tile);
+                //if its not obstacle and value not set:
+                if (mapTerrainMod[tile.x][tile.y] != -1 && mapHeat[tile.x][tile.y] == 0.f)
+                {
+                    //TODO: ADD CONSIDERING MAP DAMAGE
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]);
+                    //add this tile for further checking
+                    toCheck.push_back(tile);
+                }
             }
         }
     }
 
     //VECTOR MAP CALCULATION
 
-    for (int x = 0; x < mapWidth; x++)
-    {
-        for (int y = 0; y < mapHeight; y++)
-        {
+    //for (int x = 0; x < mapWidth; x++)
+    //{
+    //    for (int y = 0; y < mapHeight; y++)
+    //    {
 
-        }
-    }
+    //    }
+    //}
 }
 
 void GameData::recalculateExpansion(Side side)
@@ -710,6 +722,12 @@ void GameData::GameUpdate()
             wantToBuild = ActorType::ACTOR_NULL;
             wantToRemove = true;
         }
+
+    if(IsKeyPressed(KEY_T))
+        calculateVectorPathfinding(
+            mouseIndex,
+            ActorType::LIGHT_INSECT
+        );
 
     if (IsKeyPressed(KEY_F2))
         if (showingCreepStates)

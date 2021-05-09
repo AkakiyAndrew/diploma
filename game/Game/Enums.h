@@ -91,3 +91,11 @@ struct TileIndex
 
 	operator Vector2() { return Vector2{ static_cast<float>(x), static_cast<float>(y) }; };
 };
+
+//struct NeighborsIndex
+//{
+//	TileIndex left = {-1,-1};
+//	TileIndex up = { -1,-1 };
+//	TileIndex right = { -1,-1 };
+//	TileIndex down = { -1,-1 };
+//};
