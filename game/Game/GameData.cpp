@@ -489,14 +489,23 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     //HEATMAP CALCULATION
     mapHeat[target.x][target.y] = 1.f; //initial target point
 
-    std::vector<TileIndex> toCheck = { target };
+    //std::vector<TileIndex> toCheck = { target };
+    int i_checking = 0, i_max = mapHeight * mapHeight, i_last_added = 0; //to replace vector
+    TileIndex* toCheck = new TileIndex[i_max];
+    toCheck[0] = target;
+
     NeighborsIndex checking;
     float previous = 1.f;
-
-    for(int i = 0; i<toCheck.size(); i++)
+    
+    //TODO: возможная оптимизация с заменой вектора на фиксированный одномерный массив, используя индексы для заполнения и обращения
+    //внутри итерации менять iLastAdded для обоз
+    for(int i = 0; i<i_max; i++)
     {
-        previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
-        checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
+        if (i <= i_last_added) //for "repair" crush on Degug configuration
+        {
+            previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
+            checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
+        }
 
         //left
         if (checking.left.x != -1 && checking.left.y != -1) //if index valid
@@ -504,11 +513,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.left.x][checking.left.y] != -1 && mapHeat[checking.left.x][checking.left.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.left);
+                toCheck[i_last_added] = (checking.left);
             }
         }
         //up
@@ -517,11 +527,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.up.x][checking.up.y] != -1 && mapHeat[checking.up.x][checking.up.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.up);
+                toCheck[i_last_added] =checking.up;
             }
         }
         //right
@@ -530,11 +541,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.right.x][checking.right.y] != -1 && mapHeat[checking.right.x][checking.right.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.right);
+                toCheck[i_last_added] =checking.right;
             }
         }
         //down
@@ -543,11 +555,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.down.x][checking.down.y] != -1 && mapHeat[checking.down.x][checking.down.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.down);
+                toCheck[i_last_added] =checking.down;
             }
         }
 
@@ -557,11 +570,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.upLeft);
+                toCheck[i_last_added] =checking.upLeft;
             }
         }
         //up-right
@@ -570,11 +584,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.upRight);
+                toCheck[i_last_added] =checking.upRight;
             }
         }
         //down-left
@@ -583,11 +598,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.downLeft);
+                toCheck[i_last_added] =checking.downLeft;
             }
         }
         //down-right
@@ -596,14 +612,17 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
             {
+                i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
                 mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
                 //add this tile for further checking
-                toCheck.push_back(checking.downRight);
+                toCheck[i_last_added] =checking.downRight;
             }
         }
     }
+
+    delete[] toCheck;
 
     //VECTOR MAP CALCULATION
 
@@ -630,7 +649,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             }
             else
                 x_buf += mapHeat[x][y];
-
             //right
             if (neighbors.right.x != -1) //check for map borders
             {
@@ -641,7 +659,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             }
             else
                 x_buf -= mapHeat[x][y];
-
             //up
             if (neighbors.up.x != -1) //check for map borders
             {
@@ -652,7 +669,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             }
             else
                 y_buf += mapHeat[x][y];
-
             //down
             if (neighbors.down.x != -1) //check for map borders
             {
@@ -885,11 +901,21 @@ void GameData::GameUpdate()
             wantToRemove = true;
         }
 
-    if(IsKeyPressed(KEY_T))
+    if (IsKeyPressed(KEY_T))
+    {
         calculateVectorPathfinding(
             mouseIndex,
             ActorType::LIGHT_INSECT
         );
+        calculateVectorPathfinding(
+            mouseIndex,
+            ActorType::HEAVY_INSECT
+        );
+        calculateVectorPathfinding(
+            mouseIndex,
+            ActorType::FLYING_INSECT
+        );
+    }
 
     if (IsKeyPressed(KEY_F2))
         if (showingCreepStates)
