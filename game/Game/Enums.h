@@ -98,4 +98,9 @@ struct NeighborsIndex
 	TileIndex up = { -1,-1 };
 	TileIndex right = { -1,-1 };
 	TileIndex down = { -1,-1 };
+
+	TileIndex upLeft = { -1,-1 };
+	TileIndex upRight = { -1,-1 };
+	TileIndex downLeft = { -1,-1 };
+	TileIndex downRight = { -1,-1 };
 };

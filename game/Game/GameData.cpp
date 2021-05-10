@@ -166,11 +166,11 @@ void GameData::setTerrain(Terrain terr)
         }
     }
 
-    //tiles neighbors allocation and pre-calculation
+    //tiles neighbors allocation 
     neighborsIndices = new NeighborsIndex * [mapWidth];
     for (int x = 0; x < mapWidth; x++)
         neighborsIndices[x] = new NeighborsIndex[mapHeight];
-
+    //neighbors pre - calculation
     for (int x = 0; x < mapWidth; x++)
         for (int y = 0; y < mapHeight; y++)
             neighborsIndices[x][y] = getNeighbors(x, y);
@@ -194,6 +194,7 @@ void GameData::setTerrain(Terrain terr)
             vectorFields[type][x] = new Vector2[mapHeight];
 
         //terrain speed modifier, individual for each Insect's unit type
+        float** mapTerrainMod = mapsPathfinding[type]["mapsTerrainMod"];
         for (int x = 0; x < mapWidth; x++)
         {
             for (int y = 0; y < mapHeight; y++)
@@ -205,24 +206,24 @@ void GameData::setTerrain(Terrain terr)
                         //cant walk in this tile
                     case TerrainType::LAKE:
                     case TerrainType::MOUNTAIN:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        mapTerrainMod[x][y] = -1.f;
                         break;
                         //can, but much slower
                     case TerrainType::SWAMP:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.5f;
+                        mapTerrainMod[x][y] = 0.5f;
                         break;
                     case TerrainType::SAND:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.8f;
+                        mapTerrainMod[x][y] = 0.8f;
                         break;
                     case TerrainType::PLAIN:
                     case TerrainType::TREE:
                     case TerrainType::STONE:
                     case TerrainType::ASH:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        mapTerrainMod[x][y] = 1.f;
                         break;
                         //just in case
                     default:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        mapTerrainMod[x][y] = -1.f;
                         break;
                     }
                 }
@@ -233,25 +234,25 @@ void GameData::setTerrain(Terrain terr)
                     {
                         //cant walk in this tile
                     case TerrainType::MOUNTAIN:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        mapTerrainMod[x][y] = -1.f;
                         break;
                         //can, but much slower
                     case TerrainType::LAKE:
                     case TerrainType::SWAMP:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.5f;
+                        mapTerrainMod[x][y] = 0.5f;
                         break;
                     case TerrainType::SAND:
                     case TerrainType::TREE:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 0.7f;
+                        mapTerrainMod[x][y] = 0.7f;
                         break;
                     case TerrainType::PLAIN:
                     case TerrainType::STONE:
                     case TerrainType::ASH:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        mapTerrainMod[x][y] = 1.f;
                         break;
                         //just in case
                     default:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        mapTerrainMod[x][y] = -1.f;
                         break;
                     }
                 }
@@ -269,11 +270,11 @@ void GameData::setTerrain(Terrain terr)
                     case TerrainType::TREE:
                     case TerrainType::STONE:
                     case TerrainType::ASH:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = 1.f;
+                        mapTerrainMod[x][y] = 1.f;
                         break;
                         //just in case
                     default:
-                        mapsPathfinding[type]["mapsTerrainMod"][x][y] = -1.f;
+                        mapTerrainMod[x][y] = -1.f;
                         break;
                     }
                 }
@@ -456,6 +457,17 @@ NeighborsIndex GameData::getNeighbors(int x, int y)
     if (y + 1 < this->mapHeight) //down
         result.down = { x, y + 1 };
 
+    //corners
+    if (y - 1 >= 0 && x - 1 >= 0) //up-left
+        result.upLeft = { x - 1, y - 1 };
+    if (y - 1 >= 0 && x + 1 < this->mapWidth) //up-right
+        result.upRight = { x + 1, y - 1 };
+    if (y + 1 < this->mapHeight && x - 1 >= 0) //down-left
+        result.downLeft = { x - 1, y + 1 };
+    if (y + 1 < this->mapHeight && x + 1 < this->mapWidth) //down-right
+        result.downRight = { x + 1, y + 1 };
+
+
     return result;
 }
 
@@ -463,7 +475,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
     float** mapHeat = mapsPathfinding[actorType]["mapsHeat"];
     float** mapTerrainMod = mapsPathfinding[actorType]["mapsTerrainMod"];
-    Vector2** mapVector;
+    Vector2** mapVector = vectorFields[actorType];
 
     //heat map nullification
     for (int x = 0; x < mapWidth; x++)
@@ -538,17 +550,123 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 toCheck.push_back(checking.down);
             }
         }
+
+        //up-left
+        if (checking.upLeft.x!=-1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.upLeft);
+            }
+        }
+        //up-right
+        if (checking.upRight.x != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.upRight);
+            }
+        }
+        //down-left
+        if (checking.downLeft.x != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.downLeft);
+            }
+        }
+        //down-right
+        if (checking.downRight.x != -1) //if index valid
+        {
+            //if its not obstacle and value not set:
+            if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
+            {
+                //TODO: ADD CONSIDERING MAP DAMAGE
+                //set value, according to terrain speed modification and damage map
+                mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
+                //add this tile for further checking
+                toCheck.push_back(checking.downRight);
+            }
+        }
     }
 
     //VECTOR MAP CALCULATION
 
-    //for (int x = 0; x < mapWidth; x++)
-    //{
-    //    for (int y = 0; y < mapHeight; y++)
-    //    {
+    float x_buf;
+    float y_buf;
+    NeighborsIndex neighbors;
 
-    //    }
-    //}
+#pragma omp parallel for private(neighbors, x_buf, y_buf)
+    for (int x = 0; x < mapWidth; x++)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            neighbors = neighborsIndices[x][y];
+            x_buf = 0.f;
+            y_buf = 0.f;
+
+            //left
+            if (neighbors.left.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction 
+                    x_buf += mapHeat[x-1][y]; //left
+                else
+                    x_buf += mapHeat[x][y]; //this tile
+            }
+            else
+                x_buf += mapHeat[x][y];
+
+            //right
+            if (neighbors.right.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction 
+                    x_buf -= mapHeat[x + 1][y]; //right
+                else
+                    x_buf -= mapHeat[x][y]; //this tile
+            }
+            else
+                x_buf -= mapHeat[x][y];
+
+            //up
+            if (neighbors.up.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x][y-1] != -1.f) //check for obstruction 
+                    y_buf += mapHeat[x][y-1]; //up
+                else
+                    y_buf += mapHeat[x][y]; //this tile
+            }
+            else
+                y_buf += mapHeat[x][y];
+
+            //down
+            if (neighbors.down.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x][y+1] != -1.f) //check for obstruction 
+                    y_buf -= mapHeat[x][y+1]; //down
+                else
+                    y_buf -= mapHeat[x][y]; //this tile
+            }
+            else
+                y_buf -= mapHeat[x][y];
+
+            mapVector[x][y] = { x_buf, y_buf };
+        }
+    }
 }
 
 void GameData::recalculateExpansion(Side side)
@@ -858,6 +976,8 @@ void GameData::GameUpdate()
             }
         }
 
+        creepCount -= buf.size();
+
         for (TileIndex tile : buf)
             mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
         //TODO: do same for MACHINES
@@ -886,6 +1006,9 @@ void GameData::GameDraw()
     }
     else
     {                    //full-detailed map
+        Vector2** vectorField = vectorFields[ActorType::LIGHT_INSECT];
+        float** terrainMod = mapsPathfinding[ActorType::LIGHT_INSECT]["mapsTerrainMod"];
+
         int index;
         for (int x = renderBorders[1]; x < renderBorders[3]; x++) //columns
         {
@@ -923,7 +1046,20 @@ void GameData::GameDraw()
                     DrawText(FormatText("%d", mapExpansionCreep[x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 14, RED);
             
                 if(IsKeyDown(KEY_F4))
-                    DrawText(FormatText("%.1f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
+                    DrawText(FormatText("%.0f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
+
+                if (IsKeyDown(KEY_F5) && terrainMod[x][y]!=-1.f)
+                {                   
+                    DrawLineEx(
+                        Vector2{ x * pixelsPerTile + pixelsPerTile / 2,
+                        y * pixelsPerTile + pixelsPerTile / 2 },
+                        Vector2{ x * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].x *2,
+                        y * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].y * 2,
+                        },
+                        3.f,
+                        GREEN);
+                    DrawCircle(x * pixelsPerTile + pixelsPerTile / 2, y * pixelsPerTile + pixelsPerTile / 2, 1, RED);
+                }
             }
         }
     }

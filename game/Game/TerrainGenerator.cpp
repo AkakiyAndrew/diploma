@@ -123,6 +123,7 @@ void TerrainGenerator::DrawInterface()
     position = { guiZeroPoint.x + 120, guiZeroPoint.y + 470, 60, 30 };
     GuiValueBox(position, "Height:", &height, 1, 4048, valueChanging[2]);
 
+    //TODO: lock button, if width/height was changed and not regenerated, to prevent access violation
     //Rerender button
     if (GuiButton(Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 300, 150.f, 50.f }, "Rerender"))
         RerenderTerrain();

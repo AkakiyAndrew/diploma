@@ -31,6 +31,7 @@ void Building::Expand()
                     if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side)>0)
                     {
                         game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
+                        game->creepCount++;
                         return;
                     }
                 }

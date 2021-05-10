@@ -58,6 +58,10 @@ public:
     std::map<ActorType, std::map<std::string, int>> genericAttributes;
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
 
+    //ECONOMICS
+    //num of creep-covered tiles
+    unsigned int creepCount = 0;
+
     //VECTOR PATHFINDING
     NeighborsIndex** neighborsIndices = nullptr;
     //have inside mapsVector, mapsHeat, mapsTerrainMod, mapsDamage
