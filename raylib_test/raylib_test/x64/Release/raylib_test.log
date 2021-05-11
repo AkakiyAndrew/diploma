@@ -1,0 +1,80 @@
+﻿  main.c
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(217,1): warning C4005: min: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\stdlib.h(1290): message : см. предыдущее определение "min"
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(218,1): warning C4005: max: изменение макроопределения
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\stdlib.h(1289): message : см. предыдущее определение "max"
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(426,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(430,39): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(452,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(512,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(516,39): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(538,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(592,31): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(596,43): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(651,39): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(653,52): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(669,39): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(673,52): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(732,15): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(755,15): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(776,15): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(811,105): warning C4244: функция: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(812,105): warning C4244: функция: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(848,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(871,31): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(873,25): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(961,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(988,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(990,65): warning C4244: функция: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(991,65): warning C4244: функция: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(995,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1020,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1022,35): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1067,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1074,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1080,35): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1110,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1117,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1126,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1134,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1141,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1148,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1200,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1261,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1284,31): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1286,25): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1388,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1403,40): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1524,45): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1581,74): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1582,74): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1586,64): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1587,64): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1590,104): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1606,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1621,119): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1641,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1697,1): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1731,51): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1732,51): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1734,77): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1772,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1796,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1847,23): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1861,41): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1920,21): warning C4244: функция: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib-master\src\physac.h(1937,30): warning C4244: =: преобразование "unsigned __int64" в "double", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(43,94): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(43,94): warning C4244: инициализация: преобразование "const int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(47,96): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(63,90): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(63,90): warning C4244: инициализация: преобразование "const int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(66,92): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(80,121): warning C4244: функция: преобразование "int" в "float", возможна потеря данных
+C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.c(81,127): warning C4244: функция: преобразование "int" в "float", возможна потеря данных
+  Создание кода
+  1 of 51 functions ( 2.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\raylib_test\x64\Release\raylib_test.exe

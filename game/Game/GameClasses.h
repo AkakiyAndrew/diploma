@@ -57,6 +57,7 @@ public:
     //attributes for GameActor constructor
     std::map<ActorType, std::map<std::string, int>> genericAttributes;
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
+    std::map<ActorType, std::map<std::string, int>> militaryAttributes;
 
     //ECONOMICS
     //num of creep-covered tiles
@@ -82,7 +83,10 @@ public:
     int numOfExpansionTileAdjoin(int x, int y, Side side); 
     int numOfExpansionTileAdjoinFading(int x, int y, Side side);
     
-    //returns vector of 
+    //return TileIndex of Vector2
+    TileIndex getTileIndex(Vector2);
+
+    //returns vector of neightbors indices
     NeighborsIndex getNeighbors(int x, int y);
 
     //returns pointer to actor in coordinates
@@ -254,18 +258,19 @@ class Core : public Constructor
 class Militaty : public GameActor
 {
 protected:
-    const int seekRange;
-    const int attackRange;
-    const int speed;
-    const int damage;
-    const int reloadCount;
-    const int angle;
-    const int rotationSpeed;
+    int seekRange;
+    int attackRange;
+    int speed;
+    int damage;
+    int reloadCount;
+    int rotationSpeed;
+    int angle;
+
     //int type
     GameActor* target;
     ActorType targetPriority;
 
-    Militaty();
+    Militaty(GameData* ptr, ActorType type, Vector2 pos, State state);
     ~Militaty();
 
     void Attack();
@@ -277,5 +282,9 @@ protected:
 
 class LightInsect : public Militaty
 {
-
+public:
+    LightInsect(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void Update();
+    void Draw();
+    void Destroy();
 };

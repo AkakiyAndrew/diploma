@@ -50,13 +50,30 @@ GameData::GameData()
     genericAttributes[ActorType::TUMOR] = std::map<std::string, int>{
         {"maxHP", 100},
         {"size", 1},
-        {"cost", 2},
-        {"sightRange", 2}
+        {"cost", 10},
+        {"sightRange", 10}
+    };
+
+    genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
+        {"maxHP", 50},
+        {"size", 1},
+        {"cost", 5},
+        {"sightRange", 8}
     };
 
     //BUILDING ACTORS ATTRIBUTES
     buildingsAttributes[ActorType::TUMOR] = std::map<std::string, int>{
         {"expansionRange", 16},
+    };
+
+    //MILITARY ACTORS ATTRIBUTES
+    militaryAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
+        {"seekRange", 8},
+        {"attackRange", 2},
+        {"speed", 5},
+        {"damage", 7},
+        {"reloadCount", 20},
+        {"rotationSpeed", 4},
     };
 }
 
@@ -471,6 +488,14 @@ NeighborsIndex GameData::getNeighbors(int x, int y)
     return result;
 }
 
+TileIndex GameData::getTileIndex(Vector2 position)
+{
+    return TileIndex{
+        static_cast<int>(position.x / pixelsPerTile),
+        static_cast<int>(position.y / pixelsPerTile)
+    };
+}
+
 void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
     float** mapHeat = mapsPathfinding[actorType]["mapsHeat"];
@@ -869,19 +894,8 @@ void GameData::GameUpdate()
     if (renderBorders[3] > mapWidth) renderBorders[3] = mapWidth;
 
     if (IsKeyPressed(KEY_ONE))
-        radius = 1;
-    if (IsKeyPressed(KEY_TWO))
-        radius = 2;
-    if (IsKeyPressed(KEY_THREE))
-        radius = 3;
-    if (IsKeyPressed(KEY_FOUR))
-        radius = 4;
-    if (IsKeyPressed(KEY_FIVE))
-        radius = 5;
-    if (IsKeyPressed(KEY_SIX))
-        radius = 6;
-    if (IsKeyPressed(KEY_SEVEN))
-        radius = 12;
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::LIGHT_INSECT;
 
     if (IsKeyPressed(KEY_E))
         if(wantToBuild == ActorType::ACTOR_NULL)
@@ -941,6 +955,13 @@ void GameData::GameUpdate()
         case ActorType::AIRDEFENSE_TURRET:
             break;
         case ActorType::LIGHT_INSECT:
+            unitsList.push_back(
+                new LightInsect(
+                    this,
+                    ActorType::LIGHT_INSECT,
+                    Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
+                    State::ONLINE)
+            );
             break;
         case ActorType::HEAVY_INSECT:
             break;
