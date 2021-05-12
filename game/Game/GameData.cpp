@@ -502,12 +502,13 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     float** mapTerrainMod = mapsPathfinding[actorType]["mapsTerrainMod"];
     Vector2** mapVector = vectorFields[actorType];
 
-    //heat map nullification
+    //heat and vector map nullification
     for (int x = 0; x < mapWidth; x++)
     {
         for (int y = 0; y < mapHeight; y++)
         {
             mapHeat[x][y] = 0.f;
+            mapVector[x][y] = { 0.f, 0.f };
         }
     }
 
@@ -651,61 +652,150 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 
     //VECTOR MAP CALCULATION
 
-    float x_buf;
-    float y_buf;
+    //float x_buf;
+    //float y_buf;
+    float minimumHeat;
+    Vector2 buf;
     NeighborsIndex neighbors;
 
-#pragma omp parallel for private(neighbors, x_buf, y_buf)
+#pragma omp parallel for private(neighbors, minimumHeat)
     for (int x = 0; x < mapWidth; x++)
     {
         for (int y = 0; y < mapHeight; y++)
         {
             neighbors = neighborsIndices[x][y];
-            x_buf = 0.f;
-            y_buf = 0.f;
+            //x_buf = 0.f;
+            //y_buf = 0.f;
+
+
+            ////left
+            //if (neighbors.left.x != -1) //check for map borders
+            //{
+            //    if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction 
+            //        x_buf += mapHeat[x-1][y]; //left
+            //    else
+            //        x_buf += mapHeat[x][y]; //this tile
+            //}
+            //else
+            //    x_buf += mapHeat[x][y];
+            ////right
+            //if (neighbors.right.x != -1) //check for map borders
+            //{
+            //    if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction 
+            //        x_buf -= mapHeat[x + 1][y]; //right
+            //    else
+            //        x_buf -= mapHeat[x][y]; //this tile
+            //}
+            //else
+            //    x_buf -= mapHeat[x][y];
+            ////up
+            //if (neighbors.up.x != -1) //check for map borders
+            //{
+            //    if (mapTerrainMod[x][y-1] != -1.f) //check for obstruction 
+            //        y_buf += mapHeat[x][y-1]; //up
+            //    else
+            //        y_buf += mapHeat[x][y]; //this tile
+            //}
+            //else
+            //    y_buf += mapHeat[x][y];
+            ////down
+            //if (neighbors.down.x != -1) //check for map borders
+            //{
+            //    if (mapTerrainMod[x][y+1] != -1.f) //check for obstruction 
+            //        y_buf -= mapHeat[x][y+1]; //down
+            //    else
+            //        y_buf -= mapHeat[x][y]; //this tile
+            //}
+            //else
+            //    y_buf -= mapHeat[x][y];
+
+            //mapVector[x][y] = { x_buf, y_buf };
+
+            //TODO: remake for using gradient?
+
+            minimumHeat = mapHeat[x][y];
 
             //left
             if (neighbors.left.x != -1) //check for map borders
             {
-                if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction 
-                    x_buf += mapHeat[x-1][y]; //left
-                else
-                    x_buf += mapHeat[x][y]; //this tile
+                if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction
+                    if (mapHeat[x - 1][y] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x - 1][y];
+                        mapVector[x][y] = { -1, 0 };
+                    }
             }
-            else
-                x_buf += mapHeat[x][y];
             //right
             if (neighbors.right.x != -1) //check for map borders
             {
-                if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction 
-                    x_buf -= mapHeat[x + 1][y]; //right
-                else
-                    x_buf -= mapHeat[x][y]; //this tile
+                if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction
+                    if (mapHeat[x + 1][y] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x + 1][y];
+                        mapVector[x][y] = { 1.f, 0.f };
+                    }
             }
-            else
-                x_buf -= mapHeat[x][y];
             //up
             if (neighbors.up.x != -1) //check for map borders
             {
-                if (mapTerrainMod[x][y-1] != -1.f) //check for obstruction 
-                    y_buf += mapHeat[x][y-1]; //up
-                else
-                    y_buf += mapHeat[x][y]; //this tile
+                if (mapTerrainMod[x][y - 1] != -1.f) //check for obstruction
+                    if (mapHeat[x][y - 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x][y - 1];
+                        mapVector[x][y] = { 0.f, -1.f };
+                    }
             }
-            else
-                y_buf += mapHeat[x][y];
             //down
             if (neighbors.down.x != -1) //check for map borders
             {
-                if (mapTerrainMod[x][y+1] != -1.f) //check for obstruction 
-                    y_buf -= mapHeat[x][y+1]; //down
-                else
-                    y_buf -= mapHeat[x][y]; //this tile
+                if (mapTerrainMod[x][y + 1] != -1.f) //check for obstruction
+                    if (mapHeat[x][y + 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x][y + 1];
+                        mapVector[x][y] = { 0.f, 1.f };
+                    }
             }
-            else
-                y_buf -= mapHeat[x][y];
 
-            mapVector[x][y] = { x_buf, y_buf };
+            //upLeft
+            if (neighbors.upLeft.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x-1][y - 1] != -1.f) //check for obstruction
+                    if (mapHeat[x - 1][y - 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x - 1][y - 1];
+                        mapVector[x][y] = { -1.f, -1.f };
+                    }
+            }
+            //upRight
+            if (neighbors.upRight.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x+1][y - 1] != -1.f) //check for obstruction
+                    if (mapHeat[x + 1][y - 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x + 1][y - 1];
+                        mapVector[x][y] = { 1.f, -1.f };
+                    }
+            }
+            //downLeft
+            if (neighbors.downLeft.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x-1][y + 1] != -1.f) //check for obstruction
+                    if (mapHeat[x - 1][y + 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x - 1][y + 1];
+                        mapVector[x][y] = { -1.f, 1.f };
+                    }
+            }
+            //downRight
+            if (neighbors.downRight.x != -1) //check for map borders
+            {
+                if (mapTerrainMod[x+1][y + 1] != -1.f) //check for obstruction
+                    if (mapHeat[x+1][y + 1] < minimumHeat)
+                    {
+                        minimumHeat = mapHeat[x+1][y + 1];
+                        mapVector[x][y] = { 1.f, 1.f };
+                    }
+            }
         }
     }
 }
