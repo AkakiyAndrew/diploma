@@ -18,10 +18,50 @@ Militaty::~Militaty()
 
 void Militaty::Move()
 {
+    //TODO: move method to new Insect class?
     TileIndex tile = game->getTileIndex(position);
     Vector2 velocityVector = game->vectorFields[type][tile.x][tile.y];
-    this->position.x += speed * velocityVector.x;
-    this->position.y += speed * velocityVector.y;
+
+    //unit and terrain speed modifications
+    velocityVector.x *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
+    velocityVector.y *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
+    
+    //creep speed mod
+    if (game->isTileExpanded(tile, side) && type!=ActorType::FLYING_INSECT)
+    {
+        velocityVector.x *= 1.25f;
+        velocityVector.y *= 1.25f;
+    }
+
+    //collision avoidance
+    Vector2 ahead = { position.x + velocityVector.x * (size * 2), position.y + velocityVector.y * (size * 2) };
+    Vector2 steering = { 0.f, 0.f };
+
+    GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
+    if (nearestObstacle != nullptr)
+    {
+        steering.x += ahead.x - nearestObstacle->getPosition().x;
+        steering.y += ahead.y - nearestObstacle->getPosition().y;
+    }
+
+    nearestObstacle = game->getNearestSpecificActor(position, game->getActorsInRadius(position, size), type, this);
+    if (nearestObstacle != nullptr)
+    {
+        steering.x += position.x - nearestObstacle->getPosition().x;
+        steering.y += position.y - nearestObstacle->getPosition().y;
+    }
+    
+    std::clamp <float>(steering.x, -1.f, 1.f);
+    std::clamp <float>(steering.y, -1.f, 1.f);
+
+    velocityVector.x+= steering.x;
+    velocityVector.y+= steering.y;
+
+    std::clamp <float>(velocityVector.x, -speed, speed);
+    std::clamp <float>(velocityVector.y, -speed, speed);
+
+    position.x += velocityVector.x;
+    position.y += velocityVector.y;
 }
 
 LightInsect::LightInsect(GameData* ptr, ActorType type, Vector2 pos, State state)
@@ -37,7 +77,7 @@ void LightInsect::Update()
 
 void LightInsect::Draw()
 {
-    DrawCircle(position.x, position.y, size * game->pixelsPerTile, ORANGE);
+    DrawCircle(position.x, position.y, size, ORANGE);
 }
 
 void LightInsect::Destroy()

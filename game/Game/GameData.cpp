@@ -49,14 +49,14 @@ GameData::GameData()
     //GENERIC ACTORS ATTRIBUTES
     genericAttributes[ActorType::TUMOR] = std::map<std::string, int>{
         {"maxHP", 100},
-        {"size", 1},
+        {"size", 16},
         {"cost", 10},
         {"sightRange", 10}
     };
 
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
-        {"size", 1},
+        {"size", 8},
         {"cost", 5},
         {"sightRange", 8}
     };
@@ -70,7 +70,7 @@ GameData::GameData()
     militaryAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"seekRange", 8},
         {"attackRange", 2},
-        {"speed", 5},
+        {"speed", 1},
         {"damage", 7},
         {"reloadCount", 20},
         {"rotationSpeed", 4},
@@ -461,6 +461,30 @@ int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
     //TODO: make checking for MACHINES side
 }
 
+bool GameData::isTileExpanded(TileIndex tile, Side side)
+{
+    if (side == Side::INSECTS)
+    {
+        if (mapExpansionCreep[tile.x][tile.y] == ExpandState::EXPANDED || mapExpansionCreep[tile.x][tile.y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+            return true;
+    }
+    else
+    {
+        //TODO: do same for MACHINES
+    }
+
+    return false;
+}
+
+void GameData::recalculateExpansion(Side side)
+{
+    for (Building* actor : this->expansionUnitsList)
+    {
+        if (actor->side == side)
+            actor->markExpandArea();
+    }
+}
+
 NeighborsIndex GameData::getNeighbors(int x, int y)
 {
     NeighborsIndex result;
@@ -800,15 +824,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     }
 }
 
-void GameData::recalculateExpansion(Side side)
-{
-    for (Building* actor : this->expansionUnitsList)
-    {
-        if(actor->side==side)
-            actor->markExpandArea();
-    }
-}
-
 GameActor* GameData::getActorInTile(int x, int y)
 {
     GameActor* result = nullptr;
@@ -822,6 +837,52 @@ GameActor* GameData::getActorInTile(int x, int y)
             result = actor;
         }
     }
+    return result;
+}
+
+std::vector<GameActor*> GameData::getActorsInRadius(Vector2 center, float radius)
+{
+    std::vector<GameActor*> result;
+
+    for (GameActor* actor: unitsList)
+    {
+        if (CheckCollisionPointCircle(actor->getPosition(), center, radius))
+        {
+            result.push_back(actor);
+        }
+    }
+
+    return result;
+}
+
+GameActor* GameData::getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller)
+{
+    GameActor* result = nullptr;
+    double minDistance;
+    double buf;
+
+    for (GameActor* actor : actors)
+    {
+        if (actor->type == type && actor!=caller)
+        {
+            if (result == nullptr) //if no actor found yet
+            {
+                result = actor;
+                //eucledian distance
+                minDistance = sqrt(pow(position.x - actor->getPosition().x, 2) + pow(position.y - actor->getPosition().y, 2)); //+ actor->size;
+            }
+            else
+            {
+                buf = sqrt(pow(position.x - actor->getPosition().x, 2) + pow(position.y - actor->getPosition().y, 2));// + actor->size;
+                if (minDistance > buf)
+                {
+                    minDistance = buf;
+                    result = actor;
+                }
+            }
+        }
+    }
+    
     return result;
 }
 

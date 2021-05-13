@@ -82,6 +82,11 @@ public:
     //return num of adjoined expansion tiles 
     int numOfExpansionTileAdjoin(int x, int y, Side side); 
     int numOfExpansionTileAdjoinFading(int x, int y, Side side);
+
+    bool isTileExpanded(TileIndex tile, Side side);
+
+    //recalculate state of expansion tiles
+    void recalculateExpansion(Side side);
     
     //return TileIndex of Vector2
     TileIndex getTileIndex(Vector2);
@@ -91,12 +96,14 @@ public:
 
     //returns pointer to actor in coordinates
     GameActor* getActorInTile(int x, int y);
+    //returns vector of actors pointers in radius of circle
+    std::vector<GameActor*> getActorsInRadius(Vector2 center, float radius);
+    GameActor* getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller = nullptr);
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
 
-    //recalculate state of expansion tiles
-    void recalculateExpansion(Side side); 
+
     
     void setTerrain(Terrain);
     bool isMapLoaded();
