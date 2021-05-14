@@ -25,9 +25,9 @@ void Militaty::Move()
     //unit and terrain speed modifications
     velocityVector.x *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
     velocityVector.y *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
-    
+
     //creep speed mod
-    if (game->isTileExpanded(tile, side) && type!=ActorType::FLYING_INSECT)
+    if (game->isTileExpanded(tile, side) && type != ActorType::FLYING_INSECT)
     {
         velocityVector.x *= 1.25f;
         velocityVector.y *= 1.25f;
@@ -37,22 +37,34 @@ void Militaty::Move()
     Vector2 ahead = { position.x + velocityVector.x * (size * 2), position.y + velocityVector.y * (size * 2) };
     Vector2 steering = { 0.f, 0.f };
 
-    GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
-    if (nearestObstacle != nullptr)
-    {
-        steering.x += ahead.x - nearestObstacle->getPosition().x;
-        steering.y += ahead.y - nearestObstacle->getPosition().y;
-    }
+    //GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
+    //if (nearestObstacle != nullptr)
+    //{
+    //    if (CheckCollisionCircles(ahead, size, nearestObstacle->getPosition(), nearestObstacle->size))
+    //    {
+    //        float R = sqrt(pow(ahead.x - nearestObstacle->getPosition().x, 2) + pow(ahead.y - nearestObstacle->getPosition().y, 2));
+    //        steering.x += (ahead.x - nearestObstacle->getPosition().x)/R;
+    //        steering.y += (ahead.y - nearestObstacle->getPosition().y)/R;
+    //    }
+    //}
 
-    nearestObstacle = game->getNearestSpecificActor(position, game->getActorsInRadius(position, size), type, this);
-    if (nearestObstacle != nullptr)
+    //GameActor* nearestObstacle = game->getNearestSpecificActor(position, game->getActorsInRadius(position, size*2), type, this);
+    for (GameActor* colActor : game->getActorsInRadius(position, size * 2))
     {
-        steering.x += position.x - nearestObstacle->getPosition().x;
-        steering.y += position.y - nearestObstacle->getPosition().y;
+        if (colActor != this)
+        {
+            if (CheckCollisionCircles(position, size, colActor->getPosition(), colActor->size))
+            {
+                float R = sqrt(pow(position.x - colActor->getPosition().x, 2) + pow(position.y - colActor->getPosition().y, 2));  //distance between circles
+                steering.x += (position.x - colActor->getPosition().x) / R;
+                steering.y += (position.y - colActor->getPosition().y) / R;
+                //steering.x += position.x - size - nearestObstacle->getPosition().x;
+                //steering.y += position.y - size - nearestObstacle->getPosition().y;
+            }
+        }
     }
-    
-    std::clamp <float>(steering.x, -1.f, 1.f);
-    std::clamp <float>(steering.y, -1.f, 1.f);
+    //std::clamp <float>(steering.x, -1.f, 1.f);
+    //std::clamp <float>(steering.y, -1.f, 1.f);
 
     velocityVector.x+= steering.x;
     velocityVector.y+= steering.y;

@@ -56,7 +56,7 @@ GameData::GameData()
 
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
-        {"size", 8},
+        {"size", 5},
         {"cost", 5},
         {"sightRange", 8}
     };
@@ -1144,6 +1144,7 @@ void GameData::GameUpdate()
         }
     }
 
+    //if(timeCount %30==0) //slowing down
     for (GameActor* actor : this->unitsList)
     {
         actor->Update();
