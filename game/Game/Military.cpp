@@ -48,16 +48,19 @@ void Militaty::Move()
         {
             //if tile near is collides with actor
             float R = sqrt(pow(position.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(position.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
-            steering.x += (position.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
-            steering.y += (position.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+            if (R != 0.f)
+            {
+                position.x += (position.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
+                position.y += (position.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+            }
         }
     }
 
     TileIndex tileAhead = game->getTileIndex(ahead);
     if (terrainMod[tileAhead.x][tileAhead.y]==-1.f)
     {
-        steering.x += ahead.x - (tileAhead.x * game->pixelsPerTile + game->pixelsPerTile / 2);
-        steering.y += ahead.y - (tileAhead.y * game->pixelsPerTile + game->pixelsPerTile / 2);
+        position.x += ahead.x - (tileAhead.x * game->pixelsPerTile + game->pixelsPerTile / 2);
+        position.y += ahead.y - (tileAhead.y * game->pixelsPerTile + game->pixelsPerTile / 2);
     }
 
     //UNIT STEERING AHEAD
@@ -76,14 +79,14 @@ void Militaty::Move()
             if (CheckCollisionCircles(position, size, colActor->getPosition(), colActor->size))
             {
                 float R = sqrt(pow(position.x - colActor->getPosition().x, 2) + pow(position.y - colActor->getPosition().y, 2));  //distance between circles
-                steering.x += (position.x - colActor->getPosition().x) / R;
-                steering.y += (position.y - colActor->getPosition().y) / R;
-                //steering.x += position.x - size - nearestObstacle->getPosition().x;
-                //steering.y += position.y - size - nearestObstacle->getPosition().y;
+                if (R != 0.f)
+                {
+                    steering.x += (position.x - colActor->getPosition().x) / R;
+                    steering.y += (position.y - colActor->getPosition().y) / R;
+                }
             }
         }
     }
-
 
     std::clamp <float>(steering.x, -1.f, 1.f);
     std::clamp <float>(steering.y, -1.f, 1.f);
@@ -102,6 +105,15 @@ void Militaty::Move()
 
     position.x += velocityVector.x;
     position.y += velocityVector.y;
+
+    if (position.x < 0 + size)
+        position.x = 0 + size;
+    if (position.y < 0 + size)
+        position.y = 0 + size;
+    if (position.x > game->getMaxWidth()*game->pixelsPerTile - size)
+        position.x = game->getMaxWidth() * game->pixelsPerTile - size;
+    if (position.y > game->getMaxHeight() * game->pixelsPerTile - size)
+        position.y = game->getMaxHeight() * game->pixelsPerTile - size;
 }
 
 LightInsect::LightInsect(GameData* ptr, ActorType type, Vector2 pos, State state)

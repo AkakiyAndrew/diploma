@@ -54,6 +54,9 @@ public:
     unsigned int radius = 1;
     const float pixelsPerTile = 16.f;
 
+    int getMaxWidth() { return mapWidth; }
+    int getMaxHeight() { return mapHeight; }
+
     //attributes for GameActor constructor
     std::map<ActorType, std::map<std::string, int>> genericAttributes;
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;

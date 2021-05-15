@@ -70,7 +70,7 @@ GameData::GameData()
     militaryAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"seekRange", 8},
         {"attackRange", 2},
-        {"speed", 1},
+        {"speed", 2},
         {"damage", 7},
         {"reloadCount", 20},
         {"rotationSpeed", 4},
