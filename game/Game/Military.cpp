@@ -18,37 +18,57 @@ Militaty::~Militaty()
 
 void Militaty::Move()
 {
+    float** terrainMod = game->mapsPathfinding[type]["mapsTerrainMod"];
     //TODO: move method to new Insect class?
     TileIndex tile = game->getTileIndex(position);
     Vector2 velocityVector = game->vectorFields[type][tile.x][tile.y];
-
-    //unit and terrain speed modifications
-    velocityVector.x *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
-    velocityVector.y *= speed * game->mapsPathfinding[type]["mapsTerrainMod"][tile.x][tile.y];
+    float speedMod = terrainMod[tile.x][tile.y];
 
     //creep speed mod
     if (game->isTileExpanded(tile, side) && type != ActorType::FLYING_INSECT)
     {
-        velocityVector.x *= 1.25f;
-        velocityVector.y *= 1.25f;
+        speedMod *= 1.25f;
     }
 
+    velocityVector.x *= speed;
+    velocityVector.y *= speed;
+
     //collision avoidance
-    Vector2 ahead = { position.x + velocityVector.x * (size * 2), position.y + velocityVector.y * (size * 2) };
+    Vector2 ahead = { position.x + velocityVector.x * 2, position.y + velocityVector.y  * 2 };
     Vector2 steering = { 0.f, 0.f };
 
-    //GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
-    //if (nearestObstacle != nullptr)
-    //{
-    //    if (CheckCollisionCircles(ahead, size, nearestObstacle->getPosition(), nearestObstacle->size))
-    //    {
-    //        float R = sqrt(pow(ahead.x - nearestObstacle->getPosition().x, 2) + pow(ahead.y - nearestObstacle->getPosition().y, 2));
-    //        steering.x += (ahead.x - nearestObstacle->getPosition().x)/R;
-    //        steering.y += (ahead.y - nearestObstacle->getPosition().y)/R;
-    //    }
-    //}
+    //WALLS COLLISION CHECK
+    std::vector<TileIndex> nearTiles = game->getNeighborsAsVector(tile.x, tile.y);
+    Rectangle tileBuf;
+    
+    for (TileIndex checkingTile : nearTiles)
+    {
+        tileBuf = Rectangle{ checkingTile.x * game->pixelsPerTile, checkingTile.y * game->pixelsPerTile, game->pixelsPerTile, game->pixelsPerTile };
+        if (terrainMod[checkingTile.x][checkingTile.y] == -1.f && CheckCollisionCircleRec(position, size, tileBuf))
+        {
+            //if tile near is collides with actor
+            float R = sqrt(pow(position.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(position.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
+            steering.x += (position.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
+            steering.y += (position.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+        }
+    }
 
-    //GameActor* nearestObstacle = game->getNearestSpecificActor(position, game->getActorsInRadius(position, size*2), type, this);
+    TileIndex tileAhead = game->getTileIndex(ahead);
+    if (terrainMod[tileAhead.x][tileAhead.y]==-1.f)
+    {
+        steering.x += ahead.x - (tileAhead.x * game->pixelsPerTile + game->pixelsPerTile / 2);
+        steering.y += ahead.y - (tileAhead.y * game->pixelsPerTile + game->pixelsPerTile / 2);
+    }
+
+    //UNIT STEERING AHEAD
+    GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
+    if (nearestObstacle != nullptr)
+    {
+        steering.x += ahead.x - nearestObstacle->getPosition().x;
+        steering.y += ahead.y - nearestObstacle->getPosition().y;
+    }
+
+    //NEARBY UNITS COLLISION CHECK
     for (GameActor* colActor : game->getActorsInRadius(position, size * 2))
     {
         if (colActor != this)
@@ -63,14 +83,22 @@ void Militaty::Move()
             }
         }
     }
-    //std::clamp <float>(steering.x, -1.f, 1.f);
-    //std::clamp <float>(steering.y, -1.f, 1.f);
+
+
+    std::clamp <float>(steering.x, -1.f, 1.f);
+    std::clamp <float>(steering.y, -1.f, 1.f);
 
     velocityVector.x+= steering.x;
     velocityVector.y+= steering.y;
 
     std::clamp <float>(velocityVector.x, -speed, speed);
     std::clamp <float>(velocityVector.y, -speed, speed);
+
+    if (speedMod > 0)
+    {
+        velocityVector.x *= speedMod;
+        velocityVector.y *= speedMod;
+    }
 
     position.x += velocityVector.x;
     position.y += velocityVector.y;

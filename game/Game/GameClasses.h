@@ -93,6 +93,8 @@ public:
 
     //returns vector of neightbors indices
     NeighborsIndex getNeighbors(int x, int y);
+    //returns vector of neighbors tiles
+    std::vector<TileIndex> getNeighborsAsVector(int x, int y);
 
     //returns pointer to actor in coordinates
     GameActor* getActorInTile(int x, int y);

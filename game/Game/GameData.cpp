@@ -56,7 +56,7 @@ GameData::GameData()
 
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
-        {"size", 5},
+        {"size", 8},
         {"cost", 5},
         {"sightRange", 8}
     };
@@ -508,6 +508,44 @@ NeighborsIndex GameData::getNeighbors(int x, int y)
     if (y + 1 < this->mapHeight && x + 1 < this->mapWidth) //down-right
         result.downRight = { x + 1, y + 1 };
 
+
+    return result;
+}
+
+std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
+{
+    std::vector<TileIndex> result;
+    result.resize(9);
+    NeighborsIndex neighbors = neighborsIndices[x][y];
+
+    //this tile
+    result[0] = TileIndex{x,y};
+
+    //left
+    if (neighbors.left.x != -1)
+        result[1] = neighbors.left;
+    //up
+    if (neighbors.up.x != -1)
+        result[2] = neighbors.up;
+    //right
+    if (neighbors.right.x != -1)
+        result[3] = neighbors.right;
+    //down
+    if (neighbors.down.x != -1)
+        result[4] = neighbors.down;
+    
+    //upLeft
+    if (neighbors.upLeft.x != -1)
+        result[5] = neighbors.upLeft;
+    //upRight
+    if (neighbors.upRight.x != -1)
+        result[6] = neighbors.upRight;
+    //downLeft
+    if (neighbors.downLeft.x != -1)
+        result[7] = neighbors.downLeft;
+    //downRight
+    if (neighbors.downRight.x != -1)
+        result[8] = neighbors.downRight;
 
     return result;
 }
