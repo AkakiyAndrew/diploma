@@ -2,6 +2,14 @@
 
 #define TILE_DRAWING
 
+float max(float a, float b)
+{
+    if (a > b)
+        return a;
+    else
+        return b;
+}
+
 GameData::GameData()
 {
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
@@ -51,19 +59,19 @@ GameData::GameData()
         {"maxHP", 100},
         {"size", 16},
         {"cost", 10},
-        {"sightRange", 10}
+        {"sightRange", 2}
     };
 
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
         {"size", 8},
         {"cost", 5},
-        {"sightRange", 8}
+        {"sightRange", 3}
     };
 
     //BUILDING ACTORS ATTRIBUTES
     buildingsAttributes[ActorType::TUMOR] = std::map<std::string, int>{
-        {"expansionRange", 16},
+        {"expansionRange", 8},
     };
 
     //MILITARY ACTORS ATTRIBUTES
@@ -96,6 +104,7 @@ void GameData::clearMap()
         removeActor(ID);
     }
 
+    lastID = 0;
 }
 
 TerrainType GameData::getTerrainType(int x, int y)
@@ -140,6 +149,15 @@ void GameData::setTerrain(Terrain terr)
         for (int x = 0; x < mapWidth; x++)
             delete[] neighborsIndices[x];
         delete[] neighborsIndices;
+
+        //fog of war
+        Side sides[] = {Side::INSECTS, Side::MACHINES};
+        for (Side side : sides)
+        {
+            for (int x = 0; x < mapWidth; x++)
+                delete[] mapsFogOfWar[side][x];
+            delete[] mapsFogOfWar[side];
+        }
     }
 
     this->mapHeight = terr.height;
@@ -242,6 +260,9 @@ void GameData::setTerrain(Terrain terr)
                     default:
                         mapTerrainMod[x][y] = -1.f;
                         break;
+                    //default:
+                    //    mapTerrainMod[x][y] = 1.f;
+                    //    break;
                     }
                 }
 
@@ -296,6 +317,22 @@ void GameData::setTerrain(Terrain terr)
                     }
                 }
             }
+        }
+    }
+
+    //fog of war
+    Side sides[] = { Side::INSECTS, Side::MACHINES };
+    for (Side side : sides)
+    {
+        mapsFogOfWar[side] = new int*[mapWidth];
+        for (int x = 0; x < mapWidth; x++)
+            mapsFogOfWar[side][x] = new int[mapHeight];
+
+        int** ptr = mapsFogOfWar[side];
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+                ptr[x][y] = -1;
         }
     }
 
@@ -438,7 +475,6 @@ int GameData::numOfExpansionTileAdjoin(int x, int y, Side side)
     return result;
     //TODO: make checking for MACHINES side
 }
-
 int GameData::numOfExpansionTileAdjoinFading(int x, int y, Side side)
 {
     int result = 0;
@@ -474,6 +510,26 @@ bool GameData::isTileExpanded(TileIndex tile, Side side)
     }
 
     return false;
+}
+bool GameData::isTileInBounds(TileIndex tile)
+{
+    if (
+        tile.x < 0 ||
+        tile.x>this->mapWidth - 1 ||
+        tile.y < 0 ||
+        tile.y>this->mapHeight - 1
+        )
+        return false;
+    else
+        return true;
+}
+
+TileIndex GameData::getTileIndex(Vector2 position)
+{
+    return TileIndex{
+        static_cast<int>(position.x / pixelsPerTile),
+        static_cast<int>(position.y / pixelsPerTile)
+    };
 }
 
 void GameData::recalculateExpansion(Side side)
@@ -511,7 +567,6 @@ NeighborsIndex GameData::getNeighbors(int x, int y)
 
     return result;
 }
-
 std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
 {
     std::vector<TileIndex> result;
@@ -550,26 +605,25 @@ std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
     return result;
 }
 
-TileIndex GameData::getTileIndex(Vector2 position)
-{
-    return TileIndex{
-        static_cast<int>(position.x / pixelsPerTile),
-        static_cast<int>(position.y / pixelsPerTile)
-    };
-}
-
 void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
     float** mapHeat = mapsPathfinding[actorType]["mapsHeat"];
     float** mapTerrainMod = mapsPathfinding[actorType]["mapsTerrainMod"];
     Vector2** mapVector = vectorFields[actorType];
 
+    int** mapFogOfWar = mapsFogOfWar[Side::INSECTS];
+
     //heat and vector map nullification
     for (int x = 0; x < mapWidth; x++)
     {
         for (int y = 0; y < mapHeight; y++)
         {
-            mapHeat[x][y] = 0.f;
+            //если проверяемый тайл скрыт туманом войны, то не менять его значение (но добавлять его окружение для проверки)
+            /*if(mapFogOfWar[x][y]==-1)
+                mapHeat[x][y] = 1.f;
+            else*/
+                mapHeat[x][y] = 0.f;
+
             mapVector[x][y] = { 0.f, 0.f };
         }
     }
@@ -595,8 +649,11 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
         }
 
+        //TODO: надо не давать алгоритму "жульничать", зная наперед где территория проходима, а где нет
+        //+пофиксить установку новой целевой точки
+
         //left
-        if (checking.left.x != -1 && checking.left.y != -1) //if index valid
+        if (checking.left.x != -1 ) //if index valid
         {
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.left.x][checking.left.y] != -1 && mapHeat[checking.left.x][checking.left.y] == 0.f)
@@ -604,13 +661,16 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.left.x][checking.left.y] == -1)
+                    mapHeat[checking.left.x][checking.left.y] = 1.f;
+                else
                 mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] = (checking.left);
             }
         }
         //up
-        if (checking.up.x != -1 && checking.up.y != -1) //if index valid
+        if (checking.up.x != -1 ) //if index valid
         {
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.up.x][checking.up.y] != -1 && mapHeat[checking.up.x][checking.up.y] == 0.f)
@@ -618,13 +678,16 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.up.x][checking.up.y] == -1)
+                    mapHeat[checking.up.x][checking.up.y] = 1.f;
+                else
                 mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.up;
             }
         }
         //right
-        if (checking.right.x != -1 && checking.right.y != -1) //if index valid
+        if (checking.right.x != -1 ) //if index valid
         {
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.right.x][checking.right.y] != -1 && mapHeat[checking.right.x][checking.right.y] == 0.f)
@@ -632,13 +695,16 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.right.x][checking.right.y] == -1)
+                    mapHeat[checking.right.x][checking.right.y] = 1.f;
+                else
                 mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.right;
             }
         }
         //down
-        if (checking.down.x != -1 && checking.down.y != -1) //if index valid
+        if (checking.down.x != -1) //if index valid
         {
             //if its not obstacle and value not set:
             if (mapTerrainMod[checking.down.x][checking.down.y] != -1 && mapHeat[checking.down.x][checking.down.y] == 0.f)
@@ -646,6 +712,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.down.x][checking.down.y] == -1)
+                    mapHeat[checking.down.x][checking.down.y] = 1.f;
+                else
                 mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.down;
@@ -661,6 +730,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.upLeft.x][checking.upLeft.y] == -1)
+                    mapHeat[checking.upLeft.x][checking.upLeft.y] = 1.f;
+                else
                 mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.upLeft;
@@ -675,6 +747,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.upRight.x][checking.upRight.y] == -1)
+                    mapHeat[checking.upRight.x][checking.upRight.y] = 1.f;
+                else
                 mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.upRight;
@@ -689,6 +764,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.downLeft.x][checking.downLeft.y] == -1)
+                    mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
+                else
                 mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.downLeft;
@@ -703,6 +781,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 i_last_added++;
                 //TODO: ADD CONSIDERING MAP DAMAGE
                 //set value, according to terrain speed modification and damage map
+                if (mapFogOfWar[checking.downRight.x][checking.downRight.y] == -1)
+                    mapHeat[checking.downRight.x][checking.downRight.y] = 1.f;
+                else
                 mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
                 //add this tile for further checking
                 toCheck[i_last_added] =checking.downRight;
@@ -714,69 +795,54 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 
     //VECTOR MAP CALCULATION
 
-    //float x_buf;
-    //float y_buf;
+    float x_buf;
+    float y_buf;
     float minimumHeat;
     Vector2 buf;
     NeighborsIndex neighbors;
+    TileIndex leftUp, rightDown, indexMinimum;
 
-#pragma omp parallel for private(neighbors, minimumHeat)
+//#pragma omp parallel for private(leftUp, rightDown, indexMinimum, minimumHeat, buf)
     for (int x = 0; x < mapWidth; x++)
     {
         for (int y = 0; y < mapHeight; y++)
         {
-            neighbors = neighborsIndices[x][y];
-            //x_buf = 0.f;
-            //y_buf = 0.f;
-
-
-            ////left
-            //if (neighbors.left.x != -1) //check for map borders
-            //{
-            //    if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction 
-            //        x_buf += mapHeat[x-1][y]; //left
-            //    else
-            //        x_buf += mapHeat[x][y]; //this tile
-            //}
-            //else
-            //    x_buf += mapHeat[x][y];
-            ////right
-            //if (neighbors.right.x != -1) //check for map borders
-            //{
-            //    if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction 
-            //        x_buf -= mapHeat[x + 1][y]; //right
-            //    else
-            //        x_buf -= mapHeat[x][y]; //this tile
-            //}
-            //else
-            //    x_buf -= mapHeat[x][y];
-            ////up
-            //if (neighbors.up.x != -1) //check for map borders
-            //{
-            //    if (mapTerrainMod[x][y-1] != -1.f) //check for obstruction 
-            //        y_buf += mapHeat[x][y-1]; //up
-            //    else
-            //        y_buf += mapHeat[x][y]; //this tile
-            //}
-            //else
-            //    y_buf += mapHeat[x][y];
-            ////down
-            //if (neighbors.down.x != -1) //check for map borders
-            //{
-            //    if (mapTerrainMod[x][y+1] != -1.f) //check for obstruction 
-            //        y_buf -= mapHeat[x][y+1]; //down
-            //    else
-            //        y_buf -= mapHeat[x][y]; //this tile
-            //}
-            //else
-            //    y_buf -= mapHeat[x][y];
-
-            //mapVector[x][y] = { x_buf, y_buf };
-
-            //TODO: remake for using gradient?
+            /*leftUp = {x-2, y-2};
+            rightDown = { x + 2, y + 2 };
+            if (leftUp.x < 0)
+                leftUp.x = 0;
+            if (leftUp.y < 0)
+                leftUp.y = 0;
+            if (rightDown.x > mapWidth-1)
+                rightDown.x = mapWidth-1;
+            if (rightDown.y > mapHeight-1)
+                rightDown.y = mapHeight-1;
 
             minimumHeat = mapHeat[x][y];
+            indexMinimum = { x,y };
 
+            for (int x_checking = leftUp.x; x_checking <= rightDown.x; x_checking++)
+            {
+                for (int y_checking = leftUp.y; y_checking <= rightDown.y; y_checking++)
+                {
+                    if (mapTerrainMod[x_checking][y_checking] != -1.f && x_checking != x && y_checking != y)
+                    {
+                        if (mapHeat[x_checking][y_checking] <= minimumHeat)
+                        {
+                            minimumHeat = mapHeat[x_checking][y_checking];
+                            indexMinimum = { x_checking, y_checking };
+                        }
+                    }
+                }
+            }
+            
+            buf = { static_cast<float>(indexMinimum.x - x), static_cast<float>(indexMinimum.y - y) };
+            if(buf.x!=0 || buf.y!= 0)
+                mapVector[x][y] = { buf.x / fabsf(max(buf.x, buf.y)), buf.y / fabsf(max(buf.x, buf.y)) };*/
+
+            neighbors = neighborsIndices[x][y];
+            //TODO: remake for using gradient?
+            minimumHeat = mapHeat[x][y];
             //left
             if (neighbors.left.x != -1) //check for map borders
             {
@@ -877,7 +943,6 @@ GameActor* GameData::getActorInTile(int x, int y)
     }
     return result;
 }
-
 std::vector<GameActor*> GameData::getActorsInRadius(Vector2 center, float radius)
 {
     std::vector<GameActor*> result;
@@ -892,7 +957,6 @@ std::vector<GameActor*> GameData::getActorsInRadius(Vector2 center, float radius
 
     return result;
 }
-
 GameActor* GameData::getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller)
 {
     GameActor* result = nullptr;
@@ -923,7 +987,6 @@ GameActor* GameData::getNearestSpecificActor(Vector2 position, std::vector<GameA
     
     return result;
 }
-
 void GameData::removeActor(unsigned int ID)
 {
     std::vector<GameActor*>::iterator iter;
@@ -950,6 +1013,87 @@ void GameData::removeActor(unsigned int ID)
 
     if(buf!=nullptr)
         delete buf;
+}
+
+void GameData::revealTerritory(TileIndex position, int radius, Side side)
+{
+    //revealed tiles numered by distance between unit and tile
+
+    int** matrix = mapsFogOfWar[side];
+    int buf;
+
+    //check tile, is it need to reveal for again
+    if (static_cast<int>(matrix[position.x][position.y]) < radius) //WTF?!
+    {
+        matrix[position.x][position.y] = radius;
+        //TODO: reverse radius to descending, remake radius using 
+        for (int r = 1; r <= radius; r++)
+        {
+            buf = radius - r;
+            for (int x = position.x + 1; x < position.x + r; x++)
+            {
+                for (int y = position.y; y > position.y - r; y--) //REVERSE int y = position.y - r; y < position.y + r; y++
+                {
+                    if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, position, r))
+                    {
+                        //adding this and opposite tiles
+                        if (isTileInBounds({ x, y }))
+                            if(matrix[x][y]<buf)
+                                matrix[x][y] = buf; // up-right
+                        if (isTileInBounds({ position.x + (position.x - x), y }))
+                            if (matrix[position.x + (position.x - x)][y] < buf)
+                                matrix[position.x + (position.x - x)][y] = buf; //up-left
+                        if (isTileInBounds({ x, position.y + (position.y - y) }))
+                            if (matrix[x][position.y + (position.y - y)] < buf)
+                                matrix[x][position.y + (position.y - y)] = buf; //down-right
+                        if (isTileInBounds({ position.x + (position.x - x), position.y + (position.y - y) }))
+                            if (matrix[position.x + (position.x - x)][position.y + (position.y - y)] < buf)
+                                matrix[position.x + (position.x - x)][position.y + (position.y - y)] = buf; //down-left
+                    }
+                }
+            }
+
+            //result.push_back(TileIndex{ x,y }); // up-right
+            //result.push_back(TileIndex{ position.x + (position.x - x), y }); //up-left
+            //result.push_back(TileIndex{ x, position.y + (position.y - y) }); //down-right
+            //result.push_back(TileIndex{ position.x + (position.x - x), position.y + (position.y - y) }); //down-left
+
+            //result.push_back(TileIndex{ position.x, position.y - r }); //up
+            //result.push_back(TileIndex{ position.x, position.y + r }); //down
+            //result.push_back(TileIndex{ position.x + r, position.y }); //right
+            //result.push_back(TileIndex{ position.x - r, position.y });//left
+
+            if (isTileInBounds({ position.x, position.y - r }))
+                if (matrix[position.x][position.y - r] < buf)
+                    matrix[position.x][position.y - r] = buf; //up
+            if (isTileInBounds({ position.x, position.y + r }))
+                if (matrix[position.x][position.y + r] < buf)
+                    matrix[position.x][position.y + r] = buf; //down
+            if (isTileInBounds({ position.x + r, position.y }))
+                if (matrix[position.x + r][position.y] < buf)
+                    matrix[position.x + r][position.y] = buf; //right
+            if (isTileInBounds({ position.x - r, position.y }))
+                if (matrix[position.x - r][position.y] < buf)
+                    matrix[position.x - r][position.y] = buf;//left
+        }
+
+        //TODO: make only 1 calculation for insect units(??)
+        if (side == Side::INSECTS)
+        {
+            calculateVectorPathfinding(
+                insectsDesirePosition,
+                ActorType::LIGHT_INSECT
+            );
+            calculateVectorPathfinding(
+                insectsDesirePosition,
+                ActorType::HEAVY_INSECT
+            );
+            calculateVectorPathfinding(
+                insectsDesirePosition,
+                ActorType::FLYING_INSECT
+            );
+        }
+    }
 }
 
 //std::vector<TileIndex> GameData::tilesInPerimeterCircle(TileIndex center, unsigned int radius)
@@ -1106,18 +1250,19 @@ void GameData::GameUpdate()
 
     if (IsKeyPressed(KEY_T))
     {
-        calculateVectorPathfinding(
-            mouseIndex,
+        insectsDesirePosition = mouseIndex;
+        /*calculateVectorPathfinding(
+            insectsDesirePosition,
             ActorType::LIGHT_INSECT
         );
         calculateVectorPathfinding(
-            mouseIndex,
+            insectsDesirePosition,
             ActorType::HEAVY_INSECT
         );
         calculateVectorPathfinding(
-            mouseIndex,
+            insectsDesirePosition,
             ActorType::FLYING_INSECT
-        );
+        );*/
     }
 
     if (IsKeyPressed(KEY_F2))
@@ -1242,49 +1387,59 @@ void GameData::GameDraw()
             0.f, pixelsPerTile, WHITE);
     }
     else
-    {                    //full-detailed map
+    {   //full-detailed map
+        
+        //black background for fog of war
+        DrawRectangle(0, 0, mapSize.x, mapSize.y, BLACK);
+
         Vector2** vectorField = vectorFields[ActorType::LIGHT_INSECT];
         float** terrainMod = mapsPathfinding[ActorType::LIGHT_INSECT]["mapsTerrainMod"];
+        int** fogOfWar = mapsFogOfWar[Side::INSECTS];
 
         int index;
         for (int x = renderBorders[1]; x < renderBorders[3]; x++) //columns
         {
             for (int y = renderBorders[0]; y < renderBorders[2]; y++) //rows
             {
-                index = mapWidth * y + x;
-
-                //ACCESS VIOLATION
-                if (mapExpansionCreep[x][y] == ExpandState::EXPANDED || mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                if (fogOfWar[x][y] != -1)
                 {
-                    float x_exp = static_cast<float>(x % (creepTexture.width / static_cast<int>(pixelsPerTile)));
-                    float y_exp = static_cast<float>(y % (creepTexture.height / static_cast<int>(pixelsPerTile)));
-                    Rectangle buf = { 
-                        x_exp* pixelsPerTile,
-                        y_exp* pixelsPerTile,
-                        pixelsPerTile,
-                        pixelsPerTile };
-                    
-                    DrawTextureRec(
-                        creepTexture,
-                        buf,
-                        Vector2{ x * pixelsPerTile, y * pixelsPerTile, },
-                        WHITE);
-                }
-                else
-                {
-                    DrawTexture(
-                        tilesetTex[static_cast<int>(mapTerrain[index])],
-                        x * pixelsPerTile,
-                        y * pixelsPerTile,
-                        WHITE);
+                    index = mapWidth * y + x;
+
+                    if (mapExpansionCreep[x][y] == ExpandState::EXPANDED || mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                    {
+                        float x_exp = static_cast<float>(x % (creepTexture.width / static_cast<int>(pixelsPerTile)));
+                        float y_exp = static_cast<float>(y % (creepTexture.height / static_cast<int>(pixelsPerTile)));
+                        Rectangle buf = {
+                            x_exp * pixelsPerTile,
+                            y_exp * pixelsPerTile,
+                            pixelsPerTile,
+                            pixelsPerTile };
+
+                        DrawTextureRec(
+                            creepTexture,
+                            buf,
+                            Vector2{ x * pixelsPerTile, y * pixelsPerTile, },
+                            WHITE);
+                    }
+                    else
+                    {
+                        DrawTexture(
+                            tilesetTex[static_cast<int>(mapTerrain[index])],
+                            x * pixelsPerTile,
+                            y * pixelsPerTile,
+                            WHITE);
+                    }
                 }
 
+                //TODO: remove
                 if (showingCreepStates)
                     DrawText(FormatText("%d", mapExpansionCreep[x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 14, RED);
             
+                //heatmap, light insects
                 if(IsKeyDown(KEY_F4))
                     DrawText(FormatText("%.0f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
 
+                //vector field, light insects
                 if (IsKeyDown(KEY_F5) && terrainMod[x][y]!=-1.f)
                 {                   
                     DrawLineEx(
@@ -1297,6 +1452,10 @@ void GameData::GameDraw()
                         GREEN);
                     DrawCircle(x * pixelsPerTile + pixelsPerTile / 2, y * pixelsPerTile + pixelsPerTile / 2, 1, RED);
                 }
+
+                //fog of war, INSECTS side
+                if(IsKeyDown(KEY_F6))
+                    DrawText(FormatText("%d", static_cast<int>(fogOfWar[x][y])), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
             }
         }
     }
@@ -1352,6 +1511,7 @@ void GameData::GameDraw()
     EndMode2D();
     DrawText(FormatText("%f", camera.zoom), 20, 20, 20, RED);
     DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 80, 20, RED);
+    DrawText(FormatText("Mouse tile index: %d, %d", mouseIndex.x, mouseIndex.y), 20, 140, 20, RED);
 
     DrawFPS(20, 50);
 }
@@ -1390,6 +1550,15 @@ GameData::~GameData()
         for (int x = 0; x < mapWidth; x++)
             delete[] neighborsIndices[x];
         delete[] neighborsIndices;
+
+        //fog of war
+        Side sides[] = { Side::INSECTS, Side::MACHINES };
+        for (Side side : sides)
+        {
+            for (int x = 0; x < mapWidth; x++)
+                delete[] mapsFogOfWar[side][x];
+            delete[] mapsFogOfWar[side];
+        }
     }
 
     UnloadTexture(creepTexture);

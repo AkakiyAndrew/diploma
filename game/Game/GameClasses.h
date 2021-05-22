@@ -47,6 +47,10 @@ private:
     //void loadActorsAttributes();
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
+    //fog of war maps
+    std::map<Side, int**> mapsFogOfWar;
+    TileIndex insectsDesirePosition = {0,0};
+
 public:
     unsigned short timeCount; //for Update()
     unsigned int lastID = 0;
@@ -75,6 +79,9 @@ public:
     //mapVector - target mapVector to calculate, mapTerrainMod - speed modification by terrain type, mapDamage - modification by receiving/dealing damage 
     void calculateVectorPathfinding(TileIndex target, ActorType actorType);
 
+    //reveals fog of war in circle with radius (in tiles) around TileIndex position
+    void revealTerritory(TileIndex position, int radius, Side side);
+
     unsigned char** mapExpansionCreep = nullptr;
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
     bool closed = false;
@@ -87,6 +94,7 @@ public:
     int numOfExpansionTileAdjoinFading(int x, int y, Side side);
 
     bool isTileExpanded(TileIndex tile, Side side);
+    bool isTileInBounds(TileIndex tile);
 
     //recalculate state of expansion tiles
     void recalculateExpansion(Side side);
@@ -109,10 +117,11 @@ public:
     void removeActor(unsigned int ID);
 
 
-    
     void setTerrain(Terrain);
     bool isMapLoaded();
     void clearMap();
+
+    TileIndex getInsectsDesirePosition() { return insectsDesirePosition; };
 
     //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
     void GameDraw(); 
@@ -130,6 +139,7 @@ protected:
     unsigned short animationFrame; //current animation 
 
     Vector2 position;
+    TileIndex positionIndex;
     State state;
     
     int HP;
@@ -150,8 +160,8 @@ public:
     int cost;
 
     //int buildCount; //just tune buildRate in cores and base
-    int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
-    
+    unsigned int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
+
     virtual void Draw() = 0;
     virtual void Update() = 0; 
     virtual void Destroy() = 0; //создать обломки/ошметки на карте, возможно даже не виртуальный, внутри использовать деструктор и/или удалять из вектора-хранилища данных игры
@@ -175,7 +185,7 @@ public:
             this->HP = this->maxHP;
         else
             this->HP += amount;
-    } 
+    }
 
     //when spawning new unit, use GameData unit settings and ActorType for seting mapHP, size, etc. State defines currentHP and, maybe, something else
     GameActor(GameData *ptr, ActorType type, Vector2 pos, State state)
@@ -185,6 +195,7 @@ public:
         maxHP = ptr->genericAttributes[type]["maxHP"];
         cost = ptr->genericAttributes[type]["cost"];
         sightRange = ptr->genericAttributes[type]["sightRange"];
+        positionIndex = ptr->getTileIndex(pos);
 
         switch (type)
         {
@@ -209,13 +220,14 @@ public:
         }
         this->ID = this->game->lastID;
         this->game->lastID++;
+
+        ptr->revealTerritory(positionIndex, sightRange, side);
     }
 };
 
 class Building: public GameActor {
 
 private:
-    TileIndex positionIndex;
     int expansionRange;
     bool expanded; //true, if all tiles around this building is filled by expansion
     std::vector<TileIndex> expansionIndices;
@@ -277,6 +289,7 @@ protected:
     int reloadCount;
     int rotationSpeed;
     int angle;
+    Vector2 velocityVector;
 
     //int type
     GameActor* target;

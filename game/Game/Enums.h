@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <omp.h>
+#include <math.h>
 
 enum class Side
 {

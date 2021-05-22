@@ -3,17 +3,17 @@
 Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     :GameActor(ptr, type, pos, state)
 {
-    //use GameData to set expansionRange, considering ActorType
-    expansionRange = ptr->buildingsAttributes[type]["expansionRange"]; // TODO: placeholder, remove later
+    expansionRange = ptr->buildingsAttributes[type]["expansionRange"];
 
-    positionIndex = TileIndex{static_cast<int>(pos.x / ptr->pixelsPerTile), static_cast<int>(pos.y / ptr->pixelsPerTile) };
+    //positionIndex = TileIndex{static_cast<int>(pos.x / ptr->pixelsPerTile), static_cast<int>(pos.y / ptr->pixelsPerTile) };
 
     expansionIndices = this->game->tilesInsideCircleOrdered(this->positionIndex, expansionRange);
 
     markExpandArea();
 
     //create creep or zerolayer on position when spawned
-    if(type == ActorType::TUMOR || type == ActorType::HIVE)
+    //if(type == ActorType::TUMOR || type == ActorType::HIVE)
+    if(side==Side::INSECTS)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
 }
 
