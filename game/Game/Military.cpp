@@ -76,15 +76,18 @@ void Militaty::Move()
 
     for (TileIndex checkingTile : nearTiles)
     {
-        tileBuf = Rectangle{ checkingTile.x * game->pixelsPerTile, checkingTile.y * game->pixelsPerTile, game->pixelsPerTile, game->pixelsPerTile };
-        if (terrainMod[checkingTile.x][checkingTile.y] == -1.f && CheckCollisionCircleRec(ahead, size, tileBuf))
+        if (checkingTile.x != -1)
         {
-            //if positionIndex near is collides with actor
-            float R = sqrt(pow(ahead.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(ahead.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
-            if (R != 0.f)
+            tileBuf = Rectangle{ checkingTile.x * game->pixelsPerTile, checkingTile.y * game->pixelsPerTile, game->pixelsPerTile, game->pixelsPerTile };
+            if (terrainMod[checkingTile.x][checkingTile.y] == -1.f && CheckCollisionCircleRec(ahead, size, tileBuf))
             {
-                steering.x += (ahead.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
-                steering.y += (ahead.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+                //if positionIndex near is collides with actor
+                float R = sqrt(pow(ahead.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(ahead.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
+                if (R != 0.f)
+                {
+                    steering.x += (ahead.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
+                    steering.y += (ahead.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+                }
             }
         }
     }
@@ -112,15 +115,18 @@ void Militaty::Move()
 
     for (TileIndex checkingTile : nearTiles)
     {
-        tileBuf = Rectangle{ checkingTile.x * game->pixelsPerTile, checkingTile.y * game->pixelsPerTile, game->pixelsPerTile, game->pixelsPerTile };
-        if (terrainMod[checkingTile.x][checkingTile.y] == -1.f && CheckCollisionCircleRec(position, size, tileBuf))
+        if (checkingTile.x != -1)
         {
-            //if positionIndex near is collides with actor
-            float R = sqrt(pow(position.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(position.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
-            if (R != 0.f)
+            tileBuf = Rectangle{ checkingTile.x * game->pixelsPerTile, checkingTile.y * game->pixelsPerTile, game->pixelsPerTile, game->pixelsPerTile };
+            if (terrainMod[checkingTile.x][checkingTile.y] == -1.f && CheckCollisionCircleRec(position, size, tileBuf))
             {
-                position.x += (position.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
-                position.y += (position.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+                //if positionIndex near is collides with actor
+                float R = sqrt(pow(position.x - (tileBuf.x + (tileBuf.width / 2.f)), 2) + pow(position.y - (tileBuf.y + (tileBuf.height / 2.f)), 2));
+                if (R != 0.f)
+                {
+                    position.x += (position.x - (tileBuf.x + (tileBuf.width / 2.f))) / R;
+                    position.y += (position.y - (tileBuf.y + (tileBuf.height / 2.f))) / R;
+                }
             }
         }
     }
