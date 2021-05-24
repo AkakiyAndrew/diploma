@@ -36,7 +36,19 @@ void Building::Expand()
                     }
                 }
             }
-            //TODO: add MACHINES-side expansion
+
+            if (this->side == Side::MACHINES)
+            {
+                if (game->mapExpansionEnergised[tile.x][tile.y] == ExpandState::AVAILABLE)
+                {
+                    if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
+                    {
+                        game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED;
+                        game->creepCount++;
+                        return;
+                    }
+                }
+            }
         }
         this->expanded = true;
     }
@@ -54,12 +66,20 @@ void Building::markExpandArea()
                 game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
             }
         }
-        //TODO: add MACHINES-side expansion
+
+        if (this->side == Side::MACHINES)
+        {
+            if (game->mapExpansionEnergised[tile.x][tile.y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+            {
+                game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED;
+            }
+        }
     }
 }
 
 Building::~Building()
 {
+    //setting expansion tiles around building to fade
     for (TileIndex tile : expansionIndices)
     {
         if (this->side == Side::INSECTS)
@@ -69,15 +89,23 @@ Building::~Building()
                 game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
             }
         }
-        //TODO: add MACHINES-side expansion
+
+        if (this->side == Side::MACHINES)
+        {
+            if (game->mapExpansionEnergised[tile.x][tile.y] == ExpandState::EXPANDED)
+            {
+                game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+            }
+        }
     }
-    game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+
+    if(this->side == Side::INSECTS)
+        game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+
+    if (this->side == Side::MACHINES)
+        game->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+
     //TODO: possible optimizaton - recalculate expansion in specific range (with getActorsInRadius method or kinda like that)
+    //recalculate expansion tiles to overlap faded tiles by existing buildings
     this->game->recalculateExpansion(this->side);
 }
-
-//для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
-//спавнить за раз 2-4 тайла, каждому свой цикл проверок:
-//проходить по спирали радиуса экспансии, проверяя является ли тайл пустым от слизи и имеется ли сосед со слизью
-
-//убываение слизи: раз в n*m циклов проверять все тайлы слизи на наличие рядом источника слизи, если нет - проверять 

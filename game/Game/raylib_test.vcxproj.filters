@@ -16,6 +16,12 @@
     <Filter Include="Файлы ресурсов\Tiles">
       <UniqueIdentifier>{712eb469-6b8b-4491-be23-53b477086a3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\Buildings">
+      <UniqueIdentifier>{9be455c8-59b3-4712-9583-07332f16b8cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Military">
+      <UniqueIdentifier>{21cfb8a1-e0ee-4207-b8e8-36198da2cb57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -30,14 +36,23 @@
     <ClCompile Include="GameData.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Building.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="Core.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
     <ClCompile Include="Tumor.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="Building.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
     <ClCompile Include="Military.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Military</Filter>
+    </ClCompile>
+    <ClCompile Include="LightInsect.cpp">
+      <Filter>Исходные файлы\Military</Filter>
+    </ClCompile>
+    <ClCompile Include="Constructor.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

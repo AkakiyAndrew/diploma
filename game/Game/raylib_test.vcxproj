@@ -151,8 +151,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
+    <ClCompile Include="Constructor.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="GameClasses.cpp" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="LightInsect.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Military.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />

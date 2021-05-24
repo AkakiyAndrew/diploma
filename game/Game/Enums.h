@@ -105,3 +105,15 @@ struct NeighborsIndex
 	TileIndex downLeft = { -1,-1 };
 	TileIndex downRight = { -1,-1 };
 };
+
+struct Animation
+{
+	Texture2D* frames;
+
+	int currentFrame;
+	int framesAmount;
+	int width = 0;
+	int height = 0;
+};
+
+//TODO: make ENUM for attributes for faster geting from std::maps

@@ -1,10 +1,2 @@
 ﻿  main.cpp
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(22,44): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(23,45): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(25,32): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(27,38): warning C4244: +=: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(97,68): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(97,31): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(98,85): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
-C:\Users\Andrew\Desktop\Диплом\raylib_test\raylib_test\main.cpp(98,50): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
   raylib_test.vcxproj -> C:\Users\Andrew\Desktop\Диплом\raylib_test\x64\Debug\raylib_test.exe

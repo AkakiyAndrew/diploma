@@ -5,3 +5,5 @@
 !/game/x64/Debug/GameProject.exe
 !/game/x64/Debug/raylib.dll
 /raylib_test/.vs/
+
+game/Game/textures/source/ps_proc/anim_fullsize_frames.psd

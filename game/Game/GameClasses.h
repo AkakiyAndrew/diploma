@@ -15,10 +15,13 @@ private:
     Image* tileset;
     Texture2D tilesetTex[8];
     Texture2D terrainTexture;
-    Texture2D creepTexture;
+    Texture2D expansionInsectsTexture;
+    Animation expansionMachinesAnimation;
     Color* palette;
+    
     std::vector<GameActor*> unitsList;
-    std::vector<Building*> expansionUnitsList;
+    std::vector<Building*> expansionUnitsList_Insects;
+    std::vector<Building*> expansionUnitsList_Machines;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -69,6 +72,21 @@ public:
     //ECONOMICS
     //num of creep-covered tiles
     unsigned int creepCount = 0;
+    //num of energy layer tiles
+    unsigned int energisedTilesCount = 0;
+
+    unsigned char** mapExpansionCreep = nullptr;
+    unsigned char** mapExpansionEnergised = nullptr;
+
+    //return num of adjoined expansion tiles 
+    int numOfExpansionTileAdjoin(int x, int y, Side side);
+    int numOfExpansionTileAdjoinFading(int x, int y, Side side);
+
+    bool isTileExpanded(TileIndex tile, Side side);
+    bool isTileInBounds(TileIndex tile);
+
+    //recalculate state of expansion tiles
+    void recalculateExpansion(Side side);
 
     //VECTOR PATHFINDING
     NeighborsIndex** neighborsIndices = nullptr;
@@ -82,22 +100,12 @@ public:
     //reveals fog of war in circle with radius (in tiles) around TileIndex position
     void revealTerritory(TileIndex position, int radius, Side side);
 
-    unsigned char** mapExpansionCreep = nullptr;
+    
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
     bool closed = false;
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
     std::vector<TileIndex>tilesInsideCircleOrdered(TileIndex center, int radius);
     //std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
-    
-    //return num of adjoined expansion tiles 
-    int numOfExpansionTileAdjoin(int x, int y, Side side); 
-    int numOfExpansionTileAdjoinFading(int x, int y, Side side);
-
-    bool isTileExpanded(TileIndex tile, Side side);
-    bool isTileInBounds(TileIndex tile);
-
-    //recalculate state of expansion tiles
-    void recalculateExpansion(Side side);
     
     //return TileIndex of Vector2
     TileIndex getTileIndex(Vector2);
@@ -135,7 +143,7 @@ public:
 
 class GameActor {
 protected:
-    Texture2D* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
+    Animation* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
     unsigned short animationFrame; //current animation 
 
     Vector2 position;
@@ -255,28 +263,38 @@ public:
 
 class Constructor : public Building
 {
+    //TODO: idea, common Draw() method for constructors
+
     GameActor* target = nullptr;
 
     int buildRate;
     int constructionRange;
     int buildRange;
 
-    void BuildOrRepair()
-    {
-        if (target != nullptr)
-        {
-            //if have non-null pointer - just repair
-            //repair
-        }
-        //seeking for target to repair must be in Update()!
-    }
+public:
+    Constructor(GameData* ptr, ActorType type, Vector2 pos, State state);
+    ~Constructor();
 
+    void BuildOrRepair();
 };
 
 class Core : public Constructor
 {
+public:
+    Core(GameData* ptr, ActorType type, Vector2 pos, State state);
     void Update();
     void Draw();
+    void Destroy();
+};
+
+class Base : public Constructor
+{
+    Base(GameData* ptr, ActorType type, Vector2 pos, State state);
+
+public:
+    void Update();
+    void Draw();
+    void Destroy();
 };
 
 class Militaty : public GameActor
