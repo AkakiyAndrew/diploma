@@ -6,6 +6,8 @@
 
 class GameActor;
 class Building;
+class Constructor;
+class Connectable;
 
 class GameData
 {
@@ -89,6 +91,7 @@ public:
     void recalculateExpansion(Side side);
 
     //VECTOR PATHFINDING
+    //pre-calculated matrix with neighbors indices
     NeighborsIndex** neighborsIndices = nullptr;
     //have inside mapsVector, mapsHeat, mapsTerrainMod, mapsDamage
     std::map<ActorType, std::map<std::string, float**>> mapsPathfinding;
@@ -205,6 +208,26 @@ public:
         sightRange = ptr->genericAttributes[type]["sightRange"];
         positionIndex = ptr->getTileIndex(pos);
 
+        switch (state)
+        {
+        case State::ONLINE:
+            break;
+        case State::OFFLINE:
+            break;
+        case State::CONSTRUCTION:
+            break;
+        case State::UNDER_CONSTRUCTION:
+            break;
+        case State::ATTACKING:
+            break;
+        case State::GOES:
+            break;
+        case State::IDLE:
+            break;
+        default:
+            break;
+        }
+
         switch (type)
         {
         case ActorType::LIGHT_TURRET:
@@ -265,21 +288,43 @@ class Constructor : public Building
 {
     //TODO: idea, common Draw() method for constructors
 
-    GameActor* target = nullptr;
+private:
+    std::vector<Connectable*>connectedUnits;
 
     int buildRate;
     int constructionRange;
     int buildRange;
+    GameActor* target = nullptr;
 
 public:
     Constructor(GameData* ptr, ActorType type, Vector2 pos, State state);
     ~Constructor();
 
+    void UnAttach(Connectable* unit);
     void BuildOrRepair();
+};
+
+class Connectable
+{
+private:
+    int connectRange;
+    Constructor* parent;
+    
+protected:
+    //return true, if connection succesful
+    bool TryConnect();
+
+public:
+    Connectable();
+    ~Connectable();
+
+    //use in destructor, or when parent destructed
+    void Disconect();
 };
 
 class Core : public Constructor
 {
+
 public:
     Core(GameData* ptr, ActorType type, Vector2 pos, State state);
     void Update();

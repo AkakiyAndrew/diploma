@@ -54,6 +54,9 @@
     <ClCompile Include="Constructor.cpp">
       <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
+    <ClCompile Include="Connectable.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h">

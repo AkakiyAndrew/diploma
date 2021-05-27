@@ -16,6 +16,20 @@ void Constructor::BuildOrRepair()
     //seeking for target to repair must be in Update()!
 }
 
+void Constructor::UnAttach(Connectable* unit)
+{
+    //seek for unit to remove from vector
+    std::vector<Connectable*>::iterator iter;
+    for (iter = connectedUnits.begin(); iter != connectedUnits.end(); iter++)
+    {
+        if ((*iter) == unit)
+        {
+            connectedUnits.erase(iter);
+            break;
+        }
+    }
+}
+
 Constructor::~Constructor()
 {
 

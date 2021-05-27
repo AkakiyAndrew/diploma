@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Building.cpp" />
+    <ClCompile Include="Connectable.cpp" />
     <ClCompile Include="Constructor.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="GameClasses.cpp" />

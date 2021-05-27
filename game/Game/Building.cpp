@@ -15,6 +15,9 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     //if(type == ActorType::TUMOR || type == ActorType::HIVE)
     if(side==Side::INSECTS)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
+
+    if (side == Side::MACHINES)
+        ptr->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
 }
 
 void Building::Expand()
@@ -44,7 +47,7 @@ void Building::Expand()
                     if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
                     {
                         game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED;
-                        game->creepCount++;
+                        game->energisedTilesCount++;
                         return;
                     }
                 }
