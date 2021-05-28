@@ -2,10 +2,31 @@
 
 void Tumor::Update()
 {
-	if (this->game->timeCount %2 == 0) // expand every 1 s
+	switch (state)
 	{
+	case State::ONLINE:
+
+		//regeneration every second, if builded
+		if (this->game->timeCount == 0)
+			this->RestoreHP(1);
+
 		Expand();
+		break;
+	case State::UNDER_CONSTRUCTION:
+		if (HP == maxHP)
+		{
+			state = State::ONLINE;
+			markAreaExpand();
+		}
+
+		break;
+	default:
+		break;
 	}
+
+	Expand();
+
+	
 }
 void Tumor::Draw()
 {

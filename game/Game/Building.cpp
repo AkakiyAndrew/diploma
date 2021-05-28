@@ -4,16 +4,18 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     :GameActor(ptr, type, pos, state)
 {
     expansionRange = ptr->buildingsAttributes[type]["expansionRange"];
+    expansionTime = ptr->buildingsAttributes[type]["expansionTime"];
 
     //positionIndex = TileIndex{static_cast<int>(pos.x / ptr->pixelsPerTile), static_cast<int>(pos.y / ptr->pixelsPerTile) };
 
     expansionIndices = this->game->tilesInsideCircleOrdered(this->positionIndex, expansionRange);
+    
+    //only if it created operational
+    if(state==State::ONLINE)
+        markAreaExpand();
 
-    markExpandArea();
-
-    //create creep or zerolayer on position when spawned
-    //if(type == ActorType::TUMOR || type == ActorType::HIVE)
-    if(side==Side::INSECTS)
+    //create creep or energised on position when spawned
+    if (side == Side::INSECTS)
         ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
 
     if (side == Side::MACHINES)
@@ -22,44 +24,55 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
 
 void Building::Expand()
 {
-    if (!this->expanded)
+    if (this->game->timeCount % expansionTime == 0)
     {
-        //TODO: further optimization - remove expanded tile from vector, on Destroy call recalculate it again to set mapExpansionCreep
-        for (TileIndex tile : expansionIndices)
+        if (!this->expanded)
         {
-            if (this->side == Side::INSECTS)
+            //TODO: further optimization - remove expanded tile from vector, on Destroy call recalculate it again to set mapExpansionCreep
+            for (TileIndex tile : expansionIndices)
             {
-                if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::AVAILABLE)
+                if (this->side == Side::INSECTS)
                 {
-                    if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side)>0)
+                    if (game->mapExpansionCreep[tile.x][tile.y] == ExpandState::AVAILABLE)
                     {
-                        game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
-                        game->creepCount++;
-                        return;
+                        if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
+                        {
+                            game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
+                            game->creepCount++;
+                            return;
+                        }
                     }
                 }
-            }
 
-            if (this->side == Side::MACHINES)
-            {
-                if (game->mapExpansionEnergised[tile.x][tile.y] == ExpandState::AVAILABLE)
+                if (this->side == Side::MACHINES)
                 {
-                    if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
+                    if (game->mapExpansionEnergised[tile.x][tile.y] == ExpandState::AVAILABLE)
                     {
-                        game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED;
-                        game->energisedTilesCount++;
-                        return;
+                        if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
+                        {
+                            game->mapExpansionEnergised[tile.x][tile.y] = ExpandState::EXPANDED;
+                            game->energisedTilesCount++;
+                            return;
+                        }
                     }
                 }
             }
+            this->expanded = true;
         }
-        this->expanded = true;
     }
 }
 
-void Building::markExpandArea()
+void Building::markAreaExpand()
 {
     this->expanded = false;
+
+    //to create initial expansion tile
+    if (side == Side::INSECTS)
+        game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
+
+    if (side == Side::MACHINES)
+        game->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
+
     for (TileIndex tile : expansionIndices)
     {
         if (this->side == Side::INSECTS)
@@ -80,7 +93,7 @@ void Building::markExpandArea()
     }
 }
 
-Building::~Building()
+void Building::markAreaFade()
 {
     //setting expansion tiles around building to fade
     for (TileIndex tile : expansionIndices)
@@ -102,7 +115,7 @@ Building::~Building()
         }
     }
 
-    if(this->side == Side::INSECTS)
+    if (this->side == Side::INSECTS)
         game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
 
     if (this->side == Side::MACHINES)
@@ -111,4 +124,9 @@ Building::~Building()
     //TODO: possible optimizaton - recalculate expansion in specific range (with getActorsInRadius method or kinda like that)
     //recalculate expansion tiles to overlap faded tiles by existing buildings
     this->game->recalculateExpansion(this->side);
+}
+
+Building::~Building()
+{
+    markAreaFade();
 }

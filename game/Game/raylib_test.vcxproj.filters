@@ -57,6 +57,9 @@
     <ClCompile Include="Connectable.cpp">
       <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
+    <ClCompile Include="Base.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h">

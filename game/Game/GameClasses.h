@@ -42,6 +42,8 @@ private:
 
     //INTERFACE
     bool showingCreepStates = false;
+    Side visionSide = Side::MACHINES;
+
 
     //тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
     //тут же и будут хранится карты урона и т.п.
@@ -70,6 +72,8 @@ public:
     std::map<ActorType, std::map<std::string, int>> genericAttributes;
     std::map<ActorType, std::map<std::string, int>> buildingsAttributes;
     std::map<ActorType, std::map<std::string, int>> militaryAttributes;
+    std::map<ActorType, std::map<std::string, int>> connectableAttributes;
+    std::map<ActorType, std::map<std::string, int>> constructorsAttributes;
 
     //ECONOMICS
     //num of creep-covered tiles
@@ -133,7 +137,7 @@ public:
     void clearMap();
 
     TileIndex getInsectsDesirePosition() { return insectsDesirePosition; };
-
+    
     //для вызова обновлений и отрисовки по всем актерам, вычисления экономических тайлов и т.п.
     void GameDraw(); 
     void GameUpdate();
@@ -180,6 +184,7 @@ public:
     {        
     }
 
+    State getState() { return state; };
     int getHP() { return this->HP; }
     Vector2 getPosition() { return this->position; }
     void Hit(int damage, ActorType hitBy)
@@ -191,11 +196,22 @@ public:
     }
     
     //for building construction, repair (and insects units and buildings regeneration?)
-    void RestoreHP(int amount)     {
+    int RestoreHP(int amount)
+    {
+        int restored;
+
         if ((this->HP + amount) > this->maxHP)
+        {
+            restored = this->maxHP - this->HP;
             this->HP = this->maxHP;
+        }
         else
+        {
+            restored = amount;
             this->HP += amount;
+        }
+            
+        return restored;
     }
 
     //when spawning new unit, use GameData unit settings and ActorType for seting mapHP, size, etc. State defines currentHP and, maybe, something else
@@ -211,18 +227,12 @@ public:
         switch (state)
         {
         case State::ONLINE:
-            break;
         case State::OFFLINE:
+            HP = maxHP;
             break;
-        case State::CONSTRUCTION:
-            break;
+        
         case State::UNDER_CONSTRUCTION:
-            break;
-        case State::ATTACKING:
-            break;
-        case State::GOES:
-            break;
-        case State::IDLE:
+            HP = 0;
             break;
         default:
             break;
@@ -260,12 +270,14 @@ class Building: public GameActor {
 
 private:
     int expansionRange;
+    int expansionTime;
     bool expanded; //true, if all tiles around this building is filled by expansion
     std::vector<TileIndex> expansionIndices;
 
 public:
     Building(GameData* ptr, ActorType type, Vector2 pos, State state);
-    void markExpandArea();
+    void markAreaFade();
+    void markAreaExpand();
     void Expand();
     virtual ~Building() = 0;
     //для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
@@ -289,17 +301,19 @@ class Constructor : public Building
     //TODO: idea, common Draw() method for constructors
 
 private:
-    std::vector<Connectable*>connectedUnits;
-
     int buildRate;
-    int constructionRange;
     int buildRange;
     GameActor* target = nullptr;
+
+protected:
+    std::vector<Connectable*>connectedUnits;
 
 public:
     Constructor(GameData* ptr, ActorType type, Vector2 pos, State state);
     ~Constructor();
 
+    //returns true, if attaching unit is not a parent of this constructor, to prevent locking loops
+    bool RequestAttachment(Connectable* unit);
     void UnAttach(Connectable* unit);
     void BuildOrRepair();
 };
@@ -308,25 +322,27 @@ class Connectable
 {
 private:
     int connectRange;
-    Constructor* parent;
+    GameData* game;
     
 protected:
+    Constructor* parent;
     //return true, if connection succesful
-    bool TryConnect();
+    bool TryConnect(Vector2 position, int ID);
 
 public:
-    Connectable();
+    //recursive checking, is this unit have chain connection to Base
+    Connectable(GameData *ptr, ActorType type);
     ~Connectable();
 
     //use in destructor, or when parent destructed
-    void Disconect();
+    virtual void Disconect();
 };
 
-class Core : public Constructor
+class Core : public Constructor, public Connectable
 {
-
 public:
     Core(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void Disconect();
     void Update();
     void Draw();
     void Destroy();
@@ -334,9 +350,8 @@ public:
 
 class Base : public Constructor
 {
-    Base(GameData* ptr, ActorType type, Vector2 pos, State state);
-
 public:
+    Base(GameData* ptr, ActorType type, Vector2 pos, State state);
     void Update();
     void Draw();
     void Destroy();

@@ -72,14 +72,21 @@ GameData::GameData()
         {"maxHP", 100},
         {"size", 16},
         {"cost", 10},
-        {"sightRange", 5}
+        {"sightRange", 10}
     };
 
     genericAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"maxHP", 100},
         {"size", 16},
         {"cost", 10},
-        {"sightRange", 5}
+        {"sightRange", 10}
+    };
+
+    genericAttributes[ActorType::BASE] = std::map<std::string, int>{
+        {"maxHP", 300},
+        {"size", 32},
+        {"cost", 10},
+        {"sightRange", 12}
     };
 
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
@@ -92,10 +99,22 @@ GameData::GameData()
     //BUILDING ACTORS ATTRIBUTES
     buildingsAttributes[ActorType::TUMOR] = std::map<std::string, int>{
         {"expansionRange", 8},
+        {"expansionTime", 8 },
+    };
+
+    buildingsAttributes[ActorType::HIVE] = std::map<std::string, int>{
+        {"expansionRange", 12},
+        {"expansionTime", 8 },
     };
 
     buildingsAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"expansionRange", 8},
+        {"expansionTime", 16 },
+    };
+
+    buildingsAttributes[ActorType::BASE] = std::map<std::string, int>{
+        {"expansionRange", 12},
+        {"expansionTime", 16 },
     };
 
     //MILITARY ACTORS ATTRIBUTES
@@ -106,6 +125,25 @@ GameData::GameData()
         {"damage", 7},
         {"reloadCount", 20},
         {"rotationSpeed", 4},
+    };
+
+    //CONNECTABLE ACTORS ATTRIBUTES
+    connectableAttributes[ActorType::CORE] = std::map<std::string, int>
+    {
+        {"connectRange", 8},
+    };
+
+    //CONSTRUCTORS ATTRIBUTES
+    constructorsAttributes[ActorType::CORE] = std::map<std::string, int>
+    {
+        {"buildRate", 10},
+        {"buildRange", 6},
+    };
+
+    constructorsAttributes[ActorType::BASE] = std::map<std::string, int>
+    {
+        {"buildRate", 20},
+        {"buildRange", 8},
     };
 }
 
@@ -680,7 +718,8 @@ void GameData::recalculateExpansion(Side side)
     {
         for (Building* actor : this->expansionUnitsList_Insects)
         {
-            actor->markExpandArea();
+            if (actor->getState() == State::ONLINE)
+                actor->markAreaExpand();
         }
     }
     
@@ -688,7 +727,8 @@ void GameData::recalculateExpansion(Side side)
     {
         for (Building* actor : this->expansionUnitsList_Machines)
         {
-            actor->markExpandArea();
+            if(actor->getState()==State::ONLINE)
+                actor->markAreaExpand();
         }
     }
 }
@@ -1346,6 +1386,80 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     }
 }
 
+void GameData::addActor(ActorType type, Vector2 position, State state)
+{
+    Building* buf_unit;
+    switch (wantToBuild)
+    {
+    case ActorType::LIGHT_TURRET:
+        break;
+    case ActorType::HEAVY_TURRET:
+        break;
+    case ActorType::AIRDEFENSE_TURRET:
+        break;
+    case ActorType::LIGHT_INSECT:
+        unitsList.push_back(
+            new LightInsect(
+                this,
+                ActorType::LIGHT_INSECT,
+                position,
+                State::ONLINE)
+        );
+        break;
+    case ActorType::HEAVY_INSECT:
+        break;
+    case ActorType::FLYING_INSECT:
+        break;
+    case ActorType::CORE:
+        
+        buf_unit = new Core(
+            this,
+            ActorType::CORE,
+            position,
+            State::OFFLINE);
+        unitsList.push_back(
+            buf_unit
+        );
+        expansionUnitsList_Machines.push_back(
+            buf_unit
+        );
+        break;
+    case ActorType::BASE:
+        Building* buf_unit;
+        buf_unit = new Base(
+            this,
+            ActorType::BASE,
+            position,
+            State::ONLINE);
+        unitsList.push_back(
+            buf_unit
+        );
+        expansionUnitsList_Machines.push_back(
+            buf_unit
+        );
+    case ActorType::HIVE:
+        break;
+    case ActorType::TUMOR:
+        Building* buf_tumor;
+        buf_tumor = new Tumor(
+            this,
+            ActorType::TUMOR,
+            position,
+            State::ONLINE);
+        unitsList.push_back(
+            buf_tumor
+        );
+        expansionUnitsList_Insects.push_back(
+            buf_tumor
+        );
+
+        //in any case nulify wantToBuild
+        wantToBuild = ActorType::ACTOR_NULL;
+        break;
+    default:
+        break;
+    }
+}
 GameActor* GameData::getActorInTile(int x, int y)
 {
     GameActor* result = nullptr;
@@ -1601,6 +1715,8 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
 //    return result;
 //}
 
+
+
 void GameData::GameUpdate()
 {
     //TIME COUNTER
@@ -1661,8 +1777,28 @@ void GameData::GameUpdate()
         else
             wantToBuild = ActorType::ACTOR_NULL;
 
+    if (IsKeyPressed(KEY_B))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::BASE;
+        else
+            wantToBuild = ActorType::ACTOR_NULL;
+
     if (IsKeyPressed(KEY_C))
         clearMap();
+
+    //clear all fog of war by current vision side
+    if (IsKeyPressed(KEY_V))
+    {
+        int** fogOfWar = mapsFogOfWar[visionSide];
+
+        for (int x = 0; x < mapWidth; x++)
+            for (int y = 0; y < mapHeight; y++)
+                fogOfWar[x][y] = 100;
+
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::LIGHT_INSECT);
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::HEAVY_INSECT);
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::FLYING_INSECT);
+    }
 
     if (IsKeyPressed(KEY_R))
         if (wantToRemove)
@@ -1690,6 +1826,12 @@ void GameData::GameUpdate()
         //);
     }
 
+    if (IsKeyPressed(KEY_F1))
+        if (visionSide == Side::INSECTS)
+            visionSide = Side::MACHINES;
+        else
+            visionSide = Side::INSECTS;
+
     if (IsKeyPressed(KEY_F2))
         if (showingCreepStates)
             showingCreepStates = false;
@@ -1702,68 +1844,11 @@ void GameData::GameUpdate()
         wantToBuild = ActorType::ACTOR_NULL;
     }
 
-    //TODO: replace to separate method
+    //ACTORS BUILDING
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
     {
-        switch (wantToBuild)
-        {
-        case ActorType::LIGHT_TURRET:
-            break;
-        case ActorType::HEAVY_TURRET:
-            break;
-        case ActorType::AIRDEFENSE_TURRET:
-            break;
-        case ActorType::LIGHT_INSECT:
-            unitsList.push_back(
-                new LightInsect(
-                    this,
-                    ActorType::LIGHT_INSECT,
-                    Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
-                    State::ONLINE)
-            );
-            break;
-        case ActorType::HEAVY_INSECT:
-            break;
-        case ActorType::FLYING_INSECT:
-            break;
-        case ActorType::CORE:
-            Building* buf_core;
-            buf_core = new Core(
-                this,
-                ActorType::CORE,
-                Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
-                State::ONLINE);
-            unitsList.push_back(
-                buf_core
-            );
-            expansionUnitsList_Machines.push_back(
-                buf_core
-            );
-            break;
-        case ActorType::BASE:
-            break;
-        case ActorType::HIVE:
-            break;
-        case ActorType::TUMOR:
-            Building* buf_tumor;
-            buf_tumor = new Tumor(
-                this,
-                ActorType::TUMOR,
-                Vector2{ mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 },
-                State::ONLINE);
-            unitsList.push_back(
-                buf_tumor
-            );
-            expansionUnitsList_Insects.push_back(
-                buf_tumor
-            );
-
-            //in any case nulify wantToBuild
-            wantToBuild = ActorType::ACTOR_NULL;
-            break;
-        default:
-            break;
-        }
+        Vector2 position = { mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 };
+        addActor(wantToBuild, position, State::ONLINE);
     }
 
     //if(timeCount %30==0) //slowing down
@@ -1862,7 +1947,7 @@ void GameData::GameDraw()
 
         Vector2** vectorField = vectorFields[ActorType::LIGHT_INSECT];
         float** terrainMod = mapsPathfinding[ActorType::LIGHT_INSECT]["mapsTerrainMod"];
-        int** fogOfWar = mapsFogOfWar[Side::INSECTS];
+        int** fogOfWar = mapsFogOfWar[visionSide];
 
         int index;
         for (int x = renderBorders[1]; x < renderBorders[3]; x++) //columns
@@ -2003,6 +2088,10 @@ void GameData::GameDraw()
     DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 80, 20, RED);
     DrawText(FormatText("Mouse tile index: %d, %d", mouseIndex.x, mouseIndex.y), 20, 140, 20, RED);
     DrawText(FormatText("Desire position: %d, %d", insectsDesirePosition.x, insectsDesirePosition.y), 20, 200, 20, RED);
+    if(visionSide==Side::INSECTS)
+        DrawText("Vision side: INSECTS", 20, 260, 20, RED);
+    else
+        DrawText("Vision side: MACHINES", 20, 260, 20, RED);
 
     DrawFPS(20, 50);
 }
