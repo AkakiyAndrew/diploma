@@ -46,11 +46,9 @@ void Core::Update()
 	default:
 		break;
 	}
-
-	//Expand();
-	
 }
 
+//dark magic
 void Core::Disconect()
 {
 	if (parent != nullptr)

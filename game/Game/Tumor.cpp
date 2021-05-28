@@ -15,6 +15,7 @@ void Tumor::Update()
 	case State::UNDER_CONSTRUCTION:
 		if (HP == maxHP)
 		{
+			//if it ready - mark area around to expand and create initiate expansion tile
 			state = State::ONLINE;
 			markAreaExpand();
 		}

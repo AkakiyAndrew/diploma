@@ -11,16 +11,17 @@ bool Connectable::TryConnect(Vector2 position, int ID)
 	bool result = false;
 
 	//???
-	//seek for Core
+	//seek for parent to connect
 	std::vector<GameActor*> buf = game->getActorsInRadius(position, connectRange * game->pixelsPerTile);
 
 	for (GameActor* actor : buf)
 	{
-		//seek for first Core or Base, that operational, and connect to it
+		//seek for first Core or Base, that operational and NOT the same unit which connecting, and connect to it
 		if ((actor->type == ActorType::CORE || actor->type == ActorType::BASE) 
 			&& actor->getState() == State::ONLINE
 			&& actor->ID !=ID)
 		{
+			//request to add this unit to parent`s vector of connected units, and check if this unit parent for connected or not
 			if (static_cast<Constructor*>(actor)->RequestAttachment(this))
 			{
 				parent = (Constructor*)actor;
@@ -28,10 +29,6 @@ bool Connectable::TryConnect(Vector2 position, int ID)
 			}
 		}
 	}
-
-	//if(parent==nullptr)
-	//	//if cant find, seek for Base
-	//	parent = (Constructor*)game->getNearestSpecificActor(position, game->getActorsInRadius(position, connectRange), ActorType::BASE, (GameActor*)this);
 
 	if (parent != nullptr)
 		result = true;

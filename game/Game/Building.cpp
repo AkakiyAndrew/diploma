@@ -13,13 +13,6 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
     //only if it created operational
     if(state==State::ONLINE)
         markAreaExpand();
-
-    //create creep or energised on position when spawned
-    if (side == Side::INSECTS)
-        ptr->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
-
-    if (side == Side::MACHINES)
-        ptr->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
 }
 
 void Building::Expand()
@@ -66,7 +59,7 @@ void Building::markAreaExpand()
 {
     this->expanded = false;
 
-    //to create initial expansion tile
+    //create creep or energised on position to initiate expansion
     if (side == Side::INSECTS)
         game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
 
