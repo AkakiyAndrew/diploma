@@ -67,7 +67,6 @@ void Building::markAreaExpand()
         game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
     }
         
-
     if (side == Side::MACHINES)
     {
         if (game->mapExpansionEnergised[positionIndex.x][positionIndex.y] == ExpandState::AVAILABLE)

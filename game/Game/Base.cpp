@@ -49,14 +49,18 @@ void Base::Update()
 	//	break;
 	//}
 
-	if (this->game->timeCount % 2 == 0) // expand every 1 s
+	Expand();
+
+	if (game->timeCount == 0)
 	{
-		Expand();
+		BuildOrRepair();
 	}
 }
 void Base::Draw()
 {
 	DrawCircle(position.x, position.y, size, BLUE);
+	drawHP();
+	DrawBuildingRay();
 }
 
 void Base::Destroy()

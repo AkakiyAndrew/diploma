@@ -16,6 +16,11 @@ void Core::Update()
 		{
 			//if connected - routine work
 			Expand();
+
+			if (game->timeCount == 0)
+			{
+				BuildOrRepair();
+			}
 		}
 		else
 		{
@@ -70,14 +75,24 @@ void Core::Disconect()
 void Core::Draw()
 {
 	DrawCircle(position.x, position.y, size, SKYBLUE);
+
+	//draw connection line
 	if (parent != nullptr)
 	{
 		DrawLineEx(position, parent->getPosition(), 2, WHITE);
-		DrawCircle(position.x, position.y, size/2, GREEN);
 	}
-	else
-		DrawCircle(position.x, position.y, size/2, RED);
+	
+	if(state==State::ONLINE)
+		DrawCircle(position.x, position.y, size / 2, GREEN);
 
+	if (state == State::OFFLINE)
+		DrawCircle(position.x, position.y, size / 2, ORANGE);
+
+	if (state == State::UNDER_CONSTRUCTION)
+		DrawCircle(position.x, position.y, size / 2, RED);
+
+	drawHP();
+	DrawBuildingRay();
 }
 
 void Core::Destroy()

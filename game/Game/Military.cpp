@@ -7,7 +7,7 @@ Militaty::Militaty(GameData* ptr, ActorType type, Vector2 pos, State state)
     attackRange = ptr->militaryAttributes[type]["attackRange"];
     speed = ptr->militaryAttributes[type]["speed"];
     damage = ptr->militaryAttributes[type]["damage"];
-    reloadCount = ptr->militaryAttributes[type]["reloadCount"];
+    cooldownCount = ptr->militaryAttributes[type]["cooldownCount"];
     rotationSpeed = ptr->militaryAttributes[type]["rotationSpeed"];
 }
 

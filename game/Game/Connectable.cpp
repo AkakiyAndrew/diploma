@@ -2,8 +2,8 @@
 
 Connectable::Connectable(GameData* ptr, ActorType type)
 {
-	game = ptr;
-	connectRange = game->connectableAttributes[type]["connectRange"];
+	gameConn = ptr;
+	connectRange = gameConn->connectableAttributes[type]["connectRange"];
 }
 
 bool Connectable::TryConnect(Vector2 position, int ID)
@@ -12,7 +12,7 @@ bool Connectable::TryConnect(Vector2 position, int ID)
 
 	//???
 	//seek for parent to connect
-	std::vector<GameActor*> buf = game->getActorsInRadius(position, connectRange * game->pixelsPerTile);
+	std::vector<GameActor*> buf = gameConn->getActorsInRadius(position, connectRange);
 
 	for (GameActor* actor : buf)
 	{

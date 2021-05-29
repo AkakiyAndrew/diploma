@@ -74,26 +74,23 @@ GameData::GameData()
         {"cost", 10},
         {"sightRange", 10}
     };
-
     genericAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"maxHP", 100},
         {"size", 16},
-        {"cost", 10},
-        {"sightRange", 10}
+        {"cost", 50},
+        {"sightRange", 10},
     };
-
     genericAttributes[ActorType::BASE] = std::map<std::string, int>{
         {"maxHP", 300},
         {"size", 32},
-        {"cost", 10},
-        {"sightRange", 12}
+        {"cost", 1000},
+        {"sightRange", 12},
     };
-
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
         {"size", 8},
         {"cost", 5},
-        {"sightRange", 3}
+        {"sightRange", 3},
     };
 
     //BUILDING ACTORS ATTRIBUTES
@@ -101,17 +98,14 @@ GameData::GameData()
         {"expansionRange", 8},
         {"expansionTime", 8 },
     };
-
     buildingsAttributes[ActorType::HIVE] = std::map<std::string, int>{
         {"expansionRange", 12},
         {"expansionTime", 8 },
     };
-
     buildingsAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"expansionRange", 8},
         {"expansionTime", 16 },
     };
-
     buildingsAttributes[ActorType::BASE] = std::map<std::string, int>{
         {"expansionRange", 12},
         {"expansionTime", 16 },
@@ -123,27 +117,26 @@ GameData::GameData()
         {"attackRange", 2},
         {"speed", 2},
         {"damage", 7},
-        {"reloadCount", 20},
+        {"cooldownCount", 20},
         {"rotationSpeed", 4},
     };
 
     //CONNECTABLE ACTORS ATTRIBUTES
     connectableAttributes[ActorType::CORE] = std::map<std::string, int>
     {
-        {"connectRange", 8},
+        {"connectRange", 8 * pixelsPerTile},
     };
 
     //CONSTRUCTORS ATTRIBUTES
     constructorsAttributes[ActorType::CORE] = std::map<std::string, int>
     {
-        {"buildRate", 10},
-        {"buildRange", 6},
+        {"buildPower", 10},
+        {"buildRange", 6 * pixelsPerTile},
     };
-
     constructorsAttributes[ActorType::BASE] = std::map<std::string, int>
     {
-        {"buildRate", 20},
-        {"buildRange", 8},
+        {"buildPower", 20},
+        {"buildRange", 8 * pixelsPerTile},
     };
 }
 
@@ -1420,7 +1413,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             this,
             ActorType::CORE,
             position,
-            State::OFFLINE);
+            State::UNDER_CONSTRUCTION);
         unitsList.push_back(
             buf_unit
         );
@@ -1728,12 +1721,10 @@ int GameData::trySpendResources(int amount, Side side)
         if (resourcesInsects - amount < 0)
         {
             spended = resourcesInsects;
-            resourcesInsects = 0;
         }
         else
         {
             spended = amount;
-            resourcesInsects -= amount;
         }
     }
     if(side == Side::MACHINES)
@@ -1741,16 +1732,25 @@ int GameData::trySpendResources(int amount, Side side)
         if (resourcesMachines - amount < 0)
         {
             spended = resourcesMachines;
-            resourcesMachines = 0;
         }
         else
         {
             spended = amount;
-            resourcesMachines -= amount;
         }
     }
 
     return spended;
+}
+void GameData::spendResources(int amount, Side side)
+{
+    if (side == Side::INSECTS)
+    {
+        resourcesInsects -= amount;
+    }
+    if (side == Side::MACHINES)
+    {
+        resourcesMachines -= amount;
+    }
 }
 
 void GameData::GameUpdate()
@@ -1902,7 +1902,7 @@ void GameData::GameUpdate()
     }
 
     //expansion fading
-    if (timeCount  == 0)
+    if (timeCount == 0)
     {
         std::vector<TileIndex>buf;
         //INSECTS

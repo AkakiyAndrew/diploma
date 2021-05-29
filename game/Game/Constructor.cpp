@@ -3,20 +3,46 @@
 Constructor::Constructor(GameData* ptr, ActorType type, Vector2 pos, State state)
     :Building(ptr, type, pos, state)
 {
-    buildRate = ptr->constructorsAttributes[type]["buildRate"];
+    buildPower = ptr->constructorsAttributes[type]["buildPower"];
     buildRange = ptr->constructorsAttributes[type]["buildRange"];
 }
 
 void Constructor::BuildOrRepair()
 {
+    if (target == nullptr)
+    {
+        for (GameActor *unit : game->getActorsInRadius(position, buildRange))
+        {
+            if (unit->getHP() != unit->maxHP && unit->side==this->side)
+            {
+                target = unit;
+                break;
+            }
+        }
+    }
+
     //if have target
     if (target != nullptr)
     {
         //repair, if target fully repaired - nullify pointer
         //TODO: consider using energy
-        target->RestoreHP(buildRate);
-        if (target->getHP() == target->maxHP)
-            target = nullptr;
+
+        //сперва - проба траты ресурсов, затем восстановление хп и фактическая трата ресурсов
+
+        //determine, how much resources can be spend
+        int canSpend = game->trySpendResources(buildPower, side);
+
+        if (canSpend != 0)
+        {
+            //technical singularity dark magic
+            int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
+            if(restored!=0)
+                game->spendResources(target->maxHP / restored, side);
+
+            //if target hp restored, nullify pointer
+            if (target->getHP() == target->maxHP)
+                target = nullptr;
+        }
     }
     //seeking for target to repair must be in Update()!
 }
@@ -51,6 +77,51 @@ void Constructor::UnAttach(Connectable* unit)
             connectedUnits.erase(iter);
             break;
         }
+    }
+}
+
+void Constructor::DrawBuildingRay()
+{
+    if (target != nullptr)
+    {
+        Vector2 offset;
+        Vector2 targetPosition = target->getPosition();
+
+        switch (game->timeCount % 9)
+        {
+        case 0:
+            offset = { -1.f,-1.f };
+            break;
+        case 1:
+            offset = { 0.f,-1.f };
+            break;
+        case 2:
+            offset = { 0.f,-1.f };
+            break;
+        case 3:
+            offset = { -1.f,0.f };
+            break;
+        case 4:
+            offset = { 1.f,0.f };
+            break;
+        case 5:
+            offset = { -1.f,1.f };
+            break;
+        case 6:
+            offset = { 0.f,1.f };
+            break;
+        case 7:
+            offset = { 1.f,1.f };
+            break;
+        default:
+            offset = { 0.f,0.f };
+            break;
+        }
+
+        targetPosition.x += (size / 2) * offset.x;
+        targetPosition.y += (size / 2) * offset.y;
+
+        DrawLineEx(position, targetPosition, 2, Color{ 45, 165,235,255 });
     }
 }
 

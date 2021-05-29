@@ -49,7 +49,7 @@ private:
 
     //RESOURCES
     unsigned resourcesInsects = 0;
-    unsigned resourcesMachines = 0;
+    unsigned resourcesMachines = 100;
 
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
@@ -75,8 +75,10 @@ public:
     std::map<ActorType, std::map<std::string, int>> constructorsAttributes;
 
     //ECONOMICS
-    //returns actual amount of resources, that used
+    //returns amount of resources, that can be used
     int trySpendResources(int amount, Side side);
+    //actual spend of resources
+    void spendResources(int amount, Side side);
     //num of creep-covered tiles
     unsigned int creepTilesCount = 0;
     //num of energy layer tiles
@@ -183,6 +185,17 @@ public:
     virtual ~GameActor() 
     {        
     }
+
+    //draw bar with HP
+    void drawHP() 
+    {
+        if (HP != maxHP)
+        {
+            DrawRectangle(position.x - size/2, position.y + size, size, 2, RED);
+            if(HP!=0)
+                DrawRectangle(position.x - size/2, position.y + size, size * ((float)HP / (float)maxHP), 2, GREEN);
+        }
+    };
 
     State getState() { return state; };
     int getHP() { return this->HP; }
@@ -301,7 +314,7 @@ class Constructor : public Building
     //TODO: idea, common Draw() method for constructors
 
 private:
-    int buildRate;
+    int buildPower;
     int buildRange;
     GameActor* target = nullptr;
 
@@ -316,13 +329,14 @@ public:
     bool RequestAttachment(Connectable* unit);
     void UnAttach(Connectable* unit);
     void BuildOrRepair();
+    void DrawBuildingRay();
 };
 
 class Connectable
 {
 private:
     int connectRange;
-    GameData* game;
+    GameData* gameConn;
     
 protected:
     Constructor* parent;
@@ -364,9 +378,9 @@ protected:
     int attackRange;
     int speed;
     int damage;
-    int reloadCount;
+    int cooldownCount; //amount of ticks, need to attack
     int rotationSpeed;
-    int angle;
+    int angle; //float?
     Vector2 velocityVector;
 
     //int type
