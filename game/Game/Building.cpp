@@ -31,7 +31,7 @@ void Building::Expand()
                         if (game->numOfExpansionTileAdjoin(tile.x, tile.y, this->side) > 0)
                         {
                             game->mapExpansionCreep[tile.x][tile.y] = ExpandState::EXPANDED;
-                            game->creepCount++;
+                            game->creepTilesCount++;
                             return;
                         }
                     }
@@ -61,10 +61,20 @@ void Building::markAreaExpand()
 
     //create creep or energised on position to initiate expansion
     if (side == Side::INSECTS)
+    {
+        if(game->mapExpansionCreep[positionIndex.x][positionIndex.y]==ExpandState::AVAILABLE)
+            game->creepTilesCount++;
         game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
+    }
+        
 
     if (side == Side::MACHINES)
+    {
+        if (game->mapExpansionEnergised[positionIndex.x][positionIndex.y] == ExpandState::AVAILABLE)
+            game->energisedTilesCount++;
         game->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED;
+    }
+        
 
     for (TileIndex tile : expansionIndices)
     {

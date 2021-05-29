@@ -45,13 +45,12 @@ private:
     Side visionSide = Side::MACHINES;
 
 
-    //тут будут хранится ссылки на актеров (взять какой-то контейнер из STL)
     //тут же и будут хранится карты урона и т.п.
 
-    //кол-во ресурсов
-    //тут же и хранить настройки
-    
-    //void loadActorsAttributes();
+    //RESOURCES
+    unsigned resourcesInsects = 0;
+    unsigned resourcesMachines = 0;
+
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
     //fog of war maps
@@ -76,8 +75,10 @@ public:
     std::map<ActorType, std::map<std::string, int>> constructorsAttributes;
 
     //ECONOMICS
+    //returns actual amount of resources, that used
+    int trySpendResources(int amount, Side side);
     //num of creep-covered tiles
-    unsigned int creepCount = 0;
+    unsigned int creepTilesCount = 0;
     //num of energy layer tiles
     unsigned int energisedTilesCount = 0;
 
@@ -130,7 +131,6 @@ public:
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
-
 
     void setTerrain(Terrain);
     bool isMapLoaded();

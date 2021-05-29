@@ -167,6 +167,10 @@ void GameData::clearMap()
     }
 
     lastID = 0;
+    resourcesInsects = 0;
+    resourcesMachines = 0;
+    //creepTilesCount = 0;
+    //energisedTilesCount = 0;
 }
 
 TerrainType GameData::getTerrainType(int x, int y)
@@ -1715,7 +1719,39 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
 //    return result;
 //}
 
+int GameData::trySpendResources(int amount, Side side)
+{
+    int spended;
 
+    if (side == Side::INSECTS)
+    {
+        if (resourcesInsects - amount < 0)
+        {
+            spended = resourcesInsects;
+            resourcesInsects = 0;
+        }
+        else
+        {
+            spended = amount;
+            resourcesInsects -= amount;
+        }
+    }
+    if(side == Side::MACHINES)
+    {
+        if (resourcesMachines - amount < 0)
+        {
+            spended = resourcesMachines;
+            resourcesMachines = 0;
+        }
+        else
+        {
+            spended = amount;
+            resourcesMachines -= amount;
+        }
+    }
+
+    return spended;
+}
 
 void GameData::GameUpdate()
 {
@@ -1882,7 +1918,7 @@ void GameData::GameUpdate()
             }
         }
 
-        creepCount -= buf.size();
+        creepTilesCount -= buf.size();
         for (TileIndex tile : buf)
             mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
         
@@ -1906,24 +1942,28 @@ void GameData::GameUpdate()
             mapExpansionEnergised[tile.x][tile.y] = ExpandState::AVAILABLE;
 
     }
-}
 
-void GameData::GameDraw()
-{
-    //ANIMATION UPDATE
+    //RESOURCES GATHERING
+    if (timeCount == 0)
+    {
+        resourcesInsects += creepTilesCount / 100;
+        resourcesMachines += energisedTilesCount / 100;
+        if (resourcesMachines > 200) resourcesMachines = 200; //maximum of Energy
+    }
 
+    //ANIMATION
     if (timeCount % 15 == 0)
     {
         expansionMachinesAnimation.currentFrame++;
 
-        if (expansionMachinesAnimation.currentFrame >= expansionMachinesAnimation.framesAmount) 
+        if (expansionMachinesAnimation.currentFrame >= expansionMachinesAnimation.framesAmount)
             expansionMachinesAnimation.currentFrame = 0;
     }
+}
 
-
+void GameData::GameDraw()
+{
     BeginMode2D(camera);
-    //TODO: test 
-    //draw terrain
 
 #ifndef TILE_DRAWING
     DrawTextureEx(
@@ -2034,13 +2074,6 @@ void GameData::GameDraw()
         }
     }
 
-    //DrawRectangleLinesEx(
-    //    viewBorders,
-    //    5,
-    //    RED
-    //);
-
-    //DrawRectangle(camera.target.x, camera.target.y, 32, 32, YELLOW);
 #endif
 
     if (this->wantToBuild != ActorType::ACTOR_NULL)
@@ -2092,6 +2125,9 @@ void GameData::GameDraw()
         DrawText("Vision side: INSECTS", 20, 260, 20, RED);
     else
         DrawText("Vision side: MACHINES", 20, 260, 20, RED);
+
+    DrawText(TextFormat("Creep: %d, food: %d", creepTilesCount, resourcesInsects), 20, 320, 20, RED);
+    DrawText(TextFormat("Zerolayer: %d, energy: %d", energisedTilesCount, resourcesMachines), 20, 380, 20, RED);
 
     DrawFPS(20, 50);
 }
