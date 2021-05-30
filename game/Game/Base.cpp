@@ -51,6 +51,8 @@ void Base::Update()
 
 	Expand();
 
+	SeekForTarget();
+
 	if (game->timeCount == 0)
 	{
 		BuildOrRepair();

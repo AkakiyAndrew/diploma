@@ -20,8 +20,11 @@ enum class State
 	OFFLINE,
 	UNDER_CONSTRUCTION,
 	ATTACKING,
-	GOES,
-	IDLE,
+	GOES, 
+	IDLE, //remove?
+	CHANGING_MODE, //for turrets mount/dismount
+	
+				   
 	//ондслюрэ опн яхярелс юрюйх х яжеохрэ я юмхлюжхеи
 };
 

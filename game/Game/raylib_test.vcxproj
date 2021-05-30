@@ -162,6 +162,7 @@
     <ClCompile Include="Military.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />
     <ClCompile Include="Tumor.cpp" />
+    <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enums.h" />

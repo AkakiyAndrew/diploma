@@ -17,6 +17,8 @@ void Core::Update()
 			//if connected - routine work
 			Expand();
 
+			SeekForTarget();
+
 			if (game->timeCount == 0)
 			{
 				BuildOrRepair();

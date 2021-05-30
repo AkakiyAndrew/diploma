@@ -60,6 +60,9 @@
     <ClCompile Include="Base.cpp">
       <Filter>Исходные файлы\Buildings</Filter>
     </ClCompile>
+    <ClCompile Include="Turret.cpp">
+      <Filter>Исходные файлы\Military</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h">

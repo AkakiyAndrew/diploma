@@ -126,6 +126,18 @@ GameData::GameData()
     {
         {"connectRange", 8 * pixelsPerTile},
     };
+    connectableAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
+    {
+        {"connectRange", 6 * pixelsPerTile},
+    };
+    connectableAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
+    {
+        {"connectRange", 6 * pixelsPerTile},
+    };
+    connectableAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>
+    {
+        {"connectRange", 6 * pixelsPerTile},
+    };
 
     //CONSTRUCTORS ATTRIBUTES
     constructorsAttributes[ActorType::CORE] = std::map<std::string, int>
@@ -138,6 +150,27 @@ GameData::GameData()
         {"buildPower", 20},
         {"buildRange", 8 * pixelsPerTile},
     };
+
+    //TURRETS ATTRIBUTES
+    turretsAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
+    {
+        {"maxCharge", 50},
+        {"chargeRate", 2},
+        {"energyPerShot", 5},
+    };
+    turretsAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
+    {
+        {"maxCharge", 50},
+        {"chargeRate", 2},
+        {"energyPerShot", 5},
+    };
+    turretsAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>
+    {
+        {"maxCharge", 50},
+        {"chargeRate", 2},
+        {"energyPerShot", 5},
+    };
+
 }
 
 bool GameData::isMapLoaded()
@@ -326,9 +359,6 @@ void GameData::setTerrain(Terrain terr)
                     default:
                         mapTerrainMod[x][y] = -1.f;
                         break;
-                    //default:
-                    //    mapTerrainMod[x][y] = 1.f;
-                    //    break;
                     }
                 }
 
@@ -706,6 +736,69 @@ std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
     else
         result[8] = { -1,-1 };
 
+    return result;
+}
+bool GameData::isOnLineOfSight(TileIndex pos1, TileIndex pos2, ActorType unitType)
+{
+    bool result = true;
+    float** mapMod;
+
+    switch (unitType)
+    {
+    case ActorType::LIGHT_TURRET:
+    case ActorType::HEAVY_TURRET:
+        //can shoot only when no mountains on sight
+        mapMod = mapsPathfinding[ActorType::FLYING_INSECT]["mapsTerrainMod"];
+        break;
+    case ActorType::AIRDEFENSE_TURRET:
+        //can shoot everywhere
+        mapMod = mapsPathfinding[ActorType::FLYING_INSECT]["mapsTerrainMod"];
+        break;
+    case ActorType::LIGHT_INSECT:
+    case ActorType::HEAVY_INSECT:
+    case ActorType::FLYING_INSECT:
+        //checking line of sight according to type of insect
+        mapMod = mapsPathfinding[unitType]["mapsTerrainMod"];
+        break;
+    default:
+        break;
+    }
+
+    int x0 = pos1.x;
+    int y0 = pos1.y;
+    int x1 = pos2.x;
+    int y1 = pos2.y;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int x = x0;
+    int y = y0;
+    int n = 1 + dx + dy;
+    int x_inc = (x1 > x0) ? 1 : -1;
+    int y_inc = (y1 > y0) ? 1 : -1;
+    int error = dx - dy;
+    dx *= 2;
+    dy *= 2;
+
+    for (; n > 0; --n)
+    {
+        //checking tile here
+        if (mapMod[x][y] == -1.f)
+            return false;
+
+        if (error > 0)
+        {
+            x += x_inc;
+            error -= dy;
+        }
+        else
+        {
+            y += y_inc;
+            error += dx;
+        }
+    }
+
+    //returns true, if all checks fine
     return result;
 }
 

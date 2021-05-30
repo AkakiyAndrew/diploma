@@ -9,18 +9,6 @@ Constructor::Constructor(GameData* ptr, ActorType type, Vector2 pos, State state
 
 void Constructor::BuildOrRepair()
 {
-    if (target == nullptr)
-    {
-        for (GameActor *unit : game->getActorsInRadius(position, buildRange))
-        {
-            if (unit->getHP() != unit->maxHP && unit->side==this->side)
-            {
-                target = unit;
-                break;
-            }
-        }
-    }
-
     //if have target
     if (target != nullptr)
     {
@@ -44,7 +32,6 @@ void Constructor::BuildOrRepair()
                 target = nullptr;
         }
     }
-    //seeking for target to repair must be in Update()!
 }
 
 bool Constructor::RequestAttachment(Connectable* unit)
@@ -64,6 +51,21 @@ bool Constructor::RequestAttachment(Connectable* unit)
         connectedUnits.push_back(unit);
 
     return result;
+}
+
+void Constructor::SeekForTarget()
+{
+    if (target == nullptr)
+    {
+        for (GameActor* unit : game->getActorsInRadius(position, buildRange))
+        {
+            if (unit->getHP() != unit->maxHP && unit->side == this->side)
+            {
+                target = unit;
+                break;
+            }
+        }
+    }
 }
 
 void Constructor::UnAttach(Connectable* unit)

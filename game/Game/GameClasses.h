@@ -73,6 +73,7 @@ public:
     std::map<ActorType, std::map<std::string, int>> militaryAttributes;
     std::map<ActorType, std::map<std::string, int>> connectableAttributes;
     std::map<ActorType, std::map<std::string, int>> constructorsAttributes;
+    std::map<ActorType, std::map<std::string, int>> turretsAttributes;
 
     //ECONOMICS
     //returns amount of resources, that can be used
@@ -130,6 +131,8 @@ public:
     //returns vector of actors pointers in radius of circle
     std::vector<GameActor*> getActorsInRadius(Vector2 center, float radius);
     GameActor* getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller = nullptr);
+    //returns true, if no obstacles on line of sight for this unit
+    bool isOnLineOfSight(TileIndex pos1, TileIndex pos2, ActorType unitType);
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
@@ -329,6 +332,7 @@ public:
     bool RequestAttachment(Connectable* unit);
     void UnAttach(Connectable* unit);
     void BuildOrRepair();
+    void SeekForTarget();
     void DrawBuildingRay();
 };
 
@@ -390,11 +394,30 @@ protected:
     Militaty(GameData* ptr, ActorType type, Vector2 pos, State state);
     ~Militaty();
 
-    void Attack();
     void SeekForEnemy();
+    void Attack();
     void Move();
     void Reload();
     void Targeting();
+};
+
+class Turret : public Militaty, public Connectable
+{
+    bool isMounted;
+    int maxCharge;
+    int charge; //amount of accumulated energy
+    int chargeRate; //how much energy takes per second
+    int energyPerShot;
+
+    void Recharge();
+    void UnMount();
+    void Mount();
+
+    //common for all of turrets (make only Attack() uniq):
+    void Update();
+    //void Draw();
+    Turret(GameData* ptr, ActorType type, Vector2 pos, State state);
+    //~Turret();
 };
 
 class LightInsect : public Militaty
