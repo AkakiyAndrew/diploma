@@ -124,4 +124,16 @@ inline int Vector2Angle(Vector2 v1, Vector2 v2)
 	return result;
 }
 
+inline float Vector2Distance(Vector2 v1, Vector2 v2)
+{
+	float result = sqrtf((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y));
+	return result;
+}
+
+inline float Vector2Length(Vector2 v)
+{
+	float result = sqrtf((v.x * v.x) + (v.y * v.y));
+	return result;
+}
+
 //TODO: make ENUM for attributes for faster geting from std::maps

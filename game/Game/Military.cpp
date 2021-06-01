@@ -24,7 +24,9 @@ void Militaty::SeekForEnemy()
 
     for (GameActor* actor : game->getActorsInRadius(position, seekRange))
     {
-        if (actor->side == enemy && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type))
+        if (actor->side == enemy 
+            && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type)
+            /*&& game->getTileIndex(actor->getPosition())*/) //FOG OF WAR?
         {
             target = actor;
             break;
@@ -38,6 +40,33 @@ void Militaty::Reload()
         cooldownRemain--;
 }
 
+void Militaty::Targeting()
+{
+    Vector2 targetPosition = target->getPosition();
+    int destinationRotation = atan2f(position.y - targetPosition.y, position.x - targetPosition.x) + PI;
+
+    if (destinationRotation != angle)
+    {
+        if (destinationRotation > angle)
+        {
+            if (angle < destinationRotation - PI)
+                angle -= rotationSpeed;
+            else
+                angle += rotationSpeed;
+        }
+        else //if (destinationRotation < topRotation)
+        {
+            if (angle > destinationRotation + PI)
+                angle += rotationSpeed;
+            else
+                angle -= rotationSpeed;
+        }
+
+        if (angle > PI * 2.0f) angle = 0;
+        if (angle < 0) angle = PI * 2.0f;
+    }
+}
+
 void Militaty::Move()
 {
     float** terrainMod = game->mapsPathfinding[type]["mapsTerrainMod"];
@@ -46,9 +75,22 @@ void Militaty::Move()
     //TODO: move method to new Insect class?
     positionIndex = game->getTileIndex(position);
 
-    game->revealTerritory(positionIndex, sightRange, side);
+    if (target == nullptr)
+    {
+        //if no enemy in sight - moving on vector field
+        velocityVector = game->vectorFields[type][positionIndex.x][positionIndex.y];
+    }
+    else
+    {
+        //if there is enemy - move toward him
+        Vector2 targetLocation = target->getPosition();
 
-    velocityVector = game->vectorFields[type][positionIndex.x][positionIndex.y];
+        Vector2 buf = { static_cast<float>(targetLocation.x - position.x), static_cast<float>(targetLocation.y - position.y) };
+        //if (buf.x != 0 || buf.y != 0)
+        //velocityVector = { buf.x / fabsf(buf.x < buf.y ? buf.y : buf.x), buf.y / fabsf(buf.x < buf.y ? buf.y : buf.x) };
+        velocityVector = { buf.x / Vector2Length(buf), buf.y / Vector2Length(buf) };
+    }
+
     float speedMod = terrainMod[positionIndex.x][positionIndex.y];
 
     //creep speed mod
@@ -122,8 +164,8 @@ void Militaty::Move()
     velocityVector.x+= steering.x;
     velocityVector.y+= steering.y;
 
-    std::clamp <float>(velocityVector.x, -speed, speed);
-    std::clamp <float>(velocityVector.y, -speed, speed);
+    velocityVector.x = std::clamp <float>(velocityVector.x, -speed, speed);
+    velocityVector.y = std::clamp <float>(velocityVector.y, -speed, speed);
 
     if (speedMod > 0)
     {

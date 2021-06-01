@@ -193,50 +193,8 @@ public:
     {        
     }
 
-    //draw bar with HP
-    void drawHP() 
-    {
-        if (HP != maxHP)
-        {
-            DrawRectangle(position.x - size/2, position.y + size, size, 2, RED);
-            if(HP!=0)
-                DrawRectangle(position.x - size/2, position.y + size, size * ((float)HP / (float)maxHP), 2, GREEN);
-        }
-    };
-
-    State getState() { return state; };
-    int getHP() { return this->HP; }
-    Vector2 getPosition() { return this->position; }
-    TileIndex getPositionIndex() { return this->positionIndex; }
-    void Hit(int damage, ActorType hitBy)
-    {
-        damage -= armor;
-        this->HP -= damage;
-        if (this->HP <= 0)
-            this->Destroy();
-    }
-    
-    //for building construction, repair (and insects units and buildings regeneration?)
-    int RestoreHP(int amount)
-    {
-        int restored;
-
-        if ((this->HP + amount) > this->maxHP)
-        {
-            restored = this->maxHP - this->HP;
-            this->HP = this->maxHP;
-        }
-        else
-        {
-            restored = amount;
-            this->HP += amount;
-        }
-            
-        return restored;
-    }
-
     //when spawning new unit, use GameData unit settings and ActorType for seting mapHP, size, etc. State defines currentHP and, maybe, something else
-    GameActor(GameData *ptr, ActorType type, Vector2 pos, State state)
+    GameActor(GameData* ptr, ActorType type, Vector2 pos, State state)
         :game(ptr), type(type), position(pos), state(state)
     {
         size = ptr->genericAttributes[type]["size"];
@@ -249,9 +207,10 @@ public:
         {
         case State::ONLINE:
         case State::OFFLINE:
+        case State::GOES:
             HP = maxHP;
             break;
-        
+
         case State::UNDER_CONSTRUCTION:
             HP = 0;
             break;
@@ -284,6 +243,50 @@ public:
         this->game->lastID++;
 
         ptr->revealTerritory(positionIndex, sightRange, side);
+
+        sprite = game->getUnitAnimation(type, state);
+    }
+
+    //draw bar with HP
+    void drawHP() 
+    {
+        if (HP != maxHP)
+        {
+            DrawRectangle(position.x - size/2, position.y + size, size, 2, RED);
+            if(HP!=0)
+                DrawRectangle(position.x - size/2, position.y + size, size * ((float)HP / (float)maxHP), 2, GREEN);
+        }
+    };
+
+    State getState() { return state; };
+    int getHP() { return this->HP; }
+    Vector2 getPosition() { return this->position; }
+    TileIndex getPositionIndex() { return this->positionIndex; }
+    void Hit(int damage, ActorType hitBy)
+    {
+        damage -= armor;
+        this->HP -= damage;
+        if (this->HP <= 0)
+            this->Destroy();
+    }
+    
+    //for building construction, repair and insects units and buildings regeneration
+    int RestoreHP(int amount)
+    {
+        int restored;
+
+        if ((this->HP + amount) > this->maxHP)
+        {
+            restored = this->maxHP - this->HP;
+            this->HP = this->maxHP;
+        }
+        else
+        {
+            restored = amount;
+            this->HP += amount;
+        }
+            
+        return restored;
     }
 };
 
@@ -404,7 +407,7 @@ protected:
     void Attack();
     void Move();
     void Reload(); //IN TURRETS USE ONLY WHEN charge>=energyPerShot!
-    void Targeting();
+    void Targeting(); //turning actor in direction of enemy
 };
 
 class Insect : public Militaty

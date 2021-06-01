@@ -117,8 +117,8 @@ GameData::GameData()
 
     //MILITARY ACTORS ATTRIBUTES
     militaryAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
-        {"seekRange", 8},
-        {"attackRange", 2},
+        {"seekRange", 8 * pixelsPerTile},
+        {"attackRange", 2 * pixelsPerTile},
         {"speed", 2},
         {"damage", 7},
         {"rotationSpeed", 4},
@@ -1497,7 +1497,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
                 this,
                 ActorType::LIGHT_INSECT,
                 position,
-                State::ONLINE)
+                State::GOES)
         );
         break;
     case ActorType::HEAVY_INSECT:

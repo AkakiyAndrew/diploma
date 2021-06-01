@@ -3,26 +3,49 @@
 Insect::Insect(GameData* ptr, ActorType type, Vector2 pos, State state)
     :Militaty(ptr, type, pos, state)
 {
-
+    
 }
 
 void Insect::Update()
 {
     switch (state)
     {
-    case State::ONLINE:
-        state = State::GOES;
-        sprite = game->getUnitAnimation(type, state);
-        break;
     case State::ATTACKING:
+        if (target == nullptr)
+        {
+            //if target destroyed
+            state = State::GOES;
+        }
+        else
+        {
+            //if not - hit target and reset cooldown
+            Targeting();
+            target->Hit(damage, type);
+            cooldownRemain = cooldownDuration;
+        }
+
         break;
     case State::GOES:
         Move();
-        break;
-    default:
+        game->revealTerritory(positionIndex, sightRange, side);
+
+        //if no locked target - seek for it
+        if (target == nullptr)
+            SeekForEnemy();
+        else
+        {
+            //if there is target and distance between it and actor less than attack distance
+            if (Vector2Distance(position, target->getPosition())<=attackRange)
+            {
+                state = State::ATTACKING;
+            }
+        }
+
         break;
     }
     
+    Reload();
+
     if (game->timeCount % 15 == 0)
         currentFrame++;
     if (currentFrame >= sprite.framesAmount)
@@ -40,16 +63,6 @@ void Insect::Draw()
         (float)angle, //rotation
         WHITE);
 
-    //DrawCircle(position.x, position.y, size, ORANGE);
-
-    //float** terrainMod = game->mapsPathfinding[type]["mapsTerrainMod"];
-    ////TODO: move method to new Insect class?
-    //TileIndex tile = game->getTileIndex(position);
-    ////collision avoidance
-    //Vector2 ahead = { position.x + velocityVector.x * 4.f, position.y + velocityVector.y * 4.f };
-    //DrawCircle(ahead.x, ahead.y, 1, RED);
-    //DrawCircleLines(ahead.x, ahead.y, size, RED);
-    //DrawCircle(position.x, position.y, 1, ORANGE);
     DrawCircleLines(position.x, position.y, size, ORANGE);
     DrawCircle(position.x + velocityVector.x, position.y + velocityVector.y, 1, BLUE);
 }
