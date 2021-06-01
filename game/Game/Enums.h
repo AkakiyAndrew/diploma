@@ -20,7 +20,7 @@ enum class State
 	OFFLINE,
 	UNDER_CONSTRUCTION,
 	ATTACKING,
-	GOES, 
+	GOES, //remove?
 	IDLE, //remove?
 	CHANGING_MODE, //for turrets mount/dismount
 	
@@ -112,10 +112,16 @@ struct Animation
 {
 	Texture2D* frames;
 
-	int currentFrame;
 	int framesAmount;
 	int width = 0;
 	int height = 0;
 };
+
+inline int Vector2Angle(Vector2 v1, Vector2 v2)
+{
+	int result = atan2f(v2.y - v1.y, v2.x - v1.x) * (180.0f / PI);
+	if (result < 0) result += 360.0f;
+	return result;
+}
 
 //TODO: make ENUM for attributes for faster geting from std::maps

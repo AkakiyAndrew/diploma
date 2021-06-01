@@ -7,18 +7,42 @@ Militaty::Militaty(GameData* ptr, ActorType type, Vector2 pos, State state)
     attackRange = ptr->militaryAttributes[type]["attackRange"];
     speed = ptr->militaryAttributes[type]["speed"];
     damage = ptr->militaryAttributes[type]["damage"];
-    cooldownCount = ptr->militaryAttributes[type]["cooldownCount"];
+    cooldownDuration = ptr->militaryAttributes[type]["cooldownDuration"];
     rotationSpeed = ptr->militaryAttributes[type]["rotationSpeed"];
+
+    cooldownRemain = cooldownDuration;
 }
 
-Militaty::~Militaty()
+void Militaty::SeekForEnemy()
 {
+    //what actors will be looking for
+    Side enemy;
+    if (side == Side::INSECTS)
+        enemy = Side::MACHINES;
+    else
+        enemy = Side::INSECTS;
 
+    for (GameActor* actor : game->getActorsInRadius(position, seekRange))
+    {
+        if (actor->side == enemy && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type))
+        {
+            target = actor;
+            break;
+        }
+    }
+}
+
+void Militaty::Reload()
+{
+    if (cooldownRemain > 0)
+        cooldownRemain--;
 }
 
 void Militaty::Move()
 {
     float** terrainMod = game->mapsPathfinding[type]["mapsTerrainMod"];
+    Vector2 previousPosition = position;
+    
     //TODO: move method to new Insect class?
     positionIndex = game->getTileIndex(position);
 
@@ -140,4 +164,12 @@ void Militaty::Move()
         position.x = game->getMaxWidth() * game->pixelsPerTile - size;
     if (position.y > game->getMaxHeight() * game->pixelsPerTile - size)
         position.y = game->getMaxHeight() * game->pixelsPerTile - size;
+
+
+    angle = Vector2Angle(previousPosition, position);
+}
+
+Militaty::~Militaty()
+{
+
 }

@@ -22,7 +22,6 @@ GameData::GameData()
     palette = new Color[]{ DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
 
     //TILESET TEXTURES
-    tileset = new Image[8];
 
     const char* filenames[] = { 
         "textures\\tileset\\LAKE.bmp",
@@ -37,23 +36,13 @@ GameData::GameData()
 
     for (int i = 0; i < 8; i++)
     {
-        tileset[i] = LoadImage(filenames[i]);
-        ImageFormat(&tileset[i], UNCOMPRESSED_R5G6B5);
+        tilesetTex[i] = LoadTexture(filenames[i]);
     }
-
-    for (int i = 0; i < 8; i++)
-    {
-        tilesetTex[i] = LoadTextureFromImage(tileset[i]);
-    }
-
-    for (int i = 0; i < 7; i++)
-        UnloadImage(tileset[i]);
 
     //EXPANSION TEXTURES
     expansionInsectsTexture = LoadTexture("textures\\source\\creep_1.png");
     expansionMachinesAnimation = {
         new Texture2D[15],
-        0,
         15
     };
 
@@ -64,6 +53,21 @@ GameData::GameData()
 
     expansionMachinesAnimation.width = expansionMachinesAnimation.frames[0].width;
     expansionMachinesAnimation.height = expansionMachinesAnimation.frames[0].height;
+
+    //UNIT SPRITES
+
+    //загрузку проводить циклом по всем нужным юнитам, везде одно и то же, подставлять форматом текста и называть файлы по типу "unitType_unitState_frameNum.png"
+    unitAnimations[ActorType::LIGHT_INSECT][State::GOES] =
+    {
+        new Texture2D[5],
+        5
+    };
+
+    for (int i = 0; i < 5; i++)
+    {
+        unitAnimations[ActorType::LIGHT_INSECT][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\lightInsect_goes_%d.png", i));
+    }
+
 
     //TODO: texture files loading, units properties
 
@@ -117,8 +121,8 @@ GameData::GameData()
         {"attackRange", 2},
         {"speed", 2},
         {"damage", 7},
-        {"cooldownCount", 20},
         {"rotationSpeed", 4},
+        {"cooldownDuration", 120}, //ticks to reload
     };
 
     //CONNECTABLE ACTORS ATTRIBUTES
@@ -741,7 +745,7 @@ std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
 bool GameData::isOnLineOfSight(TileIndex pos1, TileIndex pos2, ActorType unitType)
 {
     bool result = true;
-    float** mapMod;
+    float** mapMod = nullptr;
 
     switch (unitType)
     {
@@ -1489,7 +1493,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         break;
     case ActorType::LIGHT_INSECT:
         unitsList.push_back(
-            new LightInsect(
+            new Insect(
                 this,
                 ActorType::LIGHT_INSECT,
                 position,
@@ -2047,10 +2051,10 @@ void GameData::GameUpdate()
     //ANIMATION
     if (timeCount % 15 == 0)
     {
-        expansionMachinesAnimation.currentFrame++;
+        currentFrame++;
 
-        if (expansionMachinesAnimation.currentFrame >= expansionMachinesAnimation.framesAmount)
-            expansionMachinesAnimation.currentFrame = 0;
+        if (currentFrame >= expansionMachinesAnimation.framesAmount)
+            currentFrame = 0;
     }
 }
 
@@ -2122,7 +2126,7 @@ void GameData::GameDraw()
                                 pixelsPerTile };
 
                             DrawTextureRec(
-                                expansionMachinesAnimation.frames[expansionMachinesAnimation.currentFrame],
+                                expansionMachinesAnimation.frames[currentFrame],
                                 buf,
                                 Vector2{ x * pixelsPerTile, y * pixelsPerTile, },
                                 WHITE);

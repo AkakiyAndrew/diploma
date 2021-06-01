@@ -48,7 +48,7 @@
     <ClCompile Include="Military.cpp">
       <Filter>Исходные файлы\Military</Filter>
     </ClCompile>
-    <ClCompile Include="LightInsect.cpp">
+    <ClCompile Include="Insect.cpp">
       <Filter>Исходные файлы\Military</Filter>
     </ClCompile>
     <ClCompile Include="Constructor.cpp">

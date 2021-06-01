@@ -19,6 +19,8 @@ private:
     Texture2D terrainTexture;
     Texture2D expansionInsectsTexture;
     Animation expansionMachinesAnimation;
+    int currentFrame = 0;
+    std::map<ActorType, std::map<State, Animation>> unitAnimations;
     Color* palette;
     
     std::vector<GameActor*> unitsList;
@@ -74,6 +76,8 @@ public:
     std::map<ActorType, std::map<std::string, int>> connectableAttributes;
     std::map<ActorType, std::map<std::string, int>> constructorsAttributes;
     std::map<ActorType, std::map<std::string, int>> turretsAttributes;
+
+    Animation getUnitAnimation(ActorType type, State state) { return unitAnimations[type][state]; }
 
     //ECONOMICS
     //returns amount of resources, that can be used
@@ -155,8 +159,8 @@ public:
 
 class GameActor {
 protected:
-    Animation* sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
-    unsigned short animationFrame; //current animation 
+    Animation sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
+    unsigned short currentFrame; //current animation 
 
     Vector2 position;
     TileIndex positionIndex;
@@ -203,6 +207,7 @@ public:
     State getState() { return state; };
     int getHP() { return this->HP; }
     Vector2 getPosition() { return this->position; }
+    TileIndex getPositionIndex() { return this->positionIndex; }
     void Hit(int damage, ActorType hitBy)
     {
         damage -= armor;
@@ -382,7 +387,8 @@ protected:
     int attackRange;
     int speed;
     int damage;
-    int cooldownCount; //amount of ticks, need to attack
+    int cooldownDuration; //how much ticks need to recharge
+    int cooldownRemain; //amount of ticks, remains to reload
     int rotationSpeed;
     int angle; //float?
     Vector2 velocityVector;
@@ -397,8 +403,17 @@ protected:
     void SeekForEnemy();
     void Attack();
     void Move();
-    void Reload();
+    void Reload(); //IN TURRETS USE ONLY WHEN charge>=energyPerShot!
     void Targeting();
+};
+
+class Insect : public Militaty
+{
+public:
+    Insect(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void Update();
+    void Draw();
+    void Destroy();   
 };
 
 class Turret : public Militaty, public Connectable
@@ -420,11 +435,3 @@ class Turret : public Militaty, public Connectable
     //~Turret();
 };
 
-class LightInsect : public Militaty
-{
-public:
-    LightInsect(GameData* ptr, ActorType type, Vector2 pos, State state);
-    void Update();
-    void Draw();
-    void Destroy();
-};
