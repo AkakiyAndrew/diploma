@@ -20,8 +20,13 @@ void Insect::Update()
         {
             //if not - hit target and reset cooldown
             Targeting();
-            game->Hit(target, damage, type);
-            cooldownRemain = cooldownDuration;
+            if (Vector2Distance(position, target->getPosition()) <= attackRange)
+            {
+                game->Hit(target, damage, type);
+                cooldownRemain = cooldownDuration;
+            }
+            else
+                state = State::GOES;
         }
 
         break;

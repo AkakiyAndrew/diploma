@@ -188,7 +188,8 @@ void GameData::clearMap()
 
     for (GameActor *actor : this->unitsList)
     {
-        IDs.push_back(actor->ID);
+        if(actor!=nullptr)
+            IDs.push_back(actor->ID);
     }
     
     for (unsigned int ID : IDs)
@@ -1523,12 +1524,9 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             ActorType::CORE,
             position,
             State::UNDER_CONSTRUCTION);
-        unitsList.push_back(
-            buf_building
-        );
-        expansionUnitsList_Machines.push_back(
-            buf_building
-        );
+        unitsList.push_back(buf_building);
+        expansionUnitsList_Machines.push_back(buf_building);
+
         break;
     case ActorType::BASE:
         buf_building = new Base(
@@ -1536,12 +1534,10 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             ActorType::BASE,
             position,
             State::ONLINE);
-        unitsList.push_back(
-            buf_building
-        );
-        expansionUnitsList_Machines.push_back(
-            buf_building
-        );
+        unitsList.push_back(buf_building);
+        expansionUnitsList_Machines.push_back(buf_building);
+
+        break;
     case ActorType::HIVE:
         break;
     case ActorType::TUMOR:
@@ -1550,19 +1546,17 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             ActorType::TUMOR,
             position,
             State::ONLINE);
-        unitsList.push_back(
-            buf_building
-        );
-        expansionUnitsList_Insects.push_back(
-            buf_building
-        );
+        unitsList.push_back(buf_building);
+        expansionUnitsList_Insects.push_back(buf_building);
 
-        //in any case nulify wantToBuild
-        wantToBuild = ActorType::ACTOR_NULL;
         break;
     default:
         break;
     }
+
+    //in any case nulify wantToBuild
+    wantToBuild = ActorType::ACTOR_NULL;
+    
 }
 GameActor* GameData::getActorInTile(int x, int y)
 {
@@ -1570,11 +1564,14 @@ GameActor* GameData::getActorInTile(int x, int y)
     Vector2 pos;
     for (GameActor* actor : unitsList)
     {
-        pos = actor->getPosition();
-        Vector2 test = { pos.x / pixelsPerTile, pos.y / pixelsPerTile };
-        if (static_cast<int>(pos.x / pixelsPerTile) == x && static_cast<int>(pos.y / pixelsPerTile) == y)
+        if (actor != nullptr)
         {
-            result = actor;
+            pos = actor->getPosition();
+            Vector2 test = { pos.x / pixelsPerTile, pos.y / pixelsPerTile };
+            if (static_cast<int>(pos.x / pixelsPerTile) == x && static_cast<int>(pos.y / pixelsPerTile) == y)
+            {
+                result = actor;
+            }
         }
     }
     return result;
@@ -1585,23 +1582,26 @@ std::vector<GameActor*> GameData::getActorsInRadius(Vector2 center, float radius
 
     for (GameActor* actor: unitsList)
     {
-        if (CheckCollisionPointCircle(actor->getPosition(), center, radius))
+        if (actor != nullptr)
         {
-            result.push_back(actor);
+            if (CheckCollisionPointCircle(actor->getPosition(), center, radius))
+            {
+                result.push_back(actor);
+            }
         }
     }
 
     return result;
 }
-GameActor* GameData::getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller)
+GameActor* GameData::getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, GameActor* caller, ActorType type)
 {
     GameActor* result = nullptr;
     double minDistance;
     double buf;
-
+    //TODO: if type==ActorType::ACTOR_NULL, do search"by default"
     for (GameActor* actor : actors)
     {
-        if (actor->type == type && actor!=caller)
+        if ((actor->type == type || type == ActorType::ACTOR_NULL) && actor!=caller)
         {
             if (result == nullptr) //if no actor found yet
             {
@@ -1627,15 +1627,18 @@ void GameData::removeActor(unsigned int ID)
 {
     std::vector<GameActor*>::iterator iter;
     GameActor* buf = nullptr;
-    for (iter = unitsList.begin(); iter != unitsList.end(); )
+    for (iter = unitsList.begin(); iter != unitsList.end(); iter++)
     {
-        if ((*iter)->ID == ID)
+        if ((*iter) != nullptr)
         {
-            buf = *iter;
-            iter = unitsList.erase(iter);
+            if ((*iter)->ID == ID)
+            {
+                buf = *iter;
+                //iter = unitsList.erase(iter);
+                (*iter) = nullptr;
+                break;
+            }
         }
-        else
-            iter++;
     }
 
     //seek in insects expansion units
@@ -2026,11 +2029,27 @@ void GameData::GameUpdate()
         addActor(wantToBuild, position, State::ONLINE);
     }
 
-    //if(timeCount %30==0) //slowing down
-    for (GameActor* actor : this->unitsList)
+    std::vector<GameActor*>::iterator iter;
+    GameActor* buf = nullptr;
+    for (iter = unitsList.begin(); iter != unitsList.end(); )
     {
-        actor->Update();
+        if ((*iter) == nullptr)
+        {
+            iter = unitsList.erase(iter);
+        }
+        else
+        {
+            (*iter)->Update();
+            iter++;
+        }
     }
+
+    //if(timeCount %30==0) //slowing down
+    //for (GameActor* actor : this->unitsList)
+    //{
+    //    //REMOVE ALL THE nullptr ACTOR POINTERS (iterator using)
+    //    actor->Update();
+    //}
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
     {
@@ -2252,7 +2271,8 @@ void GameData::GameDraw()
     for (GameActor* actor : this->unitsList)
     {
         //TODO: checking, is actor inside of screen rectangle (render it or not)
-        actor->Draw();
+        if(actor!=nullptr) //dont need this?
+            actor->Draw();
     }
 
     EndMode2D();

@@ -137,7 +137,7 @@ public:
     GameActor* getActorInTile(int x, int y);
     //returns vector of actors pointers in radius of circle
     std::vector<GameActor*> getActorsInRadius(Vector2 center, float radius);
-    GameActor* getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, ActorType type, GameActor* caller = nullptr);
+    GameActor* getNearestSpecificActor(Vector2 position, std::vector<GameActor*> actors, GameActor* caller, ActorType type = ActorType::ACTOR_NULL);
     //returns true, if no obstacles on line of sight for this unit
     bool isOnLineOfSight(TileIndex pos1, TileIndex pos2, ActorType unitType);
 

@@ -24,16 +24,22 @@ void Militaty::SeekForEnemy()
     else
         enemy = Side::INSECTS;
 
+    std::vector<GameActor*> buf;
+
     for (GameActor* actor : game->getActorsInRadius(position, seekRange)) // TODO: seek for nearest?
     {
         if (actor->side == enemy 
             && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type)
             /*&& game->getTileIndex(actor->getPosition())*/) //FOG OF WAR?
         {
-            target = actor;
-            break;
+            buf.push_back(actor);
+            /*target = actor;
+            break;*/
         }
     }
+
+    if (buf.size() != 0)
+        target = game->getNearestSpecificActor(position, buf, this);
 }
 
 void Militaty::Reload()
@@ -109,7 +115,7 @@ void Militaty::Move()
     Vector2 steering = { 0.f, 0.f };
 
     //UNIT STEERING AHEAD
-    GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), type, this);
+    GameActor* nearestObstacle = game->getNearestSpecificActor(ahead, game->getActorsInRadius(ahead, size), this, type);
     if (nearestObstacle != nullptr)
     {
         float R = sqrt(pow(ahead.x - nearestObstacle->getPosition().x, 2) + pow(ahead.y - nearestObstacle->getPosition().y, 2));
