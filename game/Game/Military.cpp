@@ -15,6 +15,8 @@ Militaty::Militaty(GameData* ptr, ActorType type, Vector2 pos, State state)
 
 void Militaty::SeekForEnemy()
 {
+    target = nullptr;
+
     //what actors will be looking for
     Side enemy;
     if (side == Side::INSECTS)
@@ -22,7 +24,7 @@ void Militaty::SeekForEnemy()
     else
         enemy = Side::INSECTS;
 
-    for (GameActor* actor : game->getActorsInRadius(position, seekRange))
+    for (GameActor* actor : game->getActorsInRadius(position, seekRange)) // TODO: seek for nearest?
     {
         if (actor->side == enemy 
             && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type)

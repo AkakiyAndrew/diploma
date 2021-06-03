@@ -8,6 +8,7 @@ class GameActor;
 class Building;
 class Constructor;
 class Connectable;
+class Militaty;
 
 class GameData
 {
@@ -26,6 +27,7 @@ private:
     std::vector<GameActor*> unitsList;
     std::vector<Building*> expansionUnitsList_Insects;
     std::vector<Building*> expansionUnitsList_Machines;
+    std::vector<Militaty*> militaryUnitsList;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -101,6 +103,8 @@ public:
 
     //recalculate state of expansion tiles
     void recalculateExpansion(Side side);
+    //if some unit dies, recalculate targets for opposite side
+    void recalculateMilitaryTargets(Side side);
 
     //VECTOR PATHFINDING
     //pre-calculated matrix with neighbors indices
@@ -115,7 +119,6 @@ public:
     //reveals fog of war in circle with radius (in tiles) around TileIndex position
     void revealTerritory(TileIndex position, int radius, Side side);
 
-    
     TerrainType getTerrainType(int x, int y); //{return this->mapTerrain[x][y]};
     bool closed = false;
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
@@ -140,6 +143,7 @@ public:
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
+    void Hit(GameActor* target, int damage, ActorType hitBy); //return true, if actor destroyed by hit
 
     void setTerrain(Terrain);
     bool isMapLoaded();
@@ -182,6 +186,9 @@ public:
     int size;
     int armor;
     int cost;
+
+    int inBattleCounter = 0;
+    bool inBattle = false; //if in battle - cant be repaired
 
     //int buildCount; //just tune buildRate in cores and base
     unsigned int sightRange; //при создании неподвижного актера единожды разведывать туман войны, для military(и турелей в мобильном режиме) обновлять каждый тик (или каждый переход на новую клетку)
@@ -257,18 +264,20 @@ public:
                 DrawRectangle(position.x - size/2, position.y + size, size * ((float)HP / (float)maxHP), 2, GREEN);
         }
     };
-
-    State getState() { return state; };
+    void isInBattleCheck() 
+    {
+        inBattleCounter--;
+        if (inBattleCounter <= 0)
+        {
+            inBattleCounter = 0;
+            inBattle = false;
+        }
+    }
+    State getState() { return state; }
     int getHP() { return this->HP; }
+    void setHP(int amount) { this->HP = amount; }
     Vector2 getPosition() { return this->position; }
     TileIndex getPositionIndex() { return this->positionIndex; }
-    void Hit(int damage, ActorType hitBy)
-    {
-        damage -= armor;
-        this->HP -= damage;
-        if (this->HP <= 0)
-            this->Destroy();
-    }
     
     //for building construction, repair and insects units and buildings regeneration
     int RestoreHP(int amount)
@@ -396,27 +405,30 @@ protected:
     int angle; //float?
     Vector2 velocityVector;
 
-    //int type
     GameActor* target;
     ActorType targetPriority;
 
     Militaty(GameData* ptr, ActorType type, Vector2 pos, State state);
     ~Militaty();
-
-    void SeekForEnemy();
-    void Attack();
+    
+    virtual void Attack() = 0;
     void Move();
     void Reload(); //IN TURRETS USE ONLY WHEN charge>=energyPerShot!
     void Targeting(); //turning actor in direction of enemy
+    void DrawReloadBar();
+
+public:
+    void SeekForEnemy();
 };
 
 class Insect : public Militaty
 {
 public:
     Insect(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void Attack();
     void Update();
     void Draw();
-    void Destroy();   
+    void Destroy();
 };
 
 class Turret : public Militaty, public Connectable
@@ -430,6 +442,8 @@ class Turret : public Militaty, public Connectable
     void Recharge();
     void UnMount();
     void Mount();
+    void DrawChargeBar();
+    void Attack();
 
     //common for all of turrets (make only Attack() uniq):
     void Update();

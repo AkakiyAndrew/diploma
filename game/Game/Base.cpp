@@ -53,6 +53,7 @@ void Base::Update()
 
 	SeekForTarget();
 
+	isInBattleCheck();
 	if (game->timeCount == 0)
 	{
 		BuildOrRepair();

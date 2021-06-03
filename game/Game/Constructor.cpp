@@ -59,10 +59,13 @@ void Constructor::SeekForTarget()
     {
         for (GameActor* unit : game->getActorsInRadius(position, buildRange))
         {
-            if (unit->getHP() != unit->maxHP && unit->side == this->side)
+            if (!unit->inBattle) //check, if this unit attacked
             {
-                target = unit;
-                break;
+                if (unit->getHP() != unit->maxHP && unit->side == this->side)
+                {
+                    target = unit;
+                    break;
+                }
             }
         }
     }

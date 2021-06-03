@@ -20,7 +20,7 @@ void Insect::Update()
         {
             //if not - hit target and reset cooldown
             Targeting();
-            target->Hit(damage, type);
+            game->Hit(target, damage, type);
             cooldownRemain = cooldownDuration;
         }
 
@@ -51,6 +51,11 @@ void Insect::Update()
     if (currentFrame >= sprite.framesAmount)
         currentFrame = 0;
     //Move();
+}
+
+void Insect::Attack()
+{
+
 }
 
 void Insect::Draw()

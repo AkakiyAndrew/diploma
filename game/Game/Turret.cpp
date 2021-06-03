@@ -20,8 +20,15 @@ void Turret::Recharge()
     }
 }
 
+void Turret::Attack()
+{
+
+}
+
 void Turret::Update()
 {
     if (parent != nullptr)
         Recharge();
+
+    isInBattleCheck();
 }

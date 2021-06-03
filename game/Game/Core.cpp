@@ -53,6 +53,7 @@ void Core::Update()
 	default:
 		break;
 	}
+	isInBattleCheck();
 }
 
 //dark magic

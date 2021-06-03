@@ -826,6 +826,15 @@ void GameData::recalculateExpansion(Side side)
         }
     }
 }
+void GameData::recalculateMilitaryTargets(Side side)
+{
+    for (Militaty* unit : militaryUnitsList)
+    {
+        if (unit->side == side)
+            unit->SeekForEnemy();
+    }
+}
+
 
 void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
@@ -1482,7 +1491,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 
 void GameData::addActor(ActorType type, Vector2 position, State state)
 {
-    Building* buf_unit;
+    Building* buf_building;
+    Militaty* buf_military;
+
     switch (wantToBuild)
     {
     case ActorType::LIGHT_TURRET:
@@ -1492,13 +1503,14 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     case ActorType::AIRDEFENSE_TURRET:
         break;
     case ActorType::LIGHT_INSECT:
-        unitsList.push_back(
-            new Insect(
-                this,
-                ActorType::LIGHT_INSECT,
-                position,
-                State::GOES)
-        );
+        buf_military = new Insect(
+            this,
+            ActorType::LIGHT_INSECT,
+            position,
+            State::GOES);
+
+        unitsList.push_back(buf_military);
+        militaryUnitsList.push_back(buf_military);
         break;
     case ActorType::HEAVY_INSECT:
         break;
@@ -1506,45 +1518,43 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         break;
     case ActorType::CORE:
         
-        buf_unit = new Core(
+        buf_building = new Core(
             this,
             ActorType::CORE,
             position,
             State::UNDER_CONSTRUCTION);
         unitsList.push_back(
-            buf_unit
+            buf_building
         );
         expansionUnitsList_Machines.push_back(
-            buf_unit
+            buf_building
         );
         break;
     case ActorType::BASE:
-        Building* buf_unit;
-        buf_unit = new Base(
+        buf_building = new Base(
             this,
             ActorType::BASE,
             position,
             State::ONLINE);
         unitsList.push_back(
-            buf_unit
+            buf_building
         );
         expansionUnitsList_Machines.push_back(
-            buf_unit
+            buf_building
         );
     case ActorType::HIVE:
         break;
     case ActorType::TUMOR:
-        Building* buf_tumor;
-        buf_tumor = new Tumor(
+        buf_building = new Tumor(
             this,
             ActorType::TUMOR,
             position,
             State::ONLINE);
         unitsList.push_back(
-            buf_tumor
+            buf_building
         );
         expansionUnitsList_Insects.push_back(
-            buf_tumor
+            buf_building
         );
 
         //in any case nulify wantToBuild
@@ -1647,9 +1657,41 @@ void GameData::removeActor(unsigned int ID)
             expandIter++;
     }
 
+    std::vector<Militaty*>::iterator militaryIter;
+    for (militaryIter = militaryUnitsList.begin(); militaryIter != militaryUnitsList.end(); )
+    {
+        if ((*militaryIter)->ID == ID)
+            militaryIter = militaryUnitsList.erase(militaryIter);
+        else
+            militaryIter++;
+    }
+
     if(buf!=nullptr)
         delete buf;
 }
+void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
+{
+    bool result = false;
+    damage -= target->armor;
+    target->setHP(target->getHP() - damage);
+    target->inBattle = true;
+    target->inBattleCounter = 60;
+
+    if (target->getHP() <= 0)
+    {
+        Side opposite;
+        if (target->side == Side::INSECTS)
+            opposite = Side::MACHINES;
+        else
+            opposite = Side::INSECTS;
+
+        removeActor(target->ID);
+        recalculateMilitaryTargets(opposite);
+        result = true;
+    }
+    //TODO: update damage maps here
+}
+
 
 void GameData::revealTerritory(TileIndex position, int radius, Side side)
 {
