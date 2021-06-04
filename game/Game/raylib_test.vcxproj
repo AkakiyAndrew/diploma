@@ -157,6 +157,7 @@
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="GameClasses.cpp" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="HeavyTurret.cpp" />
     <ClCompile Include="Insect.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Military.cpp" />

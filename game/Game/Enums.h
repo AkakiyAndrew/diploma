@@ -20,7 +20,7 @@ enum class State
 	OFFLINE,
 	UNDER_CONSTRUCTION,
 	ATTACKING,
-	GOES, //remove?
+	GOES,
 	IDLE, //remove?
 	CHANGING_MODE, //for turrets mount/dismount
 	
@@ -93,6 +93,7 @@ struct TileIndex
 	int y;
 
 	operator Vector2() { return Vector2{ static_cast<float>(x), static_cast<float>(y) }; };
+	bool operator==(TileIndex rhs) { return (x == rhs.x) && (y == rhs.y); };
 };
 
 struct NeighborsIndex

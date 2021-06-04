@@ -171,8 +171,8 @@ protected:
     State state;
     
     int HP;
-    int progress; //for construction? or just use state in Update
     bool selectable; //удалить? все равно просматривать данные необходимо, а приказы отдавать не тут/сменить на selected, чтобы в Draw рисовать рамку, а в GUI хранить указатель на выбранного актера
+    int angle; //float?
 
 public:
     GameData* game;
@@ -402,7 +402,7 @@ protected:
     int cooldownDuration; //how much ticks need to recharge
     int cooldownRemain; //amount of ticks, remains to reload
     int rotationSpeed;
-    int angle; //float?
+    
     Vector2 velocityVector;
 
     GameActor* target;
@@ -412,7 +412,6 @@ protected:
     ~Militaty();
     
     virtual void Attack() = 0;
-    void Move();
     void Reload(); //IN TURRETS USE ONLY WHEN charge>=energyPerShot!
     void Targeting(); //turning actor in direction of enemy
     void DrawReloadBar();
@@ -423,6 +422,7 @@ public:
 
 class Insect : public Militaty
 {
+    void Move();
 public:
     Insect(GameData* ptr, ActorType type, Vector2 pos, State state);
     void Attack();
@@ -433,22 +433,34 @@ public:
 
 class Turret : public Militaty, public Connectable
 {
-    bool isMounted;
+protected:
+    Animation chasisSprite;
+    bool isMounted = true;
     int maxCharge;
     int charge; //amount of accumulated energy
     int chargeRate; //how much energy takes per second
     int energyPerShot;
+    std::vector<TileIndex> waypoints;
+    int modeProgressCounter = 0; //for changing mode
+    int attackProgressCounter = 0; //for counting attack
 
+    void Move();
     void Recharge();
-    void UnMount();
-    void Mount();
     void DrawChargeBar();
     void Attack();
 
+public:
+    void ChangeMode();
     //common for all of turrets (make only Attack() uniq):
     void Update();
-    //void Draw();
+    void Draw();
     Turret(GameData* ptr, ActorType type, Vector2 pos, State state);
     //~Turret();
 };
 
+class HeavyTurret : public Turret
+{
+public:
+    HeavyTurret(GameData* ptr, ActorType type, Vector2 pos, State state);
+    void Attack();
+};
