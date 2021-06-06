@@ -4,8 +4,15 @@ Turret::Turret(GameData* ptr, ActorType type, Vector2 pos, State state)
     :Militaty(ptr, type, pos, state), 
     Connectable(ptr, type)
 {
+    maxCharge = ptr->turretsAttributes[type]["maxCharge"];
+    chargeRate = ptr->turretsAttributes[type]["chargeRate"];
+    energyPerShot = ptr->turretsAttributes[type]["energyPerShot"];
+
     isMounted = true;
     charge = 0;
+    chasisAngle = 0;
+    chasisSprite = game->getUnitAnimation(ActorType::TURRET_CHASIS, State::CHANGING_MODE);
+    chasisCurrentFrame = chasisSprite.framesAmount;
 }
 
 void Turret::Recharge()
@@ -22,7 +29,10 @@ void Turret::Recharge()
 
 void Turret::Attack()
 {
-    game->Hit(target, damage, type);
+    //TODO::make different attacks for all turrets
+    if(type==ActorType::HEAVY_TURRET)
+        game->Hit(target, damage, type);
+    charge -= energyPerShot;
     cooldownRemain = cooldownDuration;
 }
 
@@ -38,14 +48,20 @@ void Turret::Update()
         {
             Targeting();
             //TODO: make check for angle (targeting return bool?)
-            //if there is target and distance between it and actor less than attack distance
-            if (Vector2Distance(position, target->getPosition()) <= attackRange)
+            //if there is target and distance between it and actor less than attack distance AND eniugh energy
+            if (Vector2Distance(position, target->getPosition()) <= attackRange && charge>= energyPerShot)
             {
                 state = State::ATTACKING;
                 sprite = game->getUnitAnimation(type, state);
             }
         }
-
+        break;
+    case State::UNDER_CONSTRUCTION:
+        if (HP == maxHP)
+        {
+            state = State::ONLINE;
+            sprite = game->getUnitAnimation(type, state);
+        }
         break;
 
     case State::ATTACKING: //stationary mode, firing on targets
@@ -81,21 +97,49 @@ void Turret::Update()
     case State::GOES: //mobile mode, can't fire
         if (waypoints.size() != 0)
         {
-            //TODO: Move() must consume energy!
-            Move();
-            game->revealTerritory(positionIndex, sightRange, side);
-            if (positionIndex == waypoints[0])
-                waypoints.erase(waypoints.begin());
+            //can move only when charged
+            if (charge != 0)
+            {
+                Move();
+                chasisAngle = angle;
+                game->revealTerritory(positionIndex, sightRange, side);
+                if (positionIndex == waypoints[0])
+                    waypoints.erase(waypoints.begin());
+                //consume energy 
+                if (game->timeCount % 10 == 0) 
+                    charge--;
+
+                //chasis animation
+                if (game->timeCount % 15 == 0)
+                    chasisCurrentFrame++;
+                if (chasisCurrentFrame >= chasisSprite.framesAmount)
+                    chasisCurrentFrame = 0;
+            }
         }
         break;
 
     case State::CHANGING_MODE:
         modeProgressCounter--;
+
+        //set animation frame
+        if (isMounted) //if it was mounted
+        {
+            chasisCurrentFrame = chasisSprite.framesAmount - modeProgressCounter / (60 / chasisSprite.framesAmount);
+        }
+        else
+        {
+            chasisCurrentFrame = modeProgressCounter / (60 / chasisSprite.framesAmount);
+        }
+        
         if (modeProgressCounter == 0)
         {
             //if mode finally changed - check, which one mode it will be
             if (isMounted) //if it was mounted
+            {
                 state = State::GOES;
+                chasisSprite = game->getUnitAnimation(ActorType::TURRET_CHASIS, state);
+                Disconect();
+            }
             else
                 state = State::ONLINE;
         }
@@ -103,17 +147,17 @@ void Turret::Update()
     }
 
     Reload();
-    if (parent != nullptr)
-        Recharge();
+    
+    if (parent != nullptr) //if connected
+    {
+        //try to recharge, if construction complete and its not in mobile mode
+        if (state != State::UNDER_CONSTRUCTION && state != State::GOES)
+            Recharge();
+    }
     else
-        TryConnect(position, ID);
+        TryConnect(position, ID); //if not
 
     isInBattleCheck();
-
-    if (game->timeCount % 15 == 0)
-        currentFrame++;
-    if (currentFrame >= sprite.framesAmount)
-        currentFrame = 0;
 }
 
 void Turret::Move()
@@ -252,20 +296,50 @@ void Turret::ChangeMode()
 {
     modeProgressCounter = 240; //4 sec.
     state = State::CHANGING_MODE;
+    chasisSprite = game->getUnitAnimation(ActorType::TURRET_CHASIS, state);
+}
+
+void Turret::DrawChargeBar()
+{
+    DrawRectangle(position.x - size / 2, position.y + size + 2, size, 2, Color{165, 100, 25, 255});
+    if (charge != 0)
+        DrawRectangle(position.x - size / 2, position.y + size+2, size * ((float)charge / (float)maxCharge), 2, Color{ 255, 200, 15, 255 });
 }
 
 void Turret::Draw()
 {
     //TODO: separately draw gun and chassis 
-
-
+    //chassis
     DrawTexturePro(
-        sprite.frames[currentFrame], //texture
-        Rectangle{ 0,0, (float)sprite.frames[currentFrame].width, (float)sprite.frames[currentFrame].height }, //source
+        chasisSprite.frames[chasisCurrentFrame], //texture
+        Rectangle{ 0,0, (float)chasisSprite.frames[chasisCurrentFrame].width, (float)chasisSprite.frames[chasisCurrentFrame].height }, //source
         Rectangle{ position.x, position.y, (float)size * 2.f, (float)size * 2.f }, //dest
         Vector2{ (float)(size), (float)(size) }, //origin
-        (float)angle, //rotation
+        (float)chasisAngle, //rotation
         WHITE);
+    
+    //if culminating attack animation
+    if (state == State::ATTACKING && attackProgressCounter>50 /*&& currentFrame == sprite.framesAmount*/ && type == ActorType::HEAVY_TURRET)
+        DrawLineEx(position, target->getPosition(), 1, RED); //laser beam
 
-    DrawCircleLines(position.x, position.y, size, DARKBLUE);
+    //gun
+    if (state != State::UNDER_CONSTRUCTION)
+    {
+        DrawTexturePro(
+            sprite.frames[currentFrame], //texture
+            Rectangle{ 0,0, (float)sprite.frames[currentFrame].width, (float)sprite.frames[currentFrame].height }, //source
+            Rectangle{ position.x, position.y, (float)size * 2.f, (float)size * 2.f }, //dest
+            Vector2{ (float)(size), (float)(size) }, //origin
+            (float)angle, //rotation
+            WHITE);
+    }
+
+    drawHP();
+    DrawChargeBar();
+    //DrawCircleLines(position.x, position.y, size, DARKBLUE);
+}
+
+void Turret::Destroy() 
+{
+
 }

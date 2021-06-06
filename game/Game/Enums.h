@@ -33,6 +33,9 @@ enum class ActorType
 	//for wantToBuild
 	ACTOR_NULL,
 
+	//for Turret animation
+	TURRET_CHASIS,
+
 	//Machines turrets
 	LIGHT_TURRET,
 	HEAVY_TURRET,

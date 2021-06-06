@@ -13,23 +13,27 @@ void Constructor::BuildOrRepair()
     if (target != nullptr)
     {
         //repair, if target fully repaired - nullify pointer
-        //TODO: consider using energy
-
-        //сперва - проба траты ресурсов, затем восстановление хп и фактическая трата ресурсов
-
-        //determine, how much resources can be spend
-        int canSpend = game->trySpendResources(buildPower, side);
-
-        if (canSpend != 0)
+        if (!target->inBattle)
         {
-            //technical singularity dark magic
-            int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
-            if(restored!=0)
-                game->spendResources(target->maxHP / restored, side);
+            //determine, how much resources can be spend
+            int canSpend = game->trySpendResources(buildPower, side);
 
-            //if target hp restored, nullify pointer
-            if (target->getHP() == target->maxHP)
-                target = nullptr;
+            if (canSpend != 0)
+            {
+                //technical singularity dark magic
+                int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
+                if (restored != 0)
+                    game->spendResources(target->maxHP / restored, side);
+
+                //if target hp restored, nullify pointer
+                if (target->getHP() == target->maxHP)
+                    target = nullptr;
+            }
+        }
+        else
+        {
+            target = nullptr;
+            SeekForTarget();
         }
     }
 }

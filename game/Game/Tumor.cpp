@@ -1,5 +1,10 @@
 #include "GameClasses.h"
 
+Tumor::Tumor(GameData* ptr, ActorType type, Vector2 pos, State state)
+	:Building(ptr, type, pos, state)
+{
+}
+
 void Tumor::Update()
 {
 	switch (state)
@@ -13,6 +18,9 @@ void Tumor::Update()
 		Expand();
 		break;
 	case State::UNDER_CONSTRUCTION:
+		//building 
+		if (this->game->timeCount % 5 == 0)
+			RestoreHP(1);
 		if (HP == maxHP)
 		{
 			//if it ready - mark area around to expand and create initiate expansion tile
@@ -32,11 +40,7 @@ void Tumor::Update()
 void Tumor::Draw()
 {
 	DrawCircle(position.x, position.y, size, RED);
-}
-
-Tumor::Tumor(GameData* ptr, ActorType type, Vector2 pos, State state) 
-	:Building(ptr, type, pos, state)
-{
+	drawHP();
 }
 
 void Tumor::Destroy()

@@ -57,6 +57,7 @@ GameData::GameData()
     //UNIT SPRITES
 
     //загрузку проводить циклом по всем нужным юнитам, везде одно и то же, подставлять форматом текста и называть файлы по типу "unitType_unitState_frameNum.png"
+    //LIGHT INSECT
     unitAnimations[ActorType::LIGHT_INSECT][State::GOES] =
     {
         new Texture2D[5],
@@ -68,6 +69,48 @@ GameData::GameData()
         unitAnimations[ActorType::LIGHT_INSECT][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\lightInsect_goes_%d.png", i));
     }
 
+    //TURRET CHASIS
+    //CHANGING_MODE
+    unitAnimations[ActorType::TURRET_CHASIS][State::CHANGING_MODE] =
+    {
+        new Texture2D[4],
+        4
+    };
+    for (int i = 0; i < 4; i++)
+    {
+        unitAnimations[ActorType::TURRET_CHASIS][State::CHANGING_MODE].frames[i] = LoadTexture(TextFormat("textures\\sprites\\turretChasis_changeMode_%d.png", i));
+    }
+    //GOES
+    unitAnimations[ActorType::TURRET_CHASIS][State::GOES] =
+    {
+        new Texture2D[3],
+        3
+    };
+    for (int i = 0; i < 3; i++)
+    {
+        unitAnimations[ActorType::TURRET_CHASIS][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\turretChasis_goes_%d.png", i));
+    }
+
+    //HEAVY_TURRET
+    unitAnimations[ActorType::HEAVY_TURRET][State::ONLINE] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::HEAVY_TURRET][State::ONLINE].frames[i] = LoadTexture(TextFormat("textures\\sprites\\heavyTurret_online_%d.png", i));
+    }
+
+    unitAnimations[ActorType::HEAVY_TURRET][State::ATTACKING] =
+    {
+        new Texture2D[6],
+        6
+    };
+    for (int i = 0; i < 6; i++)
+    {
+        unitAnimations[ActorType::HEAVY_TURRET][State::ATTACKING].frames[i] = LoadTexture(TextFormat("textures\\sprites\\heavyTurret_attacking_%d.png", i));
+    }
 
     //TODO: texture files loading, units properties
 
@@ -88,6 +131,12 @@ GameData::GameData()
         {"maxHP", 300},
         {"size", 32},
         {"cost", 1000},
+        {"sightRange", 12},
+    };
+    genericAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
+        {"maxHP", 200},
+        {"size", 16},
+        {"cost", 150},
         {"sightRange", 12},
     };
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
@@ -123,6 +172,14 @@ GameData::GameData()
         {"damage", 7},
         {"rotationSpeed", 4},
         {"cooldownDuration", 120}, //ticks to reload
+    };
+    militaryAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
+        {"seekRange", 10 * pixelsPerTile},
+        {"attackRange", 7 * pixelsPerTile},
+        {"speed", 1},
+        {"damage", 20},
+        {"rotationSpeed", 2},
+        {"cooldownDuration", 240}, //ticks to reload
     };
 
     //CONNECTABLE ACTORS ATTRIBUTES
@@ -164,9 +221,9 @@ GameData::GameData()
     };
     turretsAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
     {
-        {"maxCharge", 50},
+        {"maxCharge", 100},
         {"chargeRate", 2},
-        {"energyPerShot", 5},
+        {"energyPerShot", 20},
     };
     turretsAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>
     {
@@ -836,7 +893,6 @@ void GameData::recalculateMilitaryTargets(Side side)
     }
 }
 
-
 void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 {
     float** mapHeat = mapsPathfinding[actorType]["mapsHeat"];
@@ -1494,12 +1550,22 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
 {
     Building* buf_building;
     Militaty* buf_military;
+    Turret* buf_turret;
 
     switch (wantToBuild)
     {
     case ActorType::LIGHT_TURRET:
         break;
     case ActorType::HEAVY_TURRET:
+        buf_turret = new Turret(
+            this,
+            ActorType::HEAVY_TURRET,
+            position,
+            State::UNDER_CONSTRUCTION);
+
+        unitsList.push_back(buf_turret);
+        militaryUnitsList.push_back(buf_turret);
+        turretUnitsList.push_back(buf_turret);
         break;
     case ActorType::AIRDEFENSE_TURRET:
         break;
@@ -1545,7 +1611,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             this,
             ActorType::TUMOR,
             position,
-            State::ONLINE);
+            State::UNDER_CONSTRUCTION);
         unitsList.push_back(buf_building);
         expansionUnitsList_Insects.push_back(buf_building);
 
@@ -1668,6 +1734,15 @@ void GameData::removeActor(unsigned int ID)
         else
             militaryIter++;
     }
+    
+    std::vector<Turret*>::iterator turretIter;
+    for (turretIter = turretUnitsList.begin(); turretIter != turretUnitsList.end(); )
+    {
+        if ((*turretIter)->ID == ID)
+            turretIter = turretUnitsList.erase(turretIter);
+        else
+            turretIter++;
+    }
 
     if(buf!=nullptr)
         delete buf;
@@ -1694,7 +1769,6 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
     }
     //TODO: update damage maps here
 }
-
 
 void GameData::revealTerritory(TileIndex position, int radius, Side side)
 {
@@ -1938,10 +2012,13 @@ void GameData::GameUpdate()
     if (renderBorders[2] > mapHeight) renderBorders[2] = mapHeight;
     if (renderBorders[3] > mapWidth) renderBorders[3] = mapWidth;
 
-    if (IsKeyPressed(KEY_ONE))
+    if (IsKeyPressed(KEY_TWO))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::HEAVY_TURRET;
+
+    if (IsKeyPressed(KEY_FOUR))
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::LIGHT_INSECT;
-
 
     if (IsKeyPressed(KEY_E))
         if(wantToBuild == ActorType::ACTOR_NULL)
@@ -2029,10 +2106,12 @@ void GameData::GameUpdate()
         addActor(wantToBuild, position, State::ONLINE);
     }
 
+    //UNIT UPDATING
     std::vector<GameActor*>::iterator iter;
     GameActor* buf = nullptr;
     for (iter = unitsList.begin(); iter != unitsList.end(); )
     {
+        //removing pointers for killed units from vector
         if ((*iter) == nullptr)
         {
             iter = unitsList.erase(iter);
@@ -2043,13 +2122,6 @@ void GameData::GameUpdate()
             iter++;
         }
     }
-
-    //if(timeCount %30==0) //slowing down
-    //for (GameActor* actor : this->unitsList)
-    //{
-    //    //REMOVE ALL THE nullptr ACTOR POINTERS (iterator using)
-    //    actor->Update();
-    //}
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
     {

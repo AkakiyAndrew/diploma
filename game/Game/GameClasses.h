@@ -9,6 +9,7 @@ class Building;
 class Constructor;
 class Connectable;
 class Militaty;
+class Turret;
 
 class GameData
 {
@@ -28,6 +29,7 @@ private:
     std::vector<Building*> expansionUnitsList_Insects;
     std::vector<Building*> expansionUnitsList_Machines;
     std::vector<Militaty*> militaryUnitsList;
+    std::vector<Turret*> turretUnitsList;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -435,6 +437,9 @@ class Turret : public Militaty, public Connectable
 {
 protected:
     Animation chasisSprite;
+    int chasisCurrentFrame;
+    int chasisAngle;
+
     bool isMounted = true;
     int maxCharge;
     int charge; //amount of accumulated energy
@@ -454,13 +459,7 @@ public:
     //common for all of turrets (make only Attack() uniq):
     void Update();
     void Draw();
+    void Destroy();
     Turret(GameData* ptr, ActorType type, Vector2 pos, State state);
     //~Turret();
-};
-
-class HeavyTurret : public Turret
-{
-public:
-    HeavyTurret(GameData* ptr, ActorType type, Vector2 pos, State state);
-    void Attack();
 };
