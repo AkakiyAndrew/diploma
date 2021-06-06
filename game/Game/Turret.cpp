@@ -12,7 +12,7 @@ Turret::Turret(GameData* ptr, ActorType type, Vector2 pos, State state)
     charge = 0;
     chasisAngle = 0;
     chasisSprite = game->getUnitAnimation(ActorType::TURRET_CHASIS, State::CHANGING_MODE);
-    chasisCurrentFrame = chasisSprite.framesAmount;
+    chasisCurrentFrame = chasisSprite.framesAmount - 1;
 }
 
 void Turret::Recharge()
@@ -46,13 +46,13 @@ void Turret::Update()
             SeekForEnemy();
         else
         {
-            Targeting();
             //TODO: make check for angle (targeting return bool?)
             //if there is target and distance between it and actor less than attack distance AND eniugh energy
-            if (Vector2Distance(position, target->getPosition()) <= attackRange && charge>= energyPerShot)
+            if (Vector2Distance(position, target->getPosition()) <= attackRange && charge>= energyPerShot && Targeting())
             {
                 state = State::ATTACKING;
                 sprite = game->getUnitAnimation(type, state);
+                currentFrame = 0;
             }
         }
         break;
@@ -72,11 +72,7 @@ void Turret::Update()
         }
         else
         {
-            if(game->timeCount==0)
-                Targeting();
-
-            //TODO: fire only when right angle
-            if (Vector2Distance(position, target->getPosition()) <= attackRange)
+            if (Vector2Distance(position, target->getPosition()) <= attackRange && Targeting())
             {
                 if (cooldownRemain == 0)
                 {
@@ -84,10 +80,16 @@ void Turret::Update()
 
                     attackProgressCounter++;
                     currentFrame = attackProgressCounter / (60 / sprite.framesAmount);
+                    if (currentFrame >= sprite.framesAmount)
+                    {
+                        currentFrame--;
+                    }
+
                     if (attackProgressCounter == 60)
                     {
                         Attack(); //hit target and reset cooldown
                         attackProgressCounter = 0;
+                        currentFrame = 0;
                     }
                 }
             }

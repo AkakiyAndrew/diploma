@@ -140,4 +140,11 @@ inline float Vector2Length(Vector2 v)
 	return result;
 }
 
+inline int degreeBetweenVectors(Vector2 v1, Vector2 v2)
+{
+	double angle = atan2(v1.x * v2.x + v1.y * v2.y, v1.x * v2.y - v1.y * v2.x);
+	
+	return (angle*180.0)/PI;
+}
+
 //TODO: make ENUM for attributes for faster geting from std::maps

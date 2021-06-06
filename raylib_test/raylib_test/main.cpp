@@ -112,6 +112,20 @@
 
 
 #include "raylib.h"
+#include <math.h>
+
+int Vector2Angle(Vector2 v1, Vector2 v2)
+{
+    int result = atan2f(v2.y - v1.y, v2.x - v1.x) * (180.0f / PI);
+    if (result < 0) result += 360.0f;
+    return result;
+}
+
+float Vector2AngleFloat(Vector2 v1, Vector2 v2)
+{
+    float result = atan2f(v2.y - v1.y, v2.x - v1.x);
+    return result;
+}
 
 int main(void)
 {
@@ -122,60 +136,76 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [textures] examples - texture source and destination rectangles");
 
-    // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
-
-    Texture2D scarfy = LoadTexture("resources/scarfy.png");        // Texture loading
-
-    int frameWidth = scarfy.width / 6;
-    int frameHeight = scarfy.height;
-
-    // Source rectangle (part of the texture to use for drawing)
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)frameWidth, (float)frameHeight };
-
-    // Destination rectangle (screen rectangle where drawing part of texture)
-    Rectangle destRec = { screenWidth / 2.0f, screenHeight / 2.0f, frameWidth * 2.0f, frameHeight * 2.0f };
-
-    // Origin of the texture (rotation/scale point), it's relative to destination rectangle size
-    Vector2 origin = { (float)frameWidth, (float)frameHeight };
-
-    int rotation = 0;
-
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
+    int angle = 0; //= Vector2Angle(center, mousePos);
+    float angleTan = 0;
+    Vector2 center{ 100.f, 100.f }, mousePos;
+
+    float rotationSpeed = 0.05f;
+    float destinationRotation = 0;
+    int timeCount = 0;
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         // Update
-        //----------------------------------------------------------------------------------
-        rotation++;
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
         BeginDrawing();
+        
+        timeCount++;
+        if (timeCount > 60)
+            timeCount = 0;
+
+        mousePos = GetMousePosition();
+        //angle = Vector2Angle(center, mousePos);
+        //angleTan = Vector2AngleFloat(center, mousePos);
+
+        if (timeCount % 5 == 0)
+        {
+            destinationRotation = atan2f(center.y - mousePos.y, center.x - mousePos.x) + PI;
+
+            if (destinationRotation != angleTan)
+            {
+                if (fmaxf(destinationRotation - angleTan, angleTan - destinationRotation) < rotationSpeed)
+                {
+                    angleTan = destinationRotation;
+                }
+                else
+                {
+                    if (destinationRotation > angleTan)
+                    {
+                        if (angleTan < destinationRotation - PI)
+                            angleTan -= rotationSpeed;
+                        else
+                            angleTan += rotationSpeed;
+                    }
+                    else
+                    {
+                        if (angleTan > destinationRotation + PI)
+                            angleTan += rotationSpeed;
+                        else
+                            angleTan -= rotationSpeed;
+                    }
+
+                    if (angleTan > PI * 2.0f) angleTan = 0;
+                    if (angleTan < 0) angleTan = PI * 2.0f;
+                }
+                angle = angleTan * 180.0 / PI;
+            }
+        }
 
         ClearBackground(RAYWHITE);
 
-        // NOTE: Using DrawTexturePro() we can easily rotate and scale the part of the texture we draw
-        // sourceRec defines the part of the texture we use for drawing
-        // destRec defines the rectangle where our texture part will fit (scaling it to fit)
-        // origin defines the point of the texture used as reference for rotation and scaling
-        // rotation defines the texture rotation (using origin as rotation point)
-        DrawTexturePro(scarfy, sourceRec, destRec, origin, (float)rotation, WHITE);
+        DrawCircle(center.x, center.y, 16, SKYBLUE);
+        DrawCircle(mousePos.x, mousePos.y, 4, RED);
+        DrawLine(center.x, center.y, mousePos.x, mousePos.y, BLACK);
 
-        DrawLine((int)destRec.x, 0, (int)destRec.x, screenHeight, GRAY);
-        DrawLine(0, (int)destRec.y, screenWidth, (int)destRec.y, GRAY);
+        DrawText(TextFormat("DestAngle: %f, currentAngle: %f, IntAngle: %d", destinationRotation, angleTan, angle), 50, 50, 18, BLACK);
 
-        DrawText("(c) Scarfy sprite by Eiden Marsal", screenWidth - 200, screenHeight - 20, 10, GRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(scarfy);        // Texture unloading
 
     CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

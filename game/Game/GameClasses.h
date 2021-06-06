@@ -166,7 +166,7 @@ public:
 class GameActor {
 protected:
     Animation sprite; //заменить на структуру анимации+максимального числа кадров? надо глянуть, как анимация реализована у других
-    unsigned short currentFrame; //current animation 
+    int currentFrame; //current animation 
 
     Vector2 position;
     TileIndex positionIndex;
@@ -403,7 +403,7 @@ protected:
     int damage;
     int cooldownDuration; //how much ticks need to recharge
     int cooldownRemain; //amount of ticks, remains to reload
-    int rotationSpeed;
+    float rotationSpeed;
     
     Vector2 velocityVector;
 
@@ -415,7 +415,7 @@ protected:
     
     virtual void Attack() = 0;
     void Reload(); //IN TURRETS USE ONLY WHEN charge>=energyPerShot!
-    void Targeting(); //turning actor in direction of enemy
+    bool Targeting(); //turning actor in direction of enemy
     void DrawReloadBar();
 
 public:

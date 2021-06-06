@@ -219,6 +219,8 @@ void Insect::Draw()
 
     DrawCircleLines(position.x, position.y, size, ORANGE);
     DrawCircle(position.x + velocityVector.x, position.y + velocityVector.y, 1, BLUE);
+
+    drawHP();
 }
 
 void Insect::Destroy()

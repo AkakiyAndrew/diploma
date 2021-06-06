@@ -8,7 +8,7 @@ Militaty::Militaty(GameData* ptr, ActorType type, Vector2 pos, State state)
     speed = ptr->militaryAttributes[type]["speed"];
     damage = ptr->militaryAttributes[type]["damage"];
     cooldownDuration = ptr->militaryAttributes[type]["cooldownDuration"];
-    rotationSpeed = ptr->militaryAttributes[type]["rotationSpeed"];
+    rotationSpeed = static_cast<float>(ptr->militaryAttributes[type]["rotationSpeed"])/100.f;
 
     cooldownRemain = cooldownDuration;
 }
@@ -37,7 +37,7 @@ void Militaty::SeekForEnemy()
             break;*/
         }
     }
-
+    
     if (buf.size() != 0)
         target = game->getNearestSpecificActor(position, buf, this);
 }
@@ -48,31 +48,46 @@ void Militaty::Reload()
         cooldownRemain--;
 }
 
-void Militaty::Targeting()
+bool Militaty::Targeting()
 {
+    bool result = true;
+
     Vector2 targetPosition = target->getPosition();
-    int destinationRotation = atan2f(position.y - targetPosition.y, position.x - targetPosition.x) + PI;
+    float destinationRotation = atan2f(position.y - targetPosition.y, position.x - targetPosition.x) + PI;
+    float angleTan = angle * PI / 180.f;
 
-    if (destinationRotation != angle)
+    if (destinationRotation != angleTan)
     {
-        if (destinationRotation > angle)
+        if (fmaxf(destinationRotation - angleTan, angleTan - destinationRotation) < rotationSpeed)
         {
-            if (angle < destinationRotation - PI)
-                angle -= rotationSpeed;
-            else
-                angle += rotationSpeed;
+            angleTan = destinationRotation;
         }
-        else //if (destinationRotation < topRotation)
+        else
         {
-            if (angle > destinationRotation + PI)
-                angle += rotationSpeed;
+            if (destinationRotation > angleTan)
+            {
+                if (angleTan < destinationRotation - PI)
+                    angleTan -= rotationSpeed;
+                else
+                    angleTan += rotationSpeed;
+            }
             else
-                angle -= rotationSpeed;
-        }
+            {
+                if (angleTan > destinationRotation + PI)
+                    angleTan += rotationSpeed;
+                else
+                    angleTan -= rotationSpeed;
+            }
 
-        if (angle > PI * 2.0f) angle = 0;
-        if (angle < 0) angle = PI * 2.0f;
+            if (angleTan > PI * 2.0f) angleTan = 0;
+            if (angleTan < 0) angleTan = PI * 2.0f;
+        }
+        angle = angleTan * 180.0 / PI;
+
+        result = destinationRotation == angleTan;
     }
+
+    return result;
 }
 
 Militaty::~Militaty()
