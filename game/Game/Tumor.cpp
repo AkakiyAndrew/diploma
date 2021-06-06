@@ -32,10 +32,6 @@ void Tumor::Update()
 	default:
 		break;
 	}
-
-	Expand();
-
-	
 }
 void Tumor::Draw()
 {

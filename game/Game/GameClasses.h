@@ -210,6 +210,8 @@ public:
         maxHP = ptr->genericAttributes[type]["maxHP"];
         cost = ptr->genericAttributes[type]["cost"];
         sightRange = ptr->genericAttributes[type]["sightRange"];
+        armor = ptr->genericAttributes[type]["armor"];
+
         positionIndex = ptr->getTileIndex(pos);
 
         switch (state)
@@ -230,11 +232,8 @@ public:
         switch (type)
         {
         case ActorType::LIGHT_TURRET:
-            //add seting properties here
         case ActorType::HEAVY_TURRET:
-            //and here
         case ActorType::AIRDEFENSE_TURRET:
-            //and everywhere
         case ActorType::CORE:
         case ActorType::BASE:
             side = Side::MACHINES;
@@ -244,7 +243,6 @@ public:
         case ActorType::FLYING_INSECT:
         case ActorType::HIVE:
         case ActorType::TUMOR:
-
             side = Side::INSECTS;
             break;
         }

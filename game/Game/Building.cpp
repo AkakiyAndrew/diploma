@@ -118,10 +118,12 @@ void Building::markAreaFade()
     }
 
     if (this->side == Side::INSECTS)
-        game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+        if (game->mapExpansionCreep[positionIndex.x][positionIndex.y] == ExpandState::EXPANDED)
+            game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
 
     if (this->side == Side::MACHINES)
-        game->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
+        if (game->mapExpansionEnergised[positionIndex.x][positionIndex.y] == ExpandState::EXPANDED)
+            game->mapExpansionEnergised[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
 
     //TODO: possible optimizaton - recalculate expansion in specific range (with getActorsInRadius method or kinda like that)
     //recalculate expansion tiles to overlap faded tiles by existing buildings

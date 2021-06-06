@@ -119,31 +119,36 @@ GameData::GameData()
         {"maxHP", 100},
         {"size", 16},
         {"cost", 10},
-        {"sightRange", 10}
+        {"sightRange", 10},
+        {"armor", 5},
     };
     genericAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"maxHP", 100},
         {"size", 16},
         {"cost", 50},
         {"sightRange", 10},
+        {"armor", 4},
     };
     genericAttributes[ActorType::BASE] = std::map<std::string, int>{
         {"maxHP", 300},
         {"size", 32},
         {"cost", 1000},
         {"sightRange", 12},
+        {"armor", 10},
     };
     genericAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"maxHP", 200},
         {"size", 16},
         {"cost", 150},
         {"sightRange", 12},
+        {"armor", 5},
     };
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
         {"size", 8},
         {"cost", 5},
         {"sightRange", 3},
+        {"armor", 1},
     };
 
     //BUILDING ACTORS ATTRIBUTES
@@ -169,15 +174,15 @@ GameData::GameData()
         {"seekRange", 8 * pixelsPerTile},
         {"attackRange", 2 * pixelsPerTile},
         {"speed", 2},
-        {"damage", 7},
-        {"rotationSpeed", 4},
-        {"cooldownDuration", 120}, //ticks to reload
+        {"damage", 15},
+        {"rotationSpeed", 8},
+        {"cooldownDuration", 45}, //ticks to reload
     };
     militaryAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"seekRange", 10 * pixelsPerTile},
         {"attackRange", 7 * pixelsPerTile},
         {"speed", 1},
-        {"damage", 20},
+        {"damage", 70},
         {"rotationSpeed", 2},
         {"cooldownDuration", 240}, //ticks to reload
     };
@@ -1934,7 +1939,7 @@ int GameData::trySpendResources(int amount, Side side)
 
     if (side == Side::INSECTS)
     {
-        if (resourcesInsects - amount < 0)
+        if (static_cast<int>(resourcesInsects) - amount < 0)
         {
             spended = resourcesInsects;
         }
@@ -1945,7 +1950,7 @@ int GameData::trySpendResources(int amount, Side side)
     }
     if(side == Side::MACHINES)
     {
-        if (resourcesMachines - amount < 0)
+        if (static_cast<int>(resourcesMachines) - amount < 0)
         {
             spended = resourcesMachines;
         }
