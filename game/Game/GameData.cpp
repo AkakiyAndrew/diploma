@@ -2,14 +2,6 @@
 
 #define TILE_DRAWING
 
-float max(float a, float b)
-{
-    if (a > b)
-        return a;
-    else
-        return b;
-}
-
 GameData::GameData()
 {
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
@@ -56,7 +48,6 @@ GameData::GameData()
 
     //UNIT SPRITES
 
-    //загрузку проводить циклом по всем нужным юнитам, везде одно и то же, подставлять форматом текста и называть файлы по типу "unitType_unitState_frameNum.png"
     //LIGHT INSECT
     unitAnimations[ActorType::LIGHT_INSECT][State::GOES] =
     {
@@ -190,7 +181,7 @@ GameData::GameData()
     //CONNECTABLE ACTORS ATTRIBUTES
     connectableAttributes[ActorType::CORE] = std::map<std::string, int>
     {
-        {"connectRange", 8 * pixelsPerTile},
+        {"connectRange", 10 * pixelsPerTile},
     };
     connectableAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
     {
@@ -209,7 +200,7 @@ GameData::GameData()
     constructorsAttributes[ActorType::CORE] = std::map<std::string, int>
     {
         {"buildPower", 10},
-        {"buildRange", 6 * pixelsPerTile},
+        {"buildRange", 8 * pixelsPerTile},
     };
     constructorsAttributes[ActorType::BASE] = std::map<std::string, int>
     {
@@ -928,8 +919,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     //std::vector<TileIndex> checking;
     float previous = 1.f;
     
-    //TODO: возможная оптимизация с заменой вектора на фиксированный одномерный массив, используя индексы для заполнения и обращения
-    //внутри итерации менять iLastAdded для обоз
     for(int i = 0; i<i_max; i++)
     {
         if (i <= i_last_added) //for "repair" crush on Degug configuration
@@ -1170,249 +1159,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 }
             }
         }
-
-
-        //for (TileIndex tile : checking)
-        //{
-        //    if (tile.x != -1) //if index valid
-        //    {
-        //        //if value not set:
-        //        if (mapHeat[tile.x][tile.y] == 0.f)
-        //        {
-        //            //if there's no fog of war:
-        //            if (mapFogOfWar[tile.x][tile.y] == -1)
-        //            {
-        //                i_last_added++;
-        //                mapHeat[tile.x][tile.y] = 1.f;
-        //                toCheck[i_last_added] = (tile);
-        //            }
-        //            else
-        //            {
-        //                //if there's no obstacle:
-        //                if (mapTerrainMod[tile.x][tile.y] != -1)
-        //                {
-        //                    i_last_added++;
-        //                    //TODO: ADD CONSIDERING MAP DAMAGE
-        //                    //set value, according to terrain speed modification and damage map
-        //                    mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]);
-        //                    //add this tile for further checking
-        //                    toCheck[i_last_added] = (tile);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        //left
-        //if (checking.left.x != -1 ) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.left.x][checking.left.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.left.x][checking.left.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.left.x][checking.left.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.left);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.left.x][checking.left.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.left);
-        //            }
-        //        }
-        //    }
-        //}
-        ////up
-        //if (checking.up.x != -1 ) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.up.x][checking.up.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.up.x][checking.up.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.up.x][checking.up.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.up);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.up);
-        //            }
-        //    }
-        //}
-        ////right
-        //if (checking.right.x != -1 ) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.right.x][checking.right.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.right.x][checking.right.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.right.x][checking.right.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.right);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.right);
-        //            }
-        //    }
-        //}
-        ////down
-        //if (checking.down.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.down.x][checking.down.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.down.x][checking.down.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.down.x][checking.down.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.down);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.down);
-        //            }
-        //    }
-        //}
-        ////up-left
-        //if (checking.upLeft.x!=-1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.upLeft.x][checking.upLeft.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.upLeft.x][checking.upLeft.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.upLeft);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.upLeft);
-        //            }
-        //    }
-        //}
-        ////up-right
-        //if (checking.upRight.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.upRight.x][checking.upRight.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.downLeft);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.upRight);
-        //            }
-        //    }
-        //}
-        ////down-left
-        //if (checking.downLeft.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.downLeft.x][checking.downLeft.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.downLeft);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.downLeft);
-        //            }
-        //    }
-        //}
-        ////down-right
-        //if (checking.downRight.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.downRight.x][checking.downRight.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.downRight.x][checking.downRight.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.downRight);
-        //        }
-        //        else
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
-        //                //add this tile for further checking
-        //                toCheck[i_last_added] = (checking.downRight);
-        //            }
-        //    }
-        //}
     }
 
     delete[] toCheck;
@@ -1431,38 +1177,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     {
         for (int y = 0; y < mapHeight; y++)
         {
-            /*upLeft = {x-2, y-2};
-            rightDown = { x + 2, y + 2 };
-            if (upLeft.x < 0)
-                upLeft.x = 0;
-            if (upLeft.y < 0)
-                upLeft.y = 0;
-            if (rightDown.x > mapWidth-1)
-                rightDown.x = mapWidth-1;
-            if (rightDown.y > mapHeight-1)
-                rightDown.y = mapHeight-1;
-
-            minimumHeat = mapHeat[x][y];
-            indexMinimum = { x,y };
-
-            for (int x_checking = upLeft.x; x_checking <= rightDown.x; x_checking++)
-            {
-                for (int y_checking = upLeft.y; y_checking <= rightDown.y; y_checking++)
-                {
-                    if (mapTerrainMod[x_checking][y_checking] != -1.f && x_checking != x && y_checking != y)
-                    {
-                        if (mapHeat[x_checking][y_checking] <= minimumHeat)
-                        {
-                            minimumHeat = mapHeat[x_checking][y_checking];
-                            indexMinimum = { x_checking, y_checking };
-                        }
-                    }
-                }
-            }
-            buf = { static_cast<float>(indexMinimum.x - x), static_cast<float>(indexMinimum.y - y) };
-            if(buf.x!=0 || buf.y!= 0)
-                mapVector[x][y] = { buf.x / fabsf(max(buf.x, buf.y)), buf.y / fabsf(max(buf.x, buf.y)) };*/
-
             neighbors = neighborsIndices[x][y];
             //TODO: remake for using gradient?
             minimumHeat = mapHeat[x][y];
@@ -2323,28 +2037,88 @@ void GameData::GameDraw()
     if (this->wantToBuild != ActorType::ACTOR_NULL)
     {
         //draw hologram of chosen actor in any case
+
+        Texture2D bufTexture;
+        int size;
+        Color tint;
+        unsigned int radius;
+        int** fogOfWar = mapsFogOfWar[visionSide];
+
         switch (wantToBuild)
         {
         case ActorType::LIGHT_TURRET:
         case ActorType::HEAVY_TURRET:
         case ActorType::AIRDEFENSE_TURRET:
-            //draw red circle of attack range and yellow - of view range
+            DrawCircleLines(
+                mouseIndex.x * pixelsPerTile + pixelsPerTile / 2,
+                mouseIndex.y * pixelsPerTile + pixelsPerTile / 2,
+                militaryAttributes[wantToBuild]["attackRange"],
+                RED
+            );
+            DrawCircleLines(
+                mouseIndex.x* pixelsPerTile + pixelsPerTile / 2,
+                mouseIndex.y* pixelsPerTile + pixelsPerTile / 2,
+                militaryAttributes[wantToBuild]["seekRange"],
+                ORANGE
+            );
+            DrawCircleLines(
+                mouseIndex.x* pixelsPerTile + pixelsPerTile / 2,
+                mouseIndex.y* pixelsPerTile + pixelsPerTile / 2,
+                connectableAttributes[wantToBuild]["connectRange"],
+                DARKBLUE
+            );
+
+            bufTexture = getUnitAnimation(ActorType::TURRET_CHASIS, State::CHANGING_MODE).frames[3];
+            size = genericAttributes[wantToBuild]["size"];
+            
+            if (getTerrainType(mouseIndex.x, mouseIndex.y) != TerrainType::MOUNTAIN &&
+                getTerrainType(mouseIndex.x, mouseIndex.y) != TerrainType::LAKE
+                )
+                tint = GREEN;
+            else
+                tint = RED;
+                
+            DrawTexturePro(
+                bufTexture, //texture
+                Rectangle{ 0,0, (float)bufTexture.width, (float)bufTexture.height }, //source
+                Rectangle{
+                    mouseIndex.x * pixelsPerTile + pixelsPerTile / 2,
+                    mouseIndex.y * pixelsPerTile + pixelsPerTile / 2,
+                    (float)size * 2.f, (float)size * 2.f }, //dest
+                Vector2{ (float)(size), (float)(size) }, //origin
+                (float)0, //rotation
+                tint
+                );
+
             break;
         case ActorType::LIGHT_INSECT:
         case ActorType::HEAVY_INSECT:
         case ActorType::FLYING_INSECT:
             break;
         case ActorType::CORE:
+            DrawCircleLines(
+                mouseIndex.x * pixelsPerTile + pixelsPerTile / 2,
+                mouseIndex.y * pixelsPerTile + pixelsPerTile / 2,
+                connectableAttributes[wantToBuild]["connectRange"],
+                YELLOW
+            );
         case ActorType::BASE:
-            //draw circle of connection range
-        case ActorType::HIVE:
-        case ActorType::TUMOR:
-            //draw blue circle of expansion
+            DrawCircleLines(
+                mouseIndex.x * pixelsPerTile + pixelsPerTile / 2,
+                mouseIndex.y * pixelsPerTile + pixelsPerTile / 2,
+                constructorsAttributes[wantToBuild]["buildRange"],
+                VIOLET
+            );
+
             radius = buildingsAttributes[wantToBuild]["expansionRange"];
             for (TileIndex tile : tilesInsideCircle(Vector2{ static_cast<float>(mouseIndex.x), static_cast<float>(mouseIndex.y) }, radius))
             {
-                DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
+                if(mapExpansionEnergised[tile.x][tile.y]==ExpandState::AVAILABLE && fogOfWar[tile.x][tile.y]!=-1)
+                    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
             }
+        case ActorType::HIVE:
+        case ActorType::TUMOR:
+            //draw blue circle of expansion
             break;
         }
     }
@@ -2354,11 +2128,24 @@ void GameData::GameDraw()
         DrawRectangle(mouseIndex.x * pixelsPerTile, mouseIndex.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(RED, 0.3f));
     }
 
+    TileIndex buf_position;
+    int** mapFogOfWar = mapsFogOfWar[visionSide];
+
     for (GameActor* actor : this->unitsList)
     {
-        //TODO: checking, is actor inside of screen rectangle (render it or not)
-        if(actor!=nullptr) //dont need this?
-            actor->Draw();
+        //TODO: consider fog of war
+        if (actor != nullptr)
+        {
+            buf_position = actor->getPositionIndex();
+            if (buf_position.x >= renderBorders[1] &&
+                buf_position.x < renderBorders[3] &&
+                buf_position.y >= renderBorders[0] &&
+                buf_position.y < renderBorders[2] &&
+                mapFogOfWar[buf_position.x][buf_position.y] != -1)
+            {
+                actor->Draw();
+            }
+        }
     }
 
     EndMode2D();

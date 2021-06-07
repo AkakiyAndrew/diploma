@@ -19,14 +19,6 @@ int main(void)
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1700;
     const int screenHeight = 600;
-    
-    int* test = nullptr;
-
-    test = new int[] {1, 2, 3};
-
-    delete[]test;
-
-    test = new int[] {1, 2, 3};
 
     InitWindow(screenWidth, screenHeight, "raylib [core] map generation");
     SetTargetFPS(60);
@@ -37,11 +29,9 @@ int main(void)
     GameState state = GameState::MAIN_MENU;
     GameData gameData;
     TerrainGenerator terrain{};
-    
-    //--------------------------------------------------------------------------------------
 
     // Main game loop
-    while (!gameClosed)        // Detect window close button or ESC key
+    while (!gameClosed)        // Detect window close button
     {
         BeginDrawing();
         ClearBackground(Color{ 150,150,150,255 });
@@ -84,17 +74,10 @@ int main(void)
         default:
             break;
         }
-
-
-        // Background
-
         EndDrawing();
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
 
     return 0;
 }

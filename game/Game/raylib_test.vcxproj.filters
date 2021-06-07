@@ -27,9 +27,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="GameClasses.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="TerrainGenerator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>

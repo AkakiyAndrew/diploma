@@ -23,9 +23,6 @@ enum class State
 	GOES,
 	IDLE, //remove?
 	CHANGING_MODE, //for turrets mount/dismount
-	
-				   
-	//ÏÎÄÓÌÀÒÜ ÏÐÎ ÑÈÑÒÅÌÓ ÀÒÀÊÈ È ÑÖÅÏÈÒÜ Ñ ÀÍÈÌÀÖÈÅÉ
 };
 
 enum class ActorType
@@ -140,11 +137,19 @@ inline float Vector2Length(Vector2 v)
 	return result;
 }
 
-inline int degreeBetweenVectors(Vector2 v1, Vector2 v2)
+//inline int degreeBetweenVectors(Vector2 v1, Vector2 v2)
+//{
+//	double angle = atan2(v1.x * v2.x + v1.y * v2.y, v1.x * v2.y - v1.y * v2.x);
+//	
+//	return (angle*180.0)/PI;
+//}
+
+inline float max(float a, float b)
 {
-	double angle = atan2(v1.x * v2.x + v1.y * v2.y, v1.x * v2.y - v1.y * v2.x);
-	
-	return (angle*180.0)/PI;
+	if (a > b)
+		return a;
+	else
+		return b;
 }
 
 //TODO: make ENUM for attributes for faster geting from std::maps

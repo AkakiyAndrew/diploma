@@ -76,8 +76,6 @@ void Insect::Move()
         Vector2 targetLocation = target->getPosition();
 
         Vector2 buf = { static_cast<float>(targetLocation.x - position.x), static_cast<float>(targetLocation.y - position.y) };
-        //if (buf.x != 0 || buf.y != 0)
-        //velocityVector = { buf.x / fabsf(buf.x < buf.y ? buf.y : buf.x), buf.y / fabsf(buf.x < buf.y ? buf.y : buf.x) };
         velocityVector = { buf.x / Vector2Length(buf), buf.y / Vector2Length(buf) };
     }
 
@@ -147,9 +145,6 @@ void Insect::Move()
             }
         }
     }
-
-    //std::clamp <float>(steering.x, -1.f, 1.f);
-    //std::clamp <float>(steering.y, -1.f, 1.f);
 
     velocityVector.x += steering.x;
     velocityVector.y += steering.y;

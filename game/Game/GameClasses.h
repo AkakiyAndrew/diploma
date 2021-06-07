@@ -68,7 +68,6 @@ public:
     unsigned short timeCount; //for Update()
     unsigned int lastID = 0;
 
-    unsigned int radius = 1;
     const float pixelsPerTile = 16.f;
 
     int getMaxWidth() { return mapWidth; }
@@ -314,11 +313,6 @@ public:
     void markAreaExpand();
     void Expand();
     virtual ~Building() = 0;
-    //для опухолей: проверяет, есть ли в области expansionRange свободное место от слизи (учитывая карту экспансии)
-    //спавнить за раз 2-4 тайла, каждому свой цикл проверок:
-    //проходить по спирали радиуса экспансии, проверяя является ли тайл пустым от слизи и имеется ли сосед со слизью
-
-    //убываение слизи: раз в n*m циклов проверять все тайлы слизи на наличие рядом источника слизи, если нет - проверять 
 };
 
 class Tumor : public Building
@@ -338,6 +332,7 @@ private:
     int buildPower;
     int buildRange;
     GameActor* target = nullptr;
+    int lastRayPosition = 0;
 
 protected:
     std::vector<Connectable*>connectedUnits;

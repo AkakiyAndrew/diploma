@@ -23,7 +23,6 @@ void Constructor::BuildOrRepair()
                 //technical singularity dark magic
                 int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
                 if (restored != 0)
-                    //game->spendResources(target->maxHP / restored, side);
                     game->spendResources((target->cost*restored)/target->maxHP, side);
 
                 //if target hp restored, nullify pointer
@@ -96,8 +95,12 @@ void Constructor::DrawBuildingRay()
     {
         Vector2 offset;
         Vector2 targetPosition = target->getPosition();
+        if (game->timeCount % 15 == 0)
+            lastRayPosition++;
+        if (lastRayPosition > 7)
+            lastRayPosition = 0;
 
-        switch (game->timeCount % 9)
+        switch (lastRayPosition)
         {
         case 0:
             offset = { -1.f,-1.f };
@@ -131,7 +134,7 @@ void Constructor::DrawBuildingRay()
         targetPosition.x += (size / 2) * offset.x;
         targetPosition.y += (size / 2) * offset.y;
 
-        DrawLineEx(position, targetPosition, 2, Color{ 45, 165,235,255 });
+        DrawLineEx(position, targetPosition, 2, VIOLET);
     }
 }
 

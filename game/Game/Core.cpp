@@ -70,9 +70,6 @@ void Core::Disconect()
 	}
 	state = State::OFFLINE;
 	markAreaFade();
-	
-	//game->mapExpansionCreep[positionIndex.x][positionIndex.y] = ExpandState::EXPANDED_WITHOUT_SOURCE;
-
 }
 
 void Core::Draw()

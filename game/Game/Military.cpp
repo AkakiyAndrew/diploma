@@ -28,13 +28,9 @@ void Militaty::SeekForEnemy()
 
     for (GameActor* actor : game->getActorsInRadius(position, seekRange)) // TODO: seek for nearest?
     {
-        if (actor->side == enemy 
-            && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type)
-            /*&& game->getTileIndex(actor->getPosition())*/) //FOG OF WAR?
+        if (actor->side == enemy && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type))
         {
             buf.push_back(actor);
-            /*target = actor;
-            break;*/
         }
     }
     

@@ -10,10 +10,7 @@ bool Connectable::TryConnect(Vector2 position, int ID)
 {
 	bool result = false;
 
-	//???
-	//seek for parent to connect
 	std::vector<GameActor*> buf = gameConn->getActorsInRadius(position, connectRange);
-
 	for (GameActor* actor : buf)
 	{
 		//seek for first Core or Base, that operational and NOT the same unit which connecting, and connect to it

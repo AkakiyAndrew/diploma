@@ -338,7 +338,6 @@ void Turret::Draw()
 
     drawHP();
     DrawChargeBar();
-    //DrawCircleLines(position.x, position.y, size, DARKBLUE);
 }
 
 void Turret::Destroy() 
