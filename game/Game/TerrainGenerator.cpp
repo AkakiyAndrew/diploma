@@ -13,7 +13,7 @@ TerrainGenerator::TerrainGenerator()
 
     //TODO: make preset maps (empty map, for path finding etc.)
     width = 128, height = 128, seed = 12345, octaves = 16;
-    frequency = 16.;
+    frequency = 8.;
 
     //TODO: replace memory allocation to regenerate/rerender
 }
@@ -82,10 +82,10 @@ void TerrainGenerator::DrawInterface()
     frequency = GuiSliderBar(
         Rectangle{ guiZeroPoint.x, guiZeroPoint.y + 440, 120, 20 },
         "Frequency: 1.0",
-        "64.0",
+        "16.0",
         frequency,
-        0.1f,
-        64.f
+        1.f,
+        16.f
     );
     
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))

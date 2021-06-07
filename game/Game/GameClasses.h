@@ -22,6 +22,7 @@ private:
     Texture2D expansionInsectsTexture;
     Animation expansionMachinesAnimation;
     int currentFrame = 0;
+    bool gamePaused = false;
     std::map<ActorType, std::map<State, Animation>> unitAnimations;
     Color* palette;
     

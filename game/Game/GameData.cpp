@@ -2098,6 +2098,12 @@ void GameData::GameUpdate()
         else
             showingCreepStates = true;
 
+    if (IsKeyPressed(KEY_SPACE))
+        if (gamePaused)
+            gamePaused = false;
+        else
+            gamePaused = true;
+
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
     {
         //right-click to clear
@@ -2111,88 +2117,91 @@ void GameData::GameUpdate()
         addActor(wantToBuild, position, State::ONLINE);
     }
 
-    //UNIT UPDATING
-    std::vector<GameActor*>::iterator iter;
-    GameActor* buf = nullptr;
-    for (iter = unitsList.begin(); iter != unitsList.end(); )
+    if (!gamePaused)
     {
-        //removing pointers for killed units from vector
-        if ((*iter) == nullptr)
+        //UNIT UPDATING
+        std::vector<GameActor*>::iterator iter;
+        GameActor* buf = nullptr;
+        for (iter = unitsList.begin(); iter != unitsList.end(); )
         {
-            iter = unitsList.erase(iter);
-        }
-        else
-        {
-            (*iter)->Update();
-            iter++;
-        }
-    }
-
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
-    {
-        GameActor *buf = getActorInTile(mouseIndex.x, mouseIndex.y);
-        if(buf!=nullptr)
-            removeActor(buf->ID);
-        wantToRemove = false;
-    }
-
-    //expansion fading
-    if (timeCount == 0)
-    {
-        std::vector<TileIndex>buf;
-        //INSECTS
-        for (int x = 0; x < mapWidth; x++)
-        {
-            for (int y = 0; y < mapHeight; y++)
+            //removing pointers for killed units from vector
+            if ((*iter) == nullptr)
             {
-                if (mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                {
-                    if (numOfExpansionTileAdjoinFading(x, y, Side::INSECTS) < 4)
-                        buf.push_back(TileIndex{ x,y });
-                }
+                iter = unitsList.erase(iter);
+            }
+            else
+            {
+                (*iter)->Update();
+                iter++;
             }
         }
 
-        creepTilesCount -= buf.size();
-        for (TileIndex tile : buf)
-            mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
-        
-        //MACHINES
-        buf.clear();
-        for (int x = 0; x < mapWidth; x++)
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
         {
-            for (int y = 0; y < mapHeight; y++)
-            {
-                if (mapExpansionEnergised[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
-                {
-                    if (numOfExpansionTileAdjoinFading(x, y, Side::MACHINES) < 4)
-                        buf.push_back(TileIndex{ x,y });
-                }
-            }
+            GameActor* buf = getActorInTile(mouseIndex.x, mouseIndex.y);
+            if (buf != nullptr)
+                removeActor(buf->ID);
+            wantToRemove = false;
         }
 
-        energisedTilesCount -= buf.size();
+        //expansion fading
+        if (timeCount == 0)
+        {
+            std::vector<TileIndex>buf;
+            //INSECTS
+            for (int x = 0; x < mapWidth; x++)
+            {
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    if (mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                    {
+                        if (numOfExpansionTileAdjoinFading(x, y, Side::INSECTS) < 4)
+                            buf.push_back(TileIndex{ x,y });
+                    }
+                }
+            }
 
-        for (TileIndex tile : buf)
-            mapExpansionEnergised[tile.x][tile.y] = ExpandState::AVAILABLE;
+            creepTilesCount -= buf.size();
+            for (TileIndex tile : buf)
+                mapExpansionCreep[tile.x][tile.y] = ExpandState::AVAILABLE;
 
-    }
+            //MACHINES
+            buf.clear();
+            for (int x = 0; x < mapWidth; x++)
+            {
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    if (mapExpansionEnergised[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                    {
+                        if (numOfExpansionTileAdjoinFading(x, y, Side::MACHINES) < 4)
+                            buf.push_back(TileIndex{ x,y });
+                    }
+                }
+            }
 
-    //RESOURCES GATHERING
-    if (timeCount == 0)
-    {
-        resourcesInsects += creepTilesCount / 100;
-        resourcesMachines += energisedTilesCount / 100;
-        if (resourcesMachines > 200) resourcesMachines = 200; //maximum of Energy
-    }
+            energisedTilesCount -= buf.size();
 
-    //ANIMATION
-    if (timeCount % 15 == 0)
-    {
-        currentFrame++;
+            for (TileIndex tile : buf)
+                mapExpansionEnergised[tile.x][tile.y] = ExpandState::AVAILABLE;
 
-        if (currentFrame >= expansionMachinesAnimation.framesAmount)
-            currentFrame = 0;
+        }
+
+        //RESOURCES GATHERING
+        if (timeCount == 0)
+        {
+            resourcesInsects += creepTilesCount / 100;
+            resourcesMachines += energisedTilesCount / 100;
+            if (resourcesMachines > 200) resourcesMachines = 200; //maximum of Energy
+        }
+
+        //ANIMATION
+        if (timeCount % 15 == 0)
+        {
+            currentFrame++;
+
+            if (currentFrame >= expansionMachinesAnimation.framesAmount)
+                currentFrame = 0;
+        }
     }
 }
 

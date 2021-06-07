@@ -23,7 +23,8 @@ void Constructor::BuildOrRepair()
                 //technical singularity dark magic
                 int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
                 if (restored != 0)
-                    game->spendResources(target->maxHP / restored, side);
+                    //game->spendResources(target->maxHP / restored, side);
+                    game->spendResources((target->cost*restored)/target->maxHP, side);
 
                 //if target hp restored, nullify pointer
                 if (target->getHP() == target->maxHP)
