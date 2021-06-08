@@ -48,13 +48,34 @@ GameData::GameData()
 
     //UNIT SPRITES
 
+    //HEAVY INSECT
+    unitAnimations[ActorType::HEAVY_INSECT][State::GOES] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::HEAVY_INSECT][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\heavyInsect_goes_%d.png", i));
+    }
+
+    //FLYING INSECT
+    unitAnimations[ActorType::FLYING_INSECT][State::GOES] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::FLYING_INSECT][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\flyingInsect_goes_%d.png", i));
+    }
+
     //LIGHT INSECT
     unitAnimations[ActorType::LIGHT_INSECT][State::GOES] =
     {
         new Texture2D[5],
         5
     };
-
     for (int i = 0; i < 5; i++)
     {
         unitAnimations[ActorType::LIGHT_INSECT][State::GOES].frames[i] = LoadTexture(TextFormat("textures\\sprites\\lightInsect_goes_%d.png", i));
@@ -103,7 +124,47 @@ GameData::GameData()
         unitAnimations[ActorType::HEAVY_TURRET][State::ATTACKING].frames[i] = LoadTexture(TextFormat("textures\\sprites\\heavyTurret_attacking_%d.png", i));
     }
 
-    //TODO: texture files loading, units properties
+    //LIGHT TURRET
+    unitAnimations[ActorType::LIGHT_TURRET][State::ONLINE] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::LIGHT_TURRET][State::ONLINE].frames[i] = LoadTexture(TextFormat("textures\\sprites\\lightTurret_online_%d.png", i));
+    }
+
+    unitAnimations[ActorType::LIGHT_TURRET][State::ATTACKING] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::LIGHT_TURRET][State::ATTACKING].frames[i] = LoadTexture(TextFormat("textures\\sprites\\lightTurret_attacking_%d.png", i));
+    }
+
+    //AIRDEFENSE TURRET
+    unitAnimations[ActorType::AIRDEFENSE_TURRET][State::ONLINE] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::AIRDEFENSE_TURRET][State::ONLINE].frames[i] = LoadTexture(TextFormat("textures\\sprites\\antiAirTurret_online_%d.png", i));
+    }
+
+    unitAnimations[ActorType::AIRDEFENSE_TURRET][State::ATTACKING] =
+    {
+        new Texture2D[1],
+        1
+    };
+    for (int i = 0; i < 1; i++)
+    {
+        unitAnimations[ActorType::AIRDEFENSE_TURRET][State::ATTACKING].frames[i] = LoadTexture(TextFormat("textures\\sprites\\antiAirTurret_attacking_%d.png", i));
+    }
 
     //GENERIC ACTORS ATTRIBUTES
     genericAttributes[ActorType::TUMOR] = std::map<std::string, int>{
@@ -127,19 +188,47 @@ GameData::GameData()
         {"sightRange", 12},
         {"armor", 10},
     };
+    genericAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>{
+        {"maxHP", 100},
+        {"size", 12},
+        {"cost", 50},
+        {"sightRange", 12},
+        {"armor", 5},
+    };
     genericAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"maxHP", 200},
         {"size", 16},
-        {"cost", 150},
+        {"cost", 50},
+        {"sightRange", 12},
+        {"armor", 5},
+    };
+    genericAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>{
+        {"maxHP", 150},
+        {"size", 12},
+        {"cost", 50},
         {"sightRange", 12},
         {"armor", 5},
     };
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
+        {"maxHP", 30},
+        {"size", 8},
+        {"cost", 10},
+        {"sightRange", 4},
+        {"armor", 1},
+    };
+    genericAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
+        {"maxHP", 100},
+        {"size", 10},
+        {"cost", 30},
+        {"sightRange", 3},
+        {"armor", 10},
+    };
+    genericAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
         {"maxHP", 50},
         {"size", 8},
-        {"cost", 5},
-        {"sightRange", 3},
-        {"armor", 1},
+        {"cost", 20},
+        {"sightRange", 5},
+        {"armor", 2},
     };
 
     //BUILDING ACTORS ATTRIBUTES
@@ -165,17 +254,49 @@ GameData::GameData()
         {"seekRange", 8 * pixelsPerTile},
         {"attackRange", 2 * pixelsPerTile},
         {"speed", 2},
+        {"damage", 5},
+        {"rotationSpeed", 8},
+        {"cooldownDuration", 30}, //ticks to reload
+    };
+    militaryAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
+        {"seekRange", 8 * pixelsPerTile},
+        {"attackRange", 2 * pixelsPerTile},
+        {"speed", 1},
+        {"damage", 30},
+        {"rotationSpeed", 4},
+        {"cooldownDuration", 60}, //ticks to reload
+    };
+    militaryAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
+        {"seekRange", 8 * pixelsPerTile},
+        {"attackRange", 2 * pixelsPerTile},
+        {"speed", 3},
         {"damage", 15},
         {"rotationSpeed", 8},
         {"cooldownDuration", 45}, //ticks to reload
     };
+    militaryAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>{
+        {"seekRange", 10 * pixelsPerTile},
+        {"attackRange", 7 * pixelsPerTile},
+        {"speed", 1},
+        {"damage", 20},
+        {"rotationSpeed", 2},
+        {"cooldownDuration", 30}, //ticks to reload
+    };
     militaryAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
+        {"seekRange", 12 * pixelsPerTile},
+        {"attackRange", 10 * pixelsPerTile},
+        {"speed", 1},
+        {"damage", 70},
+        {"rotationSpeed", 2},
+        {"cooldownDuration", 120}, //ticks to reload
+    };
+    militaryAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>{
         {"seekRange", 10 * pixelsPerTile},
         {"attackRange", 7 * pixelsPerTile},
         {"speed", 1},
         {"damage", 70},
         {"rotationSpeed", 2},
-        {"cooldownDuration", 240}, //ticks to reload
+        {"cooldownDuration", 60}, //ticks to reload
     };
 
     //CONNECTABLE ACTORS ATTRIBUTES
@@ -211,8 +332,8 @@ GameData::GameData()
     //TURRETS ATTRIBUTES
     turretsAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
     {
-        {"maxCharge", 50},
-        {"chargeRate", 2},
+        {"maxCharge", 70},
+        {"chargeRate", 1},
         {"energyPerShot", 5},
     };
     turretsAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
@@ -225,7 +346,7 @@ GameData::GameData()
     {
         {"maxCharge", 50},
         {"chargeRate", 2},
-        {"energyPerShot", 5},
+        {"energyPerShot", 10},
     };
 
 }
@@ -1274,11 +1395,11 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     switch (wantToBuild)
     {
     case ActorType::LIGHT_TURRET:
-        break;
     case ActorType::HEAVY_TURRET:
+    case ActorType::AIRDEFENSE_TURRET:
         buf_turret = new Turret(
             this,
-            ActorType::HEAVY_TURRET,
+            wantToBuild,
             position,
             State::UNDER_CONSTRUCTION);
 
@@ -1286,24 +1407,19 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         militaryUnitsList.push_back(buf_turret);
         turretUnitsList.push_back(buf_turret);
         break;
-    case ActorType::AIRDEFENSE_TURRET:
-        break;
     case ActorType::LIGHT_INSECT:
+    case ActorType::HEAVY_INSECT:
+    case ActorType::FLYING_INSECT:
         buf_military = new Insect(
             this,
-            ActorType::LIGHT_INSECT,
+            wantToBuild,
             position,
             State::GOES);
 
         unitsList.push_back(buf_military);
         militaryUnitsList.push_back(buf_military);
         break;
-    case ActorType::HEAVY_INSECT:
-        break;
-    case ActorType::FLYING_INSECT:
-        break;
     case ActorType::CORE:
-        
         buf_building = new Core(
             this,
             ActorType::CORE,
@@ -1311,7 +1427,6 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             State::UNDER_CONSTRUCTION);
         unitsList.push_back(buf_building);
         expansionUnitsList_Machines.push_back(buf_building);
-
         break;
     case ActorType::BASE:
         buf_building = new Base(
@@ -1321,7 +1436,8 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             State::ONLINE);
         unitsList.push_back(buf_building);
         expansionUnitsList_Machines.push_back(buf_building);
-
+        basePtr = buf_building;
+        insectsDesirePosition = basePtr->getPositionIndex(); //once base placed, game begins
         break;
     case ActorType::HIVE:
         break;
@@ -1470,9 +1586,12 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
 {
     bool result = false;
     damage -= target->armor;
+    if (damage <= 0) damage = 1; //every hit deals at least 1 damage
     target->setHP(target->getHP() - damage);
     target->inBattle = true;
     target->inBattleCounter = 60;
+
+    //TODO: consider victory 
 
     if (target->getHP() <= 0)
     {
@@ -1548,14 +1667,14 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
                 insectsDesirePosition,
                 ActorType::LIGHT_INSECT
             );
-            //calculateVectorPathfinding(
-            //    insectsDesirePosition,
-            //    ActorType::HEAVY_INSECT
-            //);
-            //calculateVectorPathfinding(
-            //    insectsDesirePosition,
-            //    ActorType::FLYING_INSECT
-            //);
+            calculateVectorPathfinding(
+                insectsDesirePosition,
+                ActorType::HEAVY_INSECT
+            );
+            calculateVectorPathfinding(
+                insectsDesirePosition,
+                ActorType::FLYING_INSECT
+            );
         }
     }
 }
@@ -1731,27 +1850,44 @@ void GameData::GameUpdate()
     if (renderBorders[2] > mapHeight) renderBorders[2] = mapHeight;
     if (renderBorders[3] > mapWidth) renderBorders[3] = mapWidth;
 
+    //TURRET BUILDING
+    if (IsKeyPressed(KEY_ONE))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::LIGHT_TURRET;
     if (IsKeyPressed(KEY_TWO))
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::HEAVY_TURRET;
-
+    if (IsKeyPressed(KEY_THREE))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::AIRDEFENSE_TURRET;
+    
+    //MANUAL INSECTS SPAWN
     if (IsKeyPressed(KEY_FOUR))
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::LIGHT_INSECT;
+    if (IsKeyPressed(KEY_FIVE))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::HEAVY_INSECT;
+    if (IsKeyPressed(KEY_SIX))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::FLYING_INSECT;
 
+    //SPAWN TUMOR
     if (IsKeyPressed(KEY_E))
         if(wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::TUMOR;
         else
             wantToBuild = ActorType::ACTOR_NULL;
 
+    //BUILD CORE
     if (IsKeyPressed(KEY_Q))
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::CORE;
         else
             wantToBuild = ActorType::ACTOR_NULL;
 
-    if (IsKeyPressed(KEY_B))
+    //BUILD BASE
+    if (IsKeyPressed(KEY_B) && basePtr == nullptr)
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::BASE;
         else
@@ -1790,14 +1926,14 @@ void GameData::GameUpdate()
             insectsDesirePosition,
             ActorType::LIGHT_INSECT
         );
-        //calculateVectorPathfinding(
-        //    insectsDesirePosition,
-        //    ActorType::HEAVY_INSECT
-        //);
-        //calculateVectorPathfinding(
-        //    insectsDesirePosition,
-        //    ActorType::FLYING_INSECT
-        //);
+        calculateVectorPathfinding(
+            insectsDesirePosition,
+            ActorType::HEAVY_INSECT
+        );
+        calculateVectorPathfinding(
+            insectsDesirePosition,
+            ActorType::FLYING_INSECT
+        );
     }
 
     if (IsKeyPressed(KEY_F1))
@@ -1831,7 +1967,7 @@ void GameData::GameUpdate()
         addActor(wantToBuild, position, State::ONLINE);
     }
 
-    if (!gamePaused)
+    if (!gamePaused && basePtr!=nullptr) //game starts only when base placed
     {
         //UNIT UPDATING
         std::vector<GameActor*>::iterator iter;

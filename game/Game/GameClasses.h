@@ -10,6 +10,7 @@ class Constructor;
 class Connectable;
 class Militaty;
 class Turret;
+class Base;
 
 class GameData
 {
@@ -31,6 +32,8 @@ private:
     std::vector<Building*> expansionUnitsList_Machines;
     std::vector<Militaty*> militaryUnitsList;
     std::vector<Turret*> turretUnitsList;
+    GameActor* basePtr = nullptr;
+    GameActor* hivePtr = nullptr;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -50,9 +53,9 @@ private:
     //INTERFACE
     bool showingCreepStates = false;
     Side visionSide = Side::MACHINES;
+    bool gameOver = false;
 
-
-    //тут же и будут хранится карты урона и т.п.
+    //DAMAGE MAP
 
     //RESOURCES
     unsigned resourcesInsects = 0;
@@ -60,7 +63,7 @@ private:
 
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
-    //fog of war maps
+    //FOG OF WAR
     std::map<Side, int**> mapsFogOfWar;
     TileIndex insectsDesirePosition = {0,0};
 

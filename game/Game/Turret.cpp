@@ -32,6 +32,45 @@ void Turret::Attack()
     //TODO::make different attacks for all turrets
     if(type==ActorType::HEAVY_TURRET)
         game->Hit(target, damage, type);
+
+    if (type == ActorType::LIGHT_TURRET) //attacks units in front of turret (triangle-AoE)
+    {
+        Vector2 targetPosition = target->getPosition();
+        float s = 1 / sqrtf(3.f);
+        Vector2 pLeft = {
+            targetPosition.x + s * (position.y - targetPosition.y),
+            targetPosition.y + s * (targetPosition.x - position.x)
+        };
+        Vector2 pRight = {
+            targetPosition.x + s * (targetPosition.y - position.y),
+            targetPosition.y + s * (position.x - targetPosition.x)
+        };
+
+        std::vector <GameActor*> buf_targets = game->getActorsInRadius(position, Vector2Distance(position, target->getPosition()));
+        //TODO: seek for enemy that can be hited
+        for (GameActor* actor : buf_targets)
+        {
+            if (actor->type != ActorType::FLYING_INSECT &&
+                actor->side != side &&
+                CheckCollisionPointTriangle(actor->getPosition(), position, pLeft, pRight))
+            {
+                game->Hit(actor, damage, type);
+            }
+        }
+    }
+
+    if (type == ActorType::AIRDEFENSE_TURRET)  //attacks units via AoE-attack (circle around target)
+    {
+        std::vector <GameActor*> buf_targets = game->getActorsInRadius(target->getPosition(), 16.f);
+        for (GameActor* actor : buf_targets)
+        {
+            if (actor->type == ActorType::FLYING_INSECT)
+            {
+                game->Hit(actor, damage, type);
+            }
+        }
+    }
+
     charge -= energyPerShot;
     cooldownRemain = cooldownDuration;
 }
@@ -321,7 +360,7 @@ void Turret::Draw()
         WHITE);
     
     //if culminating attack animation
-    if (state == State::ATTACKING && attackProgressCounter>50 /*&& currentFrame == sprite.framesAmount*/ && type == ActorType::HEAVY_TURRET)
+    if (state == State::ATTACKING && attackProgressCounter>50 && type == ActorType::HEAVY_TURRET)
         DrawLineEx(position, target->getPosition(), 1, RED); //laser beam
 
     //gun

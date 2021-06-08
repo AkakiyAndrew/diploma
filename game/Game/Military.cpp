@@ -30,7 +30,14 @@ void Militaty::SeekForEnemy()
     {
         if (actor->side == enemy && game->isOnLineOfSight(positionIndex, actor->getPositionIndex(), type))
         {
-            buf.push_back(actor);
+            //additional check for different types of units:
+            if ((type == ActorType::LIGHT_TURRET && actor->type != ActorType::FLYING_INSECT) ||
+                (type == ActorType::HEAVY_TURRET && actor->type != ActorType::FLYING_INSECT) ||
+                (type == ActorType::AIRDEFENSE_TURRET && actor->type == ActorType::FLYING_INSECT) ||
+                side == Side::INSECTS) //insects can attack all machines buildings
+            {
+                buf.push_back(actor);
+            }
         }
     }
     
