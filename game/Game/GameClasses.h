@@ -30,6 +30,7 @@ private:
     std::vector<GameActor*> unitsList;
     std::vector<Building*> expansionUnitsList_Insects;
     std::vector<Building*> expansionUnitsList_Machines;
+    std::vector<Constructor*> constructorList;
     std::vector<Militaty*> militaryUnitsList;
     std::vector<Turret*> turretUnitsList;
     GameActor* basePtr = nullptr;
@@ -59,7 +60,7 @@ private:
 
     //RESOURCES
     unsigned resourcesInsects = 0;
-    unsigned resourcesMachines = 100;
+    unsigned resourcesMachines = 1000;
 
     //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 

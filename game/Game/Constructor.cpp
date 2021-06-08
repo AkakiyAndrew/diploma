@@ -13,7 +13,7 @@ void Constructor::BuildOrRepair()
     if (target != nullptr)
     {
         //repair, if target fully repaired - nullify pointer
-        if (!target->inBattle)
+        if (!target->inBattle/* && target->cost != 0*/)
         {
             //determine, how much resources can be spend
             int canSpend = game->trySpendResources(buildPower, side);
@@ -23,7 +23,7 @@ void Constructor::BuildOrRepair()
                 //technical singularity dark magic
                 int restored = target->RestoreHP(target->maxHP / (target->cost / canSpend));
                 if (restored != 0)
-                    game->spendResources((target->cost*restored)/target->maxHP, side);
+                    game->spendResources(min((target->cost * restored) / target->maxHP, canSpend), side);
 
                 //if target hp restored, nullify pointer
                 if (target->getHP() == target->maxHP)

@@ -224,7 +224,7 @@ GameData::GameData()
         {"armor", 10},
     };
     genericAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
-        {"maxHP", 50},
+        {"maxHP", 70},
         {"size", 8},
         {"cost", 20},
         {"sightRange", 5},
@@ -242,11 +242,11 @@ GameData::GameData()
     };
     buildingsAttributes[ActorType::CORE] = std::map<std::string, int>{
         {"expansionRange", 8},
-        {"expansionTime", 16 },
+        {"expansionTime", 4 },
     };
     buildingsAttributes[ActorType::BASE] = std::map<std::string, int>{
         {"expansionRange", 12},
-        {"expansionTime", 16 },
+        {"expansionTime", 4 },
     };
 
     //MILITARY ACTORS ATTRIBUTES
@@ -269,18 +269,18 @@ GameData::GameData()
     militaryAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
         {"seekRange", 8 * pixelsPerTile},
         {"attackRange", 2 * pixelsPerTile},
-        {"speed", 3},
+        {"speed", 2},
         {"damage", 15},
         {"rotationSpeed", 8},
         {"cooldownDuration", 45}, //ticks to reload
     };
     militaryAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>{
         {"seekRange", 10 * pixelsPerTile},
-        {"attackRange", 7 * pixelsPerTile},
+        {"attackRange", 6 * pixelsPerTile},
         {"speed", 1},
         {"damage", 20},
-        {"rotationSpeed", 2},
-        {"cooldownDuration", 30}, //ticks to reload
+        {"rotationSpeed", 6},
+        {"cooldownDuration", 15}, //ticks to reload
     };
     militaryAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"seekRange", 12 * pixelsPerTile},
@@ -288,15 +288,15 @@ GameData::GameData()
         {"speed", 1},
         {"damage", 70},
         {"rotationSpeed", 2},
-        {"cooldownDuration", 120}, //ticks to reload
+        {"cooldownDuration", 60}, //ticks to reload
     };
     militaryAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>{
-        {"seekRange", 10 * pixelsPerTile},
-        {"attackRange", 7 * pixelsPerTile},
+        {"seekRange", 16 * pixelsPerTile},
+        {"attackRange", 12 * pixelsPerTile},
         {"speed", 1},
-        {"damage", 70},
-        {"rotationSpeed", 2},
-        {"cooldownDuration", 60}, //ticks to reload
+        {"damage", 40},
+        {"rotationSpeed", 4},
+        {"cooldownDuration", 30}, //ticks to reload
     };
 
     //CONNECTABLE ACTORS ATTRIBUTES
@@ -333,8 +333,8 @@ GameData::GameData()
     turretsAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
     {
         {"maxCharge", 70},
-        {"chargeRate", 1},
-        {"energyPerShot", 5},
+        {"chargeRate", 2},
+        {"energyPerShot", 3},
     };
     turretsAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
     {
@@ -346,7 +346,7 @@ GameData::GameData()
     {
         {"maxCharge", 50},
         {"chargeRate", 2},
-        {"energyPerShot", 10},
+        {"energyPerShot", 7},
     };
 
 }
@@ -373,7 +373,8 @@ void GameData::clearMap()
 
     lastID = 0;
     resourcesInsects = 0;
-    resourcesMachines = 0;
+    resourcesMachines = 1000;
+    basePtr = nullptr;
     //creepTilesCount = 0;
     //energisedTilesCount = 0;
 }
@@ -1391,6 +1392,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     Building* buf_building;
     Militaty* buf_military;
     Turret* buf_turret;
+    Constructor* buf_constructor;
 
     switch (wantToBuild)
     {
@@ -1420,23 +1422,25 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         militaryUnitsList.push_back(buf_military);
         break;
     case ActorType::CORE:
-        buf_building = new Core(
+        buf_constructor = new Core(
             this,
             ActorType::CORE,
             position,
             State::UNDER_CONSTRUCTION);
-        unitsList.push_back(buf_building);
-        expansionUnitsList_Machines.push_back(buf_building);
+        unitsList.push_back(buf_constructor);
+        expansionUnitsList_Machines.push_back(buf_constructor);
+        constructorList.push_back(buf_constructor);
         break;
     case ActorType::BASE:
-        buf_building = new Base(
+        buf_constructor = new Base(
             this,
             ActorType::BASE,
             position,
             State::ONLINE);
-        unitsList.push_back(buf_building);
-        expansionUnitsList_Machines.push_back(buf_building);
-        basePtr = buf_building;
+        unitsList.push_back(buf_constructor);
+        expansionUnitsList_Machines.push_back(buf_constructor);
+        basePtr = buf_constructor;
+        constructorList.push_back(buf_constructor);
         insectsDesirePosition = basePtr->getPositionIndex(); //once base placed, game begins
         break;
     case ActorType::HIVE:
@@ -1579,6 +1583,16 @@ void GameData::removeActor(unsigned int ID)
             turretIter++;
     }
 
+    std::vector<Constructor*>::iterator constructorIter;
+    for (constructorIter = constructorList.begin(); constructorIter != constructorList.end(); )
+    {
+        if ((*constructorIter)->ID == ID)
+            constructorIter = constructorList.erase(constructorIter);
+        else
+            constructorIter++;
+    }
+    
+
     if(buf!=nullptr)
         delete buf;
 }
@@ -1601,8 +1615,17 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
         else
             opposite = Side::INSECTS;
 
+        if (target->side == Side::MACHINES)
+        {
+            for (Constructor* constructor : constructorList)
+            {
+                constructor->SeekForTarget();
+            }
+        }
+
         removeActor(target->ID);
         recalculateMilitaryTargets(opposite);
+
         result = true;
     }
     //TODO: update damage maps here
@@ -2041,10 +2064,10 @@ void GameData::GameUpdate()
         {
             resourcesInsects += creepTilesCount / 100;
             resourcesMachines += energisedTilesCount / 100;
-            if (resourcesMachines > 200) resourcesMachines = 200; //maximum of Energy
+            if (resourcesMachines > 1000) resourcesMachines = 1000; //maximum of Energy
         }
 
-        //ANIMATION
+        //TILE ANIMATION
         if (timeCount % 15 == 0)
         {
             currentFrame++;

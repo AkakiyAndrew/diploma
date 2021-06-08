@@ -17,9 +17,10 @@ Building::Building(GameData* ptr, ActorType type, Vector2 pos, State state)
 
 void Building::Expand()
 {
-    if (this->game->timeCount % expansionTime == 0)
+    
+    if (!this->expanded)
     {
-        if (!this->expanded)
+        if (this->game->timeCount % expansionTime == 0)
         {
             //TODO: further optimization - remove expanded tile from vector, on Destroy call recalculate it again to set mapExpansionCreep
             for (TileIndex tile : expansionIndices)

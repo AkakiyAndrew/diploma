@@ -152,4 +152,12 @@ inline float max(float a, float b)
 		return b;
 }
 
+inline float min(float a, float b)
+{
+	if (a < b)
+		return a;
+	else
+		return b;
+}
+
 //TODO: make ENUM for attributes for faster geting from std::maps

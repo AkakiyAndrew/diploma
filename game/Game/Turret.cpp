@@ -35,8 +35,8 @@ void Turret::Attack()
 
     if (type == ActorType::LIGHT_TURRET) //attacks units in front of turret (triangle-AoE)
     {
-        Vector2 targetPosition = target->getPosition();
-        float s = 1 / sqrtf(3.f);
+        Vector2 targetPosition = { position.x + attackRange * cosf(angle * PI / 180.f),position.y + attackRange * sinf(angle * PI / 180.f) };//= target->getPosition();
+        float s = 1 / sqrtf(3.f); //tan^-1 0.36 instead?
         Vector2 pLeft = {
             targetPosition.x + s * (position.y - targetPosition.y),
             targetPosition.y + s * (targetPosition.x - position.x)
@@ -115,19 +115,26 @@ void Turret::Update()
             {
                 if (cooldownRemain == 0)
                 {
-                    //for animation
-
-                    attackProgressCounter++;
-                    currentFrame = attackProgressCounter / (60 / sprite.framesAmount);
-                    if (currentFrame >= sprite.framesAmount)
+                    if (type == ActorType::HEAVY_TURRET || type==ActorType::AIRDEFENSE_TURRET)
                     {
-                        currentFrame--;
+                        //for animation
+                        attackProgressCounter++;
+                        currentFrame = attackProgressCounter / (60 / sprite.framesAmount);
+                        if (currentFrame >= sprite.framesAmount)
+                        {
+                            currentFrame--;
+                        }
+
+                        if (attackProgressCounter == 60)
+                        {
+                            Attack(); //hit target and reset cooldown
+                            attackProgressCounter = 0;
+                            currentFrame = 0;
+                        }
                     }
-
-                    if (attackProgressCounter == 60)
+                    else
                     {
-                        Attack(); //hit target and reset cooldown
-                        attackProgressCounter = 0;
+                        Attack();
                         currentFrame = 0;
                     }
                 }
@@ -362,6 +369,32 @@ void Turret::Draw()
     //if culminating attack animation
     if (state == State::ATTACKING && attackProgressCounter>50 && type == ActorType::HEAVY_TURRET)
         DrawLineEx(position, target->getPosition(), 1, RED); //laser beam
+
+    if (type == ActorType::LIGHT_TURRET)
+    {
+        Vector2 targetPosition = { position.x + attackRange * cosf(angle * PI / 180.f),position.y + attackRange * sinf(angle * PI / 180.f) };//= target->getPosition();
+        float s = 1 / sqrtf(3.f); //tan^-1 0.36 instead?
+        Vector2 pLeft = {
+            targetPosition.x + s * (position.y - targetPosition.y),
+            targetPosition.y + s * (targetPosition.x - position.x)
+        };
+        Vector2 pRight = {
+            targetPosition.x + s * (targetPosition.y - position.y),
+            targetPosition.y + s * (position.x - targetPosition.x)
+        };
+
+        if(state==State::ATTACKING)
+            DrawTriangle(position, pLeft, pRight, Fade(Color{240, 50,50,255}, 0.25));
+        else
+            if(state!=State::UNDER_CONSTRUCTION)
+                DrawTriangle(position, pLeft, pRight, Fade(YELLOW, 0.25));
+    }
+
+    if (state == State::ATTACKING && attackProgressCounter > 55 && type == ActorType::AIRDEFENSE_TURRET)
+    {
+        Vector2 targetPos = target->getPosition();
+        DrawCircleGradient(targetPos.x, targetPos.y, 16.f, Fade(RED, 0.5), Fade(ORANGE,0.5));
+    }
 
     //gun
     if (state != State::UNDER_CONSTRUCTION)
