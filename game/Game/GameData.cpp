@@ -1460,7 +1460,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     }
 
     //in any case nulify wantToBuild
-    wantToBuild = ActorType::ACTOR_NULL;
+    //wantToBuild = ActorType::ACTOR_NULL;
     
 }
 GameActor* GameData::getActorInTile(int x, int y)
@@ -2176,8 +2176,8 @@ void GameData::GameDraw()
                     DrawLineEx(
                         Vector2{ x * pixelsPerTile + pixelsPerTile / 2,
                         y * pixelsPerTile + pixelsPerTile / 2 },
-                        Vector2{ x * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].x *2,
-                        y * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].y * 2,
+                        Vector2{ x * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].x *6,
+                        y * pixelsPerTile + pixelsPerTile / 2 + vectorField[x][y].y * 6,
                         },
                         3.f,
                         GREEN);
