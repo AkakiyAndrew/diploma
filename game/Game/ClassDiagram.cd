@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GameData" Collapsed="true">
+    <Position X="20.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AE8QGJCghjYKEMYFsEIQIEw2AIGKFEDUobxy0gvAAYA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameActor" Collapsed="true">
+    <Position X="15.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YASAIEgQggAAggQQAIAAIAAAQBBVAAAMAAGAAFBAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Building" Collapsed="true">
+    <Position X="17" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQABAhAQIAAAAAAAAAAAAAEAAAAAAIAABAAAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tumor" Collapsed="true">
+    <Position X="22" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAgAAAAAAAAAAAAFAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Constructor" Collapsed="true">
+    <Position X="18.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAGQABAAAAAAAIEADAAQAAAAAAAEEAAAAQAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Connectable" Collapsed="true">
+    <Position X="14.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAABAAAABAAAAAAAAQAAIAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Core" Collapsed="true">
+    <Position X="16.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAIAAAAAAAgAAAAAgAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Base" Collapsed="true">
+    <Position X="18.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAgAAAAAAAAAAAABAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Militaty" Collapsed="true">
+    <Position X="12.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAIAQAAABgAAAJAAABAAAAIASAQACCABAAAAMAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Insect" Collapsed="true">
+    <Position X="11.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAIAAAgAAAAACAAAAAIBAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Turret" Collapsed="true">
+    <Position X="12.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAwCBAAEEIAAAgEACAAAAEAAAIJAEAAAAAAQAgAAEgA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Hive" Collapsed="true">
+    <Position X="20.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAgAAEAAAAAAAAABAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>GameClasses.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

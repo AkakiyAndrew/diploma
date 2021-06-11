@@ -328,6 +328,16 @@ public:
     Tumor(GameData* ptr, ActorType type, Vector2 pos, State state);
 };
 
+class Hive : public Building
+{
+public:
+    void Update();
+    void Draw();
+    void Destroy();
+    void SpawnUnits();
+    Hive(GameData* ptr, ActorType type, Vector2 pos, State state);
+};
+
 class Constructor : public Building
 {
     //TODO: idea, common Draw() method for constructors
