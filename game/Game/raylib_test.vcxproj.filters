@@ -22,6 +22,9 @@
     <Filter Include="Исходные файлы\Military">
       <UniqueIdentifier>{21cfb8a1-e0ee-4207-b8e8-36198da2cb57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\Sprites">
+      <UniqueIdentifier>{13f62d64-c15a-4184-bae7-2be32058b27f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -99,6 +102,81 @@
     </Image>
     <Image Include="textures\tileset\CREEP.png">
       <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\sprites\antiAirTurret_attacking_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\antiAirTurret_online_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\flyingInsect_goes_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyInsect_goes_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_1.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_2.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_3.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_4.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_attacking_5.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\heavyTurret_online_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightInsect_goes_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightInsect_goes_1.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightInsect_goes_2.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightInsect_goes_3.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightInsect_goes_4.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightTurret_attacking_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\lightTurret_online_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_changeMode_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_changeMode_1.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_changeMode_2.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_changeMode_3.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_goes_0.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_goes_1.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\sprites\turretChasis_goes_2.png">
+      <Filter>Файлы ресурсов\Sprites</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

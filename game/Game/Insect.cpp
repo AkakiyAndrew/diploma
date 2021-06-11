@@ -10,6 +10,22 @@ void Insect::Update()
 {
     switch (state)
     {
+    case State::GOES:
+        Move();
+        game->revealTerritory(positionIndex, sightRange, side);
+
+        //if no locked target - seek for it
+        if (target == nullptr)
+            SeekForEnemy();
+        else
+        {
+            //if there is target and distance between it and actor less than attack distance
+            if (Vector2Distance(position, target->getPosition())<=attackRange)
+            {
+                state = State::ATTACKING;
+            }
+        }
+        break;
     case State::ATTACKING:
         if (target == nullptr)
         {
@@ -27,23 +43,6 @@ void Insect::Update()
             }
             else
                 state = State::GOES;
-        }
-
-        break;
-    case State::GOES:
-        Move();
-        game->revealTerritory(positionIndex, sightRange, side);
-
-        //if no locked target - seek for it
-        if (target == nullptr)
-            SeekForEnemy();
-        else
-        {
-            //if there is target and distance between it and actor less than attack distance
-            if (Vector2Distance(position, target->getPosition())<=attackRange)
-            {
-                state = State::ATTACKING;
-            }
         }
 
         break;

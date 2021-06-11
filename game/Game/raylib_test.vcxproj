@@ -170,6 +170,31 @@
     <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="textures\sprites\antiAirTurret_attacking_0.png" />
+    <Image Include="textures\sprites\antiAirTurret_online_0.png" />
+    <Image Include="textures\sprites\flyingInsect_goes_0.png" />
+    <Image Include="textures\sprites\heavyInsect_goes_0.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_0.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_1.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_2.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_3.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_4.png" />
+    <Image Include="textures\sprites\heavyTurret_attacking_5.png" />
+    <Image Include="textures\sprites\heavyTurret_online_0.png" />
+    <Image Include="textures\sprites\lightInsect_goes_0.png" />
+    <Image Include="textures\sprites\lightInsect_goes_1.png" />
+    <Image Include="textures\sprites\lightInsect_goes_2.png" />
+    <Image Include="textures\sprites\lightInsect_goes_3.png" />
+    <Image Include="textures\sprites\lightInsect_goes_4.png" />
+    <Image Include="textures\sprites\lightTurret_attacking_0.png" />
+    <Image Include="textures\sprites\lightTurret_online_0.png" />
+    <Image Include="textures\sprites\turretChasis_changeMode_0.png" />
+    <Image Include="textures\sprites\turretChasis_changeMode_1.png" />
+    <Image Include="textures\sprites\turretChasis_changeMode_2.png" />
+    <Image Include="textures\sprites\turretChasis_changeMode_3.png" />
+    <Image Include="textures\sprites\turretChasis_goes_0.png" />
+    <Image Include="textures\sprites\turretChasis_goes_1.png" />
+    <Image Include="textures\sprites\turretChasis_goes_2.png" />
     <Image Include="textures\tileset\CREEP.png" />
     <Image Include="textures\tileset\LAKE.bmp" />
     <Image Include="textures\tileset\MOUNTAIN.bmp" />
