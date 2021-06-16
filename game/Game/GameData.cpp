@@ -211,21 +211,21 @@ GameData::GameData()
     };
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 30},
-        {"size", 8},
+        {"size", 4},
         {"cost", 10},
         {"sightRange", 4},
         {"armor", 1},
     };
     genericAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
         {"maxHP", 100},
-        {"size", 10},
+        {"size", 8},
         {"cost", 30},
         {"sightRange", 3},
         {"armor", 10},
     };
     genericAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
         {"maxHP", 70},
-        {"size", 8},
+        {"size", 6},
         {"cost", 20},
         {"sightRange", 5},
         {"armor", 2},
@@ -276,9 +276,9 @@ GameData::GameData()
     };
     militaryAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>{
         {"seekRange", 10 * pixelsPerTile},
-        {"attackRange", 6 * pixelsPerTile},
+        {"attackRange", 4 * pixelsPerTile},
         {"speed", 1},
-        {"damage", 20},
+        {"damage", 15},
         {"rotationSpeed", 6},
         {"cooldownDuration", 15}, //ticks to reload
     };
@@ -415,6 +415,11 @@ void GameData::setTerrain(Terrain terr)
             for (int x = 0; x < mapWidth; x++)
                 delete[] vectorFields[type][x];
             delete[] vectorFields[type];
+
+            //damage matrix
+            for (int x = 0; x < mapWidth; x++)
+                delete[] mapsDamage[type][x];
+            delete[] mapsDamage[type];
         }
 
         //neighbors matrix
@@ -507,6 +512,16 @@ void GameData::setTerrain(Terrain terr)
         for (int x = 0; x < mapWidth; x++)
             vectorFields[type][x] = new Vector2[mapHeight];
 
+        //damage map
+        int** buf_matrix = new int* [mapWidth];
+        for (int x = 0; x < mapWidth; x++)
+            buf_matrix[x] = new int[mapHeight];
+        //damage map initialisation
+        for (int x = 0; x < mapWidth; x++)
+            for (int y = 0; y < mapHeight; y++)
+                buf_matrix[x][y] = 0;
+        mapsDamage[type] = buf_matrix;
+        
         //terrain speed modifier, individual for each Insect's unit type
         float** mapTerrainMod = mapsPathfinding[type]["mapsTerrainMod"];
         for (int x = 0; x < mapWidth; x++)
@@ -1018,6 +1033,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     Vector2** mapVector = vectorFields[actorType];
 
     int** mapFogOfWar = mapsFogOfWar[Side::INSECTS];
+    int** mapDamage = mapsDamage[actorType];
 
     //heat and vector map nullification
     for (int x = 0; x < mapWidth; x++)
@@ -1056,7 +1072,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             //if value not set:
             if (mapHeat[checking.left.x][checking.left.y] == 0.f)
             {
-                //if there's no fog of war:
+                //if there's fog of war:
                 if (mapFogOfWar[checking.left.x][checking.left.y] == -1)
                 {
                     i_last_added++;
@@ -1072,7 +1088,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
+                        mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
                         //add this checking.left for further checking
                         toCheck[i_last_added] = (checking.left);
                     }
@@ -1101,7 +1117,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
+                        mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.left.x][checking.left.y];
                         //add this checking.up for further checking
                         toCheck[i_last_added] = (checking.up);
                     }
@@ -1130,7 +1146,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
+                        mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
                         //add this checking.right for further checking
                         toCheck[i_last_added] = (checking.right);
                     }
@@ -1159,7 +1175,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
+                        mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
                         //add this checking.down for further checking
                         toCheck[i_last_added] = (checking.down);
                     }
@@ -1189,7 +1205,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
+                        mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
                         //add this checking.upLeft for further checking
                         toCheck[i_last_added] = (checking.upLeft);
                     }
@@ -1218,7 +1234,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
 
-                        mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
+                        mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
                         //add this checking.upRight for further checking
                         toCheck[i_last_added] = (checking.upRight);
                     }
@@ -1246,7 +1262,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         i_last_added++;
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
-                        mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
+                        mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
                         //add this checking.downLeft for further checking
                         toCheck[i_last_added] = (checking.downLeft);
                     }
@@ -1274,7 +1290,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                         i_last_added++;
                         //TODO: ADD CONSIDERING MAP DAMAGE
                         //set value, according to terrain speed modification and damage map
-                        mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
+                        mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
                         //add this checking.downRight for further checking
                         toCheck[i_last_added] = (checking.downRight);
                     }
@@ -1617,9 +1633,35 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
 
         if (target->side == Side::MACHINES)
         {
+            //TODO: make reducing damage map, if damaging Machines unit
             for (Constructor* constructor : constructorList)
             {
                 constructor->SeekForTarget();
+            }
+        }
+        else
+        {
+            //affect damage map if it is Insect 
+            switch (target->type)
+            {
+            case ActorType::LIGHT_INSECT:
+            case ActorType::HEAVY_INSECT:
+            case ActorType::FLYING_INSECT:
+                int** damageMap = mapsDamage[target->type];
+                TileIndex targetTileIndex = target->getPositionIndex();
+                NeighborsIndex neighbors = getNeighbors(targetTileIndex.x, targetTileIndex.y);
+
+                damageMap[targetTileIndex.x][targetTileIndex.y] += damage; //center
+                if (neighbors.left.x != -1)
+                    damageMap[neighbors.left.x][neighbors.left.y] += damage / 2; //left
+                if (neighbors.up.x != -1)
+                    damageMap[neighbors.up.x][neighbors.up.y] += damage / 2; //up
+                if (neighbors.right.x != -1)
+                    damageMap[neighbors.right.x][neighbors.right.y] += damage / 2; //right
+                if (neighbors.down.x != -1)
+                    damageMap[neighbors.down.x][neighbors.down.y] += damage / 2; //down
+
+                break;
             }
         }
 
@@ -1832,11 +1874,6 @@ void GameData::spendResources(int amount, Side side)
 
 void GameData::GameUpdate()
 {
-    //TIME COUNTER
-    timeCount++;
-    if (timeCount > 60)
-        timeCount = 0;
-
     if (IsKeyPressed(KEY_ESCAPE)) closed = true;
     
     mousePosition = GetMousePosition();
@@ -1992,6 +2029,14 @@ void GameData::GameUpdate()
 
     if (!gamePaused && basePtr!=nullptr) //game starts only when base placed
     {
+        //TIME COUNTER
+        timeCount++;
+        if (timeCount > 60)
+        {
+            timeCount = 0;
+            timeCountSeconds++;
+        }
+
         //UNIT UPDATING
         std::vector<GameActor*>::iterator iter;
         GameActor* buf = nullptr;
@@ -2008,6 +2053,9 @@ void GameData::GameUpdate()
                 iter++;
             }
         }
+
+        ////TUMOR SPAWNING
+        //if()
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
         {
@@ -2059,11 +2107,33 @@ void GameData::GameUpdate()
 
         }
 
-        //RESOURCES GATHERING
-        if (timeCount == 0)
+        //damage map fading
+        if (timeCountSeconds % 5 == 0 && timeCount == 0)
         {
-            resourcesInsects += creepTilesCount / 100;
-            resourcesMachines += energisedTilesCount / 100;
+            //iterate through all insects types
+            std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+            for (ActorType actorType : insectsTypes)
+            {
+                int** matrixBuf = mapsDamage[actorType];
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    for (int y = 0; y < mapHeight; y++)
+                    {
+                        if (matrixBuf[x][y] > 0)
+                            matrixBuf[x][y] -= 1;
+                    }
+                }
+
+                //vector field recalculating
+                calculateVectorPathfinding(insectsDesirePosition, actorType);
+            }
+        }
+
+        //RESOURCES GATHERING
+        if (timeCount % 15 == 0)
+        {
+            resourcesInsects += creepTilesCount / 25;
+            resourcesMachines += energisedTilesCount / 25;
             if (resourcesMachines > 1000) resourcesMachines = 1000; //maximum of Energy
         }
 

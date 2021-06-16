@@ -57,12 +57,11 @@ private:
     bool gameOver = false;
 
     //DAMAGE MAP
+    std::map<ActorType, int**> mapsDamage;
 
     //RESOURCES
     unsigned resourcesInsects = 0;
     unsigned resourcesMachines = 1000;
-
-    //оставить тут методы "приказов", а вызывать их извне в общем цикле?
 
     //FOG OF WAR
     std::map<Side, int**> mapsFogOfWar;
@@ -70,6 +69,7 @@ private:
 
 public:
     unsigned short timeCount; //for Update()
+    unsigned short timeCountSeconds;
     unsigned int lastID = 0;
 
     const float pixelsPerTile = 16.f;
