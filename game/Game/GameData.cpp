@@ -1057,7 +1057,20 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     //std::vector<TileIndex> checking;
     float previous = 1.f;
     
-    for(int i = 0; i<i_max; i++)
+    for (int x = 0; x < mapWidth; x++)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            if (mapFogOfWar[x][y] == -1 && (x!=target.x && y!=target.y))
+            {
+                i_last_added++;
+                toCheck[i_last_added] = TileIndex{x, y};
+                mapHeat[x][y] = 1.f;
+            }
+        }
+    }
+
+    for (int i = 0; i < i_max; i++)
     {
         if (i <= i_last_added) //for "repair" crush on Degug configuration
         {
@@ -1069,116 +1082,68 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
         //left
         if (checking.left.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.left.x][checking.left.y] == 0.f)
+            //if value not set and there's fog of war:
+            if (mapHeat[checking.left.x][checking.left.y] == 0.f && mapFogOfWar[checking.left.x][checking.left.y] != -1)
             {
-                //if there's fog of war:
-                if (mapFogOfWar[checking.left.x][checking.left.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.left.x][checking.left.y] != -1)
                 {
                     i_last_added++;
-                    mapHeat[checking.left.x][checking.left.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
+                    //add this checking.left for further checking
                     toCheck[i_last_added] = (checking.left);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.left.x][checking.left.y] != -1)
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
-                        //add this checking.left for further checking
-                        toCheck[i_last_added] = (checking.left);
-                    }
                 }
             }
         }
         //up
         if (checking.up.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.up.x][checking.up.y] == 0.f)
+            //if value not set and there's fog of war:
+            if (mapHeat[checking.up.x][checking.up.y] == 0.f && mapFogOfWar[checking.up.x][checking.up.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.up.x][checking.up.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
                 {
                     i_last_added++;
-                    mapHeat[checking.up.x][checking.up.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.up.x][checking.up.y];
+                    //add this checking.up for further checking
                     toCheck[i_last_added] = (checking.up);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.left.x][checking.left.y];
-                        //add this checking.up for further checking
-                        toCheck[i_last_added] = (checking.up);
-                    }
                 }
             }
         }
         //right
         if (checking.right.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.right.x][checking.right.y] == 0.f)
+            //if value not set and there's fog of war:
+            if (mapHeat[checking.right.x][checking.right.y] == 0.f && mapFogOfWar[checking.right.x][checking.right.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.right.x][checking.right.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
                 {
                     i_last_added++;
-                    mapHeat[checking.right.x][checking.right.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
+                    //add this checking.right for further checking
                     toCheck[i_last_added] = (checking.right);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
-                        //add this checking.right for further checking
-                        toCheck[i_last_added] = (checking.right);
-                    }
                 }
             }
         }
         //down
         if (checking.down.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.down.x][checking.down.y] == 0.f)
+            //if value not set and there's fog of war:
+            if (mapHeat[checking.down.x][checking.down.y] == 0.f && mapFogOfWar[checking.down.x][checking.down.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.down.x][checking.down.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
                 {
                     i_last_added++;
-                    mapHeat[checking.down.x][checking.down.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
+                    //add this checking.down for further checking
                     toCheck[i_last_added] = (checking.down);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
-                        //add this checking.down for further checking
-                        toCheck[i_last_added] = (checking.down);
-                    }
                 }
             }
         }
@@ -1186,117 +1151,269 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
         //upLeft
         if (checking.upLeft.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
+            //if value not set and there's no fog of war:
+            if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f && mapFogOfWar[checking.upLeft.x][checking.upLeft.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.upLeft.x][checking.upLeft.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
                 {
                     i_last_added++;
-                    mapHeat[checking.upLeft.x][checking.upLeft.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
+                    //add this checking.upLeft for further checking
                     toCheck[i_last_added] = (checking.upLeft);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
-                        //add this checking.upLeft for further checking
-                        toCheck[i_last_added] = (checking.upLeft);
-                    }
                 }
             }
         }
         //upRight
         if (checking.upRight.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
+            //if value not set and there's no fog of war:
+            if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f && mapFogOfWar[checking.upRight.x][checking.upRight.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.upRight.x][checking.upRight.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
                 {
                     i_last_added++;
-                    mapHeat[checking.upRight.x][checking.upRight.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
+                    //add this checking.upRight for further checking
                     toCheck[i_last_added] = (checking.upRight);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-
-                        mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
-                        //add this checking.upRight for further checking
-                        toCheck[i_last_added] = (checking.upRight);
-                    }
                 }
             }
         }
         //downLeft
         if (checking.downLeft.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
+            //if value not set and there's no fog of war:
+            if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f && mapFogOfWar[checking.downLeft.x][checking.downLeft.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.downLeft.x][checking.downLeft.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
                 {
                     i_last_added++;
-                    mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
+                    //add this checking.downLeft for further checking
                     toCheck[i_last_added] = (checking.downLeft);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-                        mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
-                        //add this checking.downLeft for further checking
-                        toCheck[i_last_added] = (checking.downLeft);
-                    }
                 }
             }
         }
         //downRight
         if (checking.downRight.x != -1) //if index valid
         {
-            //if value not set:
-            if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
+            //if value not set and there's no fog of war:
+            if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f && mapFogOfWar[checking.downRight.x][checking.downRight.y] != -1)
             {
-                //if there's no fog of war:
-                if (mapFogOfWar[checking.downRight.x][checking.downRight.y] == -1)
+                //if there's no obstacle:
+                if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
                 {
                     i_last_added++;
-                    mapHeat[checking.downRight.x][checking.downRight.y] = 1.f;
+                    //set value, according to terrain speed modification and damage map
+                    mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
+                    //add this checking.downRight for further checking
                     toCheck[i_last_added] = (checking.downRight);
-                }
-                else
-                {
-                    //if there's no obstacle:
-                    if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-                    {
-                        i_last_added++;
-                        //TODO: ADD CONSIDERING MAP DAMAGE
-                        //set value, according to terrain speed modification and damage map
-                        mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
-                        //add this checking.downRight for further checking
-                        toCheck[i_last_added] = (checking.downRight);
-                    }
                 }
             }
         }
+
+
+        ////up
+        //if (checking.up.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.up.x][checking.up.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.up.x][checking.up.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.up.x][checking.up.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.up);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.left.x][checking.left.y];
+        //                //add this checking.up for further checking
+        //                toCheck[i_last_added] = (checking.up);
+        //            }
+        //        }
+        //    }
+        //}
+        ////right
+        //if (checking.right.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.right.x][checking.right.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.right.x][checking.right.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.right.x][checking.right.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.right);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
+        //                //add this checking.right for further checking
+        //                toCheck[i_last_added] = (checking.right);
+        //            }
+        //        }
+        //    }
+        //}
+        ////down
+        //if (checking.down.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.down.x][checking.down.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.down.x][checking.down.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.down.x][checking.down.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.down);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
+        //                //add this checking.down for further checking
+        //                toCheck[i_last_added] = (checking.down);
+        //            }
+        //        }
+        //    }
+        //}
+        ////upLeft
+        //if (checking.upLeft.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.upLeft.x][checking.upLeft.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.upLeft.x][checking.upLeft.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.upLeft);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
+        //                //add this checking.upLeft for further checking
+        //                toCheck[i_last_added] = (checking.upLeft);
+        //            }
+        //        }
+        //    }
+        //}
+        ////upRight
+        //if (checking.upRight.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.upRight.x][checking.upRight.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.upRight.x][checking.upRight.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.upRight);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
+        //                //add this checking.upRight for further checking
+        //                toCheck[i_last_added] = (checking.upRight);
+        //            }
+        //        }
+        //    }
+        //}
+        ////downLeft
+        //if (checking.downLeft.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.downLeft.x][checking.downLeft.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.downLeft);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
+        //                //add this checking.downLeft for further checking
+        //                toCheck[i_last_added] = (checking.downLeft);
+        //            }
+        //        }
+        //    }
+        //}
+        ////downRight
+        //if (checking.downRight.x != -1) //if index valid
+        //{
+        //    //if value not set:
+        //    if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
+        //    {
+        //        //if there's no fog of war:
+        //        if (mapFogOfWar[checking.downRight.x][checking.downRight.y] == -1)
+        //        {
+        //            i_last_added++;
+        //            mapHeat[checking.downRight.x][checking.downRight.y] = 1.f;
+        //            toCheck[i_last_added] = (checking.downRight);
+        //        }
+        //        else
+        //        {
+        //            //if there's no obstacle:
+        //            if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
+        //            {
+        //                i_last_added++;
+        //                //TODO: ADD CONSIDERING MAP DAMAGE
+        //                //set value, according to terrain speed modification and damage map
+        //                mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
+        //                //add this checking.downRight for further checking
+        //                toCheck[i_last_added] = (checking.downRight);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     delete[] toCheck;
@@ -2125,7 +2242,7 @@ void GameData::GameUpdate()
                 }
 
                 //vector field recalculating
-                calculateVectorPathfinding(insectsDesirePosition, actorType);
+                //calculateVectorPathfinding(insectsDesirePosition, actorType);
             }
         }
 
@@ -2238,7 +2355,7 @@ void GameData::GameDraw()
             
                 //heatmap, light insects
                 if(IsKeyDown(KEY_F4))
-                    DrawText(FormatText("%.0f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 10, SKYBLUE);
+                    DrawText(FormatText("%.0f", mapsPathfinding[ActorType::LIGHT_INSECT]["mapsHeat"][x][y]), x * pixelsPerTile + pixelsPerTile / 3, y * pixelsPerTile + pixelsPerTile / 3, 6, SKYBLUE);
 
                 //vector field, light insects
                 if (IsKeyDown(KEY_F5) && terrainMod[x][y]!=-1.f)
