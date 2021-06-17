@@ -36,6 +36,10 @@ void Tumor::Update()
 void Tumor::Draw()
 {
 	DrawCircle(position.x, position.y, size, RED);
+	if (state == State::UNDER_CONSTRUCTION)
+		DrawCircle(position.x, position.y, size / 2, ORANGE);
+	else
+		DrawCircle(position.x, position.y, size / 2, PURPLE);
 	drawHP();
 }
 

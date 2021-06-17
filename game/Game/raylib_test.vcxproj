@@ -156,6 +156,7 @@
     <ClCompile Include="Constructor.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="Hive.cpp" />
     <ClCompile Include="Insect.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Military.cpp" />

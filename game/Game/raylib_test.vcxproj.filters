@@ -63,6 +63,9 @@
     <ClCompile Include="Turret.cpp">
       <Filter>Исходные файлы\Military</Filter>
     </ClCompile>
+    <ClCompile Include="Hive.cpp">
+      <Filter>Исходные файлы\Buildings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h">

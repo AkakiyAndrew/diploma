@@ -129,7 +129,7 @@ public:
     bool closed = false;
     std::vector<TileIndex>tilesInsideCircle(Vector2 center, unsigned int radius);
     std::vector<TileIndex>tilesInsideCircleOrdered(TileIndex center, int radius);
-    //std::vector<TileIndex>tilesInPerimeterCircle(TileIndex center, unsigned int radius);
+    std::vector<TileIndex>tilesInPerimeterCircleOrdered(TileIndex center, unsigned int radius);
     
     //return TileIndex of Vector2
     TileIndex getTileIndex(Vector2);
