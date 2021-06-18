@@ -2255,24 +2255,74 @@ void GameData::GameUpdate()
         }
 
         //damage map fading
-        if (timeCountSeconds % 5 == 0 && timeCount == 0)
+        //if (timeCountSeconds % 2 == 0 && timeCount == 0)
+        //{
+        //    //iterate through all insects types
+        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+        //    for (ActorType actorType : insectsTypes)
+        //    {
+        //        int** matrixBuf = mapsDamage[actorType];
+
+        //        for (int x = 0; x < mapWidth; x++)
+        //        {
+        //            for (int y = 0; y < mapHeight; y++)
+        //            {
+        //                if (matrixBuf[x][y] >= 5)
+        //                    matrixBuf[x][y] -= 5;
+        //                else
+        //                    matrixBuf[x][y] = 0;
+        //            }
+        //        }
+
+        //        //vector field recalculating
+        //        calculateVectorPathfinding(insectsDesirePosition, actorType);
+        //    }
+        //}
+
+        //damage map spread
+        //if (timeCountSeconds % 1 == 0 && timeCount == 0)
+        if(IsKeyPressed(KEY_H))
         {
             //iterate through all insects types
             std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
             for (ActorType actorType : insectsTypes)
             {
                 int** matrixBuf = mapsDamage[actorType];
+                int toTransfer;
+                NeighborsIndex neighbors;
+
                 for (int x = 0; x < mapWidth; x++)
                 {
                     for (int y = 0; y < mapHeight; y++)
                     {
-                        if (matrixBuf[x][y] > 0)
-                            matrixBuf[x][y] -= 1;
+                        if (matrixBuf[x][y] >= 36) //if damage more than 36
+                        {
+                            neighbors = getNeighbors(x, y);
+                            toTransfer = matrixBuf[x][y] * 0.1;
+
+                            if (neighbors.left.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x - 1][y] += toTransfer;
+                            }
+                            if (neighbors.up.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x][y - 1] += toTransfer;
+                            }
+                            if (neighbors.right.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x + 1][y] += toTransfer;
+                            }
+                            if (neighbors.down.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x][y + 1] += toTransfer;
+                            }
+                        }
                     }
                 }
-
-                //vector field recalculating
-                calculateVectorPathfinding(insectsDesirePosition, actorType);
             }
         }
 
