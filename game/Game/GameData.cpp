@@ -1138,55 +1138,330 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     int bufHeat;
     std::list<TileIndex> toCheck = { target };
     std::vector<TileIndex> neighborsVector;
+    NeighborsIndex neighbors;
 
     std::list<TileIndex>::iterator iter;
     //iter = toCheck.erase(iter);
     for (iter = toCheck.begin(); iter != toCheck.end(); )
     {
-        neighborsVector = getNeighborsAsVector((*iter).x, (*iter).y);
+        //neighborsVector = getNeighborsAsVector((*iter).x, (*iter).y);
+        neighbors = getNeighbors((*iter).x, (*iter).y);
         previous = mapHeat[(*iter).x][(*iter).y];
 
-        for (TileIndex tile : neighborsVector)
+        //left
+        if (neighbors.left.x != -1) //if index valid
         {
-            if (tile.x != -1) //if index valid
+            //if value not set:
+            if (mapHeat[neighbors.left.x][neighbors.left.y] == 0.f)
             {
-                //if value not set:
-                if (mapHeat[tile.x][tile.y] == 0.f)
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.left.x][neighbors.left.y] == -1)
                 {
-                    //if there's fog of war:
-                    if (mapFogOfWar[tile.x][tile.y] == -1)
-                    {
-                        mapHeat[tile.x][tile.y] = 1.f;
-                        toCheck.push_back(tile);
-                    }
-                    else
-                    {
-                        //if there's no obstacle:
-                        if (mapTerrainMod[tile.x][tile.y] != -1)
-                        {
-                            //set value, according to terrain speed modification and damage map
-                            mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]) + mapDamage[tile.x][tile.y];
-                            //add this tile for further checking
-                            toCheck.push_back(tile);
-                        }
-                    }
+                    mapHeat[neighbors.left.x][neighbors.left.y] = 1.f;
+                    toCheck.push_back(neighbors.left);
                 }
                 else
                 {
-                    //if there's NO fog of war:
-                    if (mapFogOfWar[tile.x][tile.y] != -1)
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.left.x][neighbors.left.y] != -1)
                     {
-                        //if value set - check, if it greater 
-                        bufHeat = previous + (1 / mapTerrainMod[tile.x][tile.y]) + mapDamage[tile.x][tile.y];
-                        if (mapHeat[tile.x][tile.y] > bufHeat)
-                        {
-                            mapHeat[tile.x][tile.y] = bufHeat;
-                            toCheck.push_back(tile);
-                        }
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.left.x][neighbors.left.y] = previous + (1 / mapTerrainMod[neighbors.left.x][neighbors.left.y]) + mapDamage[neighbors.left.x][neighbors.left.y];
+                        //add this neighbors.left for further checking
+                        toCheck.push_back(neighbors.left);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.left.x][neighbors.left.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.left.x][neighbors.left.y]) + mapDamage[neighbors.left.x][neighbors.left.y];
+                    if (mapHeat[neighbors.left.x][neighbors.left.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.left.x][neighbors.left.y] = bufHeat;
+                        toCheck.push_back(neighbors.left);
                     }
                 }
             }
         }
+        //up
+        if (neighbors.up.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.up.x][neighbors.up.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.up.x][neighbors.up.y] == -1)
+                {
+                    mapHeat[neighbors.up.x][neighbors.up.y] = 1.f;
+                    toCheck.push_back(neighbors.up);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.up.x][neighbors.up.y] != -1)
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.up.x][neighbors.up.y] = previous + (1 / mapTerrainMod[neighbors.up.x][neighbors.up.y]) + mapDamage[neighbors.up.x][neighbors.up.y];
+                        //add this neighbors.up for further checking
+                        toCheck.push_back(neighbors.up);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.up.x][neighbors.up.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.up.x][neighbors.up.y]) + mapDamage[neighbors.up.x][neighbors.up.y];
+                    if (mapHeat[neighbors.up.x][neighbors.up.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.up.x][neighbors.up.y] = bufHeat;
+                        toCheck.push_back(neighbors.up);
+                    }
+                }
+            }
+        }
+        //right
+        if (neighbors.right.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.right.x][neighbors.right.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.right.x][neighbors.right.y] == -1)
+                {
+                    mapHeat[neighbors.right.x][neighbors.right.y] = 1.f;
+                    toCheck.push_back(neighbors.right);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.right.x][neighbors.right.y] != -1)
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.right.x][neighbors.right.y] = previous + (1 / mapTerrainMod[neighbors.right.x][neighbors.right.y]) + mapDamage[neighbors.right.x][neighbors.right.y];
+                        //add this neighbors.right for further checking
+                        toCheck.push_back(neighbors.right);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.right.x][neighbors.right.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.right.x][neighbors.right.y]) + mapDamage[neighbors.right.x][neighbors.right.y];
+                    if (mapHeat[neighbors.right.x][neighbors.right.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.right.x][neighbors.right.y] = bufHeat;
+                        toCheck.push_back(neighbors.right);
+                    }
+                }
+            }
+        }
+        //down
+        if (neighbors.down.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.down.x][neighbors.down.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.down.x][neighbors.down.y] == -1)
+                {
+                    mapHeat[neighbors.down.x][neighbors.down.y] = 1.f;
+                    toCheck.push_back(neighbors.down);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.down.x][neighbors.down.y] != -1)
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.down.x][neighbors.down.y] = previous + (1 / mapTerrainMod[neighbors.down.x][neighbors.down.y]) + mapDamage[neighbors.down.x][neighbors.down.y];
+                        //add this neighbors.down for further checking
+                        toCheck.push_back(neighbors.down);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.down.x][neighbors.down.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.down.x][neighbors.down.y]) + mapDamage[neighbors.down.x][neighbors.down.y];
+                    if (mapHeat[neighbors.down.x][neighbors.down.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.down.x][neighbors.down.y] = bufHeat;
+                        toCheck.push_back(neighbors.down);
+                    }
+                }
+            }
+        }
+
+        //upLeft
+        if (neighbors.upLeft.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.upLeft.x][neighbors.upLeft.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.upLeft.x][neighbors.upLeft.y] == -1)
+                {
+                    mapHeat[neighbors.upLeft.x][neighbors.upLeft.y] = 1.f;
+                    toCheck.push_back(neighbors.upLeft);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.upLeft.x][neighbors.upLeft.y] != -1 && (mapTerrainMod[neighbors.up.x][neighbors.up.y] != -1.f || mapTerrainMod[neighbors.left.x][neighbors.left.y] != -1.f))
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.upLeft.x][neighbors.upLeft.y] = previous + (1 / mapTerrainMod[neighbors.upLeft.x][neighbors.upLeft.y]) + mapDamage[neighbors.upLeft.x][neighbors.upLeft.y];
+                        //add this neighbors.upLeft for further checking
+                        toCheck.push_back(neighbors.upLeft);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.upLeft.x][neighbors.upLeft.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.upLeft.x][neighbors.upLeft.y]) + mapDamage[neighbors.upLeft.x][neighbors.upLeft.y];
+                    if (mapHeat[neighbors.upLeft.x][neighbors.upLeft.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.upLeft.x][neighbors.upLeft.y] = bufHeat;
+                        toCheck.push_back(neighbors.upLeft);
+                    }
+                }
+            }
+        }
+        //upRight
+        if (neighbors.upRight.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.upRight.x][neighbors.upRight.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.upRight.x][neighbors.upRight.y] == -1)
+                {
+                    mapHeat[neighbors.upRight.x][neighbors.upRight.y] = 1.f;
+                    toCheck.push_back(neighbors.upRight);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.upRight.x][neighbors.upRight.y] != -1 && (mapTerrainMod[neighbors.up.x][neighbors.up.y] != -1.f || mapTerrainMod[neighbors.right.x][neighbors.right.y] != -1.f))
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.upRight.x][neighbors.upRight.y] = previous + (1 / mapTerrainMod[neighbors.upRight.x][neighbors.upRight.y]) + mapDamage[neighbors.upRight.x][neighbors.upRight.y];
+                        //add this neighbors.upRight for further checking
+                        toCheck.push_back(neighbors.upRight);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.upRight.x][neighbors.upRight.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.upRight.x][neighbors.upRight.y]) + mapDamage[neighbors.upRight.x][neighbors.upRight.y];
+                    if (mapHeat[neighbors.upRight.x][neighbors.upRight.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.upRight.x][neighbors.upRight.y] = bufHeat;
+                        toCheck.push_back(neighbors.upRight);
+                    }
+                }
+            }
+        }
+        //downLeft
+        if (neighbors.downLeft.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.downLeft.x][neighbors.downLeft.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.downLeft.x][neighbors.downLeft.y] == -1)
+                {
+                    mapHeat[neighbors.downLeft.x][neighbors.downLeft.y] = 1.f;
+                    toCheck.push_back(neighbors.downLeft);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.downLeft.x][neighbors.downLeft.y] != -1 && (mapTerrainMod[neighbors.down.x][neighbors.down.y] != -1.f || mapTerrainMod[neighbors.left.x][neighbors.left.y] != -1.f))
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.downLeft.x][neighbors.downLeft.y] = previous + (1 / mapTerrainMod[neighbors.downLeft.x][neighbors.downLeft.y]) + mapDamage[neighbors.downLeft.x][neighbors.downLeft.y];
+                        //add this neighbors.downLeft for further checking
+                        toCheck.push_back(neighbors.downLeft);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.downLeft.x][neighbors.downLeft.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.downLeft.x][neighbors.downLeft.y]) + mapDamage[neighbors.downLeft.x][neighbors.downLeft.y];
+                    if (mapHeat[neighbors.downLeft.x][neighbors.downLeft.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.downLeft.x][neighbors.downLeft.y] = bufHeat;
+                        toCheck.push_back(neighbors.downLeft);
+                    }
+                }
+            }
+        }
+        //downRight
+        if (neighbors.downRight.x != -1) //if index valid
+        {
+            //if value not set:
+            if (mapHeat[neighbors.downRight.x][neighbors.downRight.y] == 0.f)
+            {
+                //if there's fog of war:
+                if (mapFogOfWar[neighbors.downRight.x][neighbors.downRight.y] == -1)
+                {
+                    mapHeat[neighbors.downRight.x][neighbors.downRight.y] = 1.f;
+                    toCheck.push_back(neighbors.downRight);
+                }
+                else
+                {
+                    //if there's no obstacle:
+                    if (mapTerrainMod[neighbors.downRight.x][neighbors.downRight.y] != -1 && (mapTerrainMod[neighbors.down.x][neighbors.down.y] != -1.f || mapTerrainMod[neighbors.right.x][neighbors.right.y] != -1.f))
+                    {
+                        //set value, according to terrain speed modification and damage map
+                        mapHeat[neighbors.downRight.x][neighbors.downRight.y] = previous + (1 / mapTerrainMod[neighbors.downRight.x][neighbors.downRight.y]) + mapDamage[neighbors.downRight.x][neighbors.downRight.y];
+                        //add this neighbors.downRight for further checking
+                        toCheck.push_back(neighbors.downRight);
+                    }
+                }
+            }
+            else
+            {
+                //if there's NO fog of war:
+                if (mapFogOfWar[neighbors.downRight.x][neighbors.downRight.y] != -1)
+                {
+                    //if value set - check, if it greater 
+                    bufHeat = previous + (1 / mapTerrainMod[neighbors.downRight.x][neighbors.downRight.y]) + mapDamage[neighbors.downRight.x][neighbors.downRight.y];
+                    if (mapHeat[neighbors.downRight.x][neighbors.downRight.y] > bufHeat)
+                    {
+                        mapHeat[neighbors.downRight.x][neighbors.downRight.y] = bufHeat;
+                        toCheck.push_back(neighbors.downRight);
+                    }
+                }
+            }
+        }
+        
         iter++;
         toCheck.pop_front();
     }
@@ -1290,23 +1565,23 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     //        }
     //    }
     // 
-    //    //upLeft
-    //    if (checking.upLeft.x != -1) //if index valid
-    //    {
-    //        //if value not set and there's no fog of war:
-    //        if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f && mapFogOfWar[checking.upLeft.x][checking.upLeft.y] != -1)
-    //        {
-    //            //if there's no obstacle:
-    //            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-    //            {
-    //                i_last_added++;
-    //                //set value, according to terrain speed modification and damage map
-    //                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
-    //                //add this checking.upLeft for further checking
-    //                toCheck[i_last_added] = (checking.upLeft);
-    //            }
-    //        }
-    //    }
+        ////upLeft
+        //if (checking.upLeft.x != -1) //if index valid
+        //{
+        //    //if value not set and there's no fog of war:
+        //    if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f && mapFogOfWar[checking.upLeft.x][checking.upLeft.y] != -1)
+        //    {
+        //        //if there's no obstacle:
+        //        if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
+        //        {
+        //            i_last_added++;
+        //            //set value, according to terrain speed modification and damage map
+        //            mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
+        //            //add this checking.upLeft for further checking
+        //            toCheck[i_last_added] = (checking.upLeft);
+        //        }
+        //    }
+        //}
     //    //upRight
     //    if (checking.upRight.x != -1) //if index valid
     //    {
@@ -1364,14 +1639,13 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
 
     //VECTOR MAP CALCULATION
 
-    float x_buf;
-    float y_buf;
+    //float x_buf;
+    //float y_buf;
     float minimumHeat;
-    Vector2 buf;
-    NeighborsIndex neighbors;
-    TileIndex upLeft, rightDown, indexMinimum;
+    //Vector2 buf;
+    //NeighborsIndex neighbors;
+    //TileIndex upLeft, rightDown, indexMinimum;
 
-//#pragma omp parallel for private(upLeft, rightDown, indexMinimum, minimumHeat, buf)
 #pragma omp parallel for private(neighbors, minimumHeat)
     for (int x = 0; x < mapWidth; x++)
     {
@@ -1780,9 +2054,10 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
 
     int** matrix = mapsFogOfWar[side];
     int buf;
+    int intelPrevious = matrix[position.x][position.y];
 
     //check tile, is it need to reveal for again
-    if (static_cast<int>(matrix[position.x][position.y]) < radius) //WTF?!
+    if (static_cast<int>(matrix[position.x][position.y]) < radius)
     {
         matrix[position.x][position.y] = radius;
         //TODO: reverse radius to descending, remake radius using 
@@ -1791,7 +2066,7 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
             buf = radius - r;
             for (int x = position.x + 1; x < position.x + r; x++)
             {
-                for (int y = position.y; y > position.y - r; y--) //REVERSE int y = position.y - r; y < position.y + r; y++
+                for (int y = position.y; y > position.y - r; y--)
                 {
                     if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, position, r))
                     {
@@ -1827,20 +2102,17 @@ void GameData::revealTerritory(TileIndex position, int radius, Side side)
         }
 
         //TODO: optimization - make vector field recalculation only when revealed tile count above zero (increase count, when matrix value changed FROM -1)
-        if (side == Side::INSECTS)
+        if (side == Side::INSECTS && intelPrevious < matrix[position.x][position.y]) //recalculate only when unit on edge of vision
         {
-            calculateVectorPathfinding(
-                insectsDesirePosition,
-                ActorType::LIGHT_INSECT
-            );
-            calculateVectorPathfinding(
-                insectsDesirePosition,
-                ActorType::HEAVY_INSECT
-            );
-            calculateVectorPathfinding(
-                insectsDesirePosition,
-                ActorType::FLYING_INSECT
-            );
+            std::vector<ActorType> types = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+#pragma omp parallel for
+            for (int i = 0; i < types.size(); i++)
+            {
+                calculateVectorPathfinding(
+                    insectsDesirePosition,
+                    types[i]
+                );
+            }
         }
     }
 }
