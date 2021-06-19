@@ -196,7 +196,6 @@
     <Image Include="textures\sprites\turretChasis_goes_0.png" />
     <Image Include="textures\sprites\turretChasis_goes_1.png" />
     <Image Include="textures\sprites\turretChasis_goes_2.png" />
-    <Image Include="textures\tileset\CREEP.png" />
     <Image Include="textures\tileset\LAKE.bmp" />
     <Image Include="textures\tileset\MOUNTAIN.bmp" />
     <Image Include="textures\tileset\PLAIN.bmp" />

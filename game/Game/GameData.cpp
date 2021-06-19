@@ -16,19 +16,18 @@ GameData::GameData()
     //TILESET TEXTURES
 
     const char* filenames[] = { 
-        "textures\\tileset\\LAKE.bmp",
-        "textures\\tileset\\SWAMP.bmp",
-        "textures\\tileset\\SAND.bmp",
-        "textures\\tileset\\PLAIN.bmp",
-        "textures\\tileset\\TREE.bmp",
-        "textures\\tileset\\STONE.bmp",
-        "textures\\tileset\\MOUNTAIN.bmp",
-        "textures\\tileset\\CREEP.png"
+        "LAKE",
+        "SWAMP",
+        "SAND",
+        "PLAIN",
+        "TREE",
+        "STONE",
+        "MOUNTAIN",
     };
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 7; i++)
     {
-        tilesetTex[i] = LoadTexture(filenames[i]);
+        tilesetTex[i] = LoadTexture(TextFormat("textures\\tileset\\%s.png", filenames[i]));
     }
 
     //EXPANSION TEXTURES
@@ -1373,13 +1372,13 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     TileIndex upLeft, rightDown, indexMinimum;
 
 //#pragma omp parallel for private(upLeft, rightDown, indexMinimum, minimumHeat, buf)
+#pragma omp parallel for private(neighbors, minimumHeat)
     for (int x = 0; x < mapWidth; x++)
     {
         for (int y = 0; y < mapHeight; y++)
         {
             neighbors = neighborsIndices[x][y];
             //TODO: remake for using gradient?
-            //minimumHeat = mapHeat[x][y] + mapDamage[x][y];
             minimumHeat = -1;
             //left
             if (neighbors.left.x != -1) //check for map borders
@@ -1534,8 +1533,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
 
         for (TileIndex tile : tilesInsideCircleOrdered(desireLocation, 50))
         {
-            if (getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
-                getTerrainType(tile.x, tile.y) != TerrainType::LAKE)
+            if (mapExpansionCreep[tile.x][tile.y] == ExpandState::AVAILABLE)
             {
                 addActor(ActorType::HIVE, Vector2{tile.x*pixelsPerTile + pixelsPerTile / 2, tile.y * pixelsPerTile + pixelsPerTile / 2 }, State::ONLINE);
                 break;
@@ -1731,29 +1729,15 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
             case ActorType::LIGHT_INSECT:
             case ActorType::HEAVY_INSECT:
             case ActorType::FLYING_INSECT:
-                int** damageMap = mapsDamage[target->type];
-                TileIndex targetTileIndex = target->getPositionIndex();
-                NeighborsIndex neighbors = getNeighbors(targetTileIndex.x, targetTileIndex.y);
+                raiseDamageMap(target->type, damage, target->getPositionIndex());
+                break;
 
-                damageMap[targetTileIndex.x][targetTileIndex.y] += damage; //center
-                if (neighbors.left.x != -1)
-                    damageMap[neighbors.left.x][neighbors.left.y] += damage / 2; //left
-                if (neighbors.up.x != -1)
-                    damageMap[neighbors.up.x][neighbors.up.y] += damage / 2; //up
-                if (neighbors.right.x != -1)
-                    damageMap[neighbors.right.x][neighbors.right.y] += damage / 2; //right
-                if (neighbors.down.x != -1)
-                    damageMap[neighbors.down.x][neighbors.down.y] += damage / 2; //down
-
-                if (neighbors.upLeft.x != -1)
-                    damageMap[neighbors.upLeft.x][neighbors.upLeft.y] += damage / 2; //upLeft
-                if (neighbors.upRight.x != -1)
-                    damageMap[neighbors.upRight.x][neighbors.upRight.y] += damage / 2; //upRight
-                if (neighbors.downLeft.x != -1)
-                    damageMap[neighbors.downLeft.x][neighbors.downLeft.y] += damage / 2; //downLeft
-                if (neighbors.downRight.x != -1)
-                    damageMap[neighbors.downRight.x][neighbors.downRight.y] += damage / 2; //downRight
-
+            default:
+                std::vector<ActorType> types = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+                for (ActorType type : types)
+                {
+                    raiseDamageMap(type, damage, target->getPositionIndex());
+                }
                 break;
             }
         }
@@ -1763,7 +1747,31 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
 
         result = true;
     }
-    //TODO: update damage maps here
+}
+void GameData::raiseDamageMap(ActorType type, int damage, TileIndex tile)
+{
+    int** damageMap = mapsDamage[type];
+    TileIndex targetTileIndex = tile;
+    NeighborsIndex neighbors = getNeighbors(targetTileIndex.x, targetTileIndex.y);
+
+    damageMap[targetTileIndex.x][targetTileIndex.y] += damage; //center
+    if (neighbors.left.x != -1)
+        damageMap[neighbors.left.x][neighbors.left.y] += damage / 2; //left
+    if (neighbors.up.x != -1)
+        damageMap[neighbors.up.x][neighbors.up.y] += damage / 2; //up
+    if (neighbors.right.x != -1)
+        damageMap[neighbors.right.x][neighbors.right.y] += damage / 2; //right
+    if (neighbors.down.x != -1)
+        damageMap[neighbors.down.x][neighbors.down.y] += damage / 2; //down
+
+    if (neighbors.upLeft.x != -1)
+        damageMap[neighbors.upLeft.x][neighbors.upLeft.y] += damage / 2; //upLeft
+    if (neighbors.upRight.x != -1)
+        damageMap[neighbors.upRight.x][neighbors.upRight.y] += damage / 2; //upRight
+    if (neighbors.downLeft.x != -1)
+        damageMap[neighbors.downLeft.x][neighbors.downLeft.y] += damage / 2; //downLeft
+    if (neighbors.downRight.x != -1)
+        damageMap[neighbors.downRight.x][neighbors.downRight.y] += damage / 2; //downRight
 }
 
 void GameData::revealTerritory(TileIndex position, int radius, Side side)
@@ -1926,6 +1934,21 @@ void GameData::GameUpdate()
     if (IsKeyPressed(KEY_THREE))
         if (wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::AIRDEFENSE_TURRET;
+
+    //BUILD BASE
+    if (IsKeyPressed(KEY_B) && basePtr == nullptr)
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::BASE;
+        else
+            wantToBuild = ActorType::ACTOR_NULL;
+
+    //BUILD CORE
+    if (IsKeyPressed(KEY_Q))
+        if (wantToBuild == ActorType::ACTOR_NULL)
+            wantToBuild = ActorType::CORE;
+        else
+            wantToBuild = ActorType::ACTOR_NULL;
+    
     
     //MANUAL INSECTS SPAWN
     if (IsKeyPressed(KEY_FOUR))
@@ -1942,20 +1965,6 @@ void GameData::GameUpdate()
     if (IsKeyPressed(KEY_E))
         if(wantToBuild == ActorType::ACTOR_NULL)
             wantToBuild = ActorType::TUMOR;
-        else
-            wantToBuild = ActorType::ACTOR_NULL;
-
-    //BUILD CORE
-    if (IsKeyPressed(KEY_Q))
-        if (wantToBuild == ActorType::ACTOR_NULL)
-            wantToBuild = ActorType::CORE;
-        else
-            wantToBuild = ActorType::ACTOR_NULL;
-
-    //BUILD BASE
-    if (IsKeyPressed(KEY_B) && basePtr == nullptr)
-        if (wantToBuild == ActorType::ACTOR_NULL)
-            wantToBuild = ActorType::BASE;
         else
             wantToBuild = ActorType::ACTOR_NULL;
 
@@ -2018,7 +2027,7 @@ void GameData::GameUpdate()
     }
 
     //ACTORS BUILDING
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL && mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE)
     {
         Vector2 position = { mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 };
         addActor(wantToBuild, position, State::ONLINE);
@@ -2116,7 +2125,7 @@ void GameData::GameUpdate()
                 {
                     if (mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
                     {
-                        if (numOfExpansionTileAdjoinFading(x, y, Side::INSECTS) < 4)
+                        if (numOfExpansionTileAdjoinFading(x, y, Side::INSECTS) < 3)
                             buf.push_back(TileIndex{ x,y });
                     }
                 }
@@ -2148,74 +2157,74 @@ void GameData::GameUpdate()
         }
 
         //damage map fading
-        //if (timeCountSeconds % 5 == 0 && timeCount == 0)
-        //{
-        //    //iterate through all insects types
-        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
-        //    for (ActorType actorType : insectsTypes)
-        //    {
-        //        int** matrixBuf = mapsDamage[actorType];
-        // 
-        //        for (int x = 0; x < mapWidth; x++)
-        //        {
-        //            for (int y = 0; y < mapHeight; y++)
-        //            {
-        //                if (matrixBuf[x][y] >= 1)
-        //                    matrixBuf[x][y] -= 1;
-        //                /*else
-        //                    matrixBuf[x][y] = 0;*/
-        //            }
-        //        }
-        // 
-        //        //vector field recalculating
-        //        calculateVectorPathfinding(insectsDesirePosition, actorType);
-        //    }
-        //}
+        if (timeCountSeconds % 5 == 0 && timeCount == 0)
+        {
+            //iterate through all insects types
+            std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+            for (ActorType actorType : insectsTypes)
+            {
+                int** matrixBuf = mapsDamage[actorType];
+         
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    for (int y = 0; y < mapHeight; y++)
+                    {
+                        if (matrixBuf[x][y] >= 1)
+                            matrixBuf[x][y] -= 1;
+                        /*else
+                            matrixBuf[x][y] = 0;*/
+                    }
+                }
+         
+                //vector field recalculating
+                calculateVectorPathfinding(insectsDesirePosition, actorType);
+            }
+        }
 
         //damage map spread
         
-        //if (timeCount % 15 == 0)
-        //{
-        //    //iterate through all insects types
-        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
-        //    for (ActorType actorType : insectsTypes)
-        //    {
-        //        int** matrixBuf = mapsDamage[actorType];
-        //        int toTransfer;
-        //        NeighborsIndex neighbors;
-        //        for (int x = 0; x < mapWidth; x++)
-        //        {
-        //            for (int y = 0; y < mapHeight; y++)
-        //            {
-        //                if (matrixBuf[x][y] >= 10) //if damage more than 36
-        //                {
-        //                    neighbors = getNeighbors(x, y);
-        //                    toTransfer = matrixBuf[x][y] * 0.1;
-        //                    if (neighbors.left.x != -1)
-        //                    {
-        //                        matrixBuf[x][y] -= toTransfer;
-        //                        matrixBuf[x - 1][y] += toTransfer;
-        //                    }
-        //                    if (neighbors.up.x != -1)
-        //                    {
-        //                        matrixBuf[x][y] -= toTransfer;
-        //                        matrixBuf[x][y - 1] += toTransfer;
-        //                    }
-        //                    if (neighbors.right.x != -1)
-        //                    {
-        //                        matrixBuf[x][y] -= toTransfer;
-        //                        matrixBuf[x + 1][y] += toTransfer;
-        //                    }
-        //                    if (neighbors.down.x != -1)
-        //                    {
-        //                        matrixBuf[x][y] -= toTransfer;
-        //                        matrixBuf[x][y + 1] += toTransfer;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
+        if (timeCount % 15 == 0)
+        {
+            //iterate through all insects types
+            std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+            for (ActorType actorType : insectsTypes)
+            {
+                int** matrixBuf = mapsDamage[actorType];
+                int toTransfer;
+                NeighborsIndex neighbors;
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    for (int y = 0; y < mapHeight; y++)
+                    {
+                        if (matrixBuf[x][y] >= 10) //if damage more than 36
+                        {
+                            neighbors = getNeighbors(x, y);
+                            toTransfer = matrixBuf[x][y] * 0.1;
+                            if (neighbors.left.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x - 1][y] += toTransfer;
+                            }
+                            if (neighbors.up.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x][y - 1] += toTransfer;
+                            }
+                            if (neighbors.right.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x + 1][y] += toTransfer;
+                            }
+                            if (neighbors.down.x != -1)
+                            {
+                                matrixBuf[x][y] -= toTransfer;
+                                matrixBuf[x][y + 1] += toTransfer;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         //military targets recalculation
         if (timeCountSeconds % 1 == 0 && timeCount == 0)
@@ -2364,10 +2373,10 @@ void GameData::GameDraw()
 
 #endif
 
-    for (TileIndex tile : tilesInPerimeterCircleOrdered(mouseIndex, buildingsAttributes[ActorType::TUMOR]["expansionRange"] + 1))
-    {
-        DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
-    }
+    //for (TileIndex tile : tilesInPerimeterCircleOrdered(mouseIndex, buildingsAttributes[ActorType::TUMOR]["expansionRange"] + 1))
+    //{
+    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
+    //}
 
     if (this->wantToBuild != ActorType::ACTOR_NULL)
     {
@@ -2406,9 +2415,7 @@ void GameData::GameDraw()
             bufTexture = getUnitAnimation(ActorType::TURRET_CHASIS, State::CHANGING_MODE).frames[3];
             size = genericAttributes[wantToBuild]["size"];
             
-            if (getTerrainType(mouseIndex.x, mouseIndex.y) != TerrainType::MOUNTAIN &&
-                getTerrainType(mouseIndex.x, mouseIndex.y) != TerrainType::LAKE
-                )
+            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE)
                 tint = GREEN;
             else
                 tint = RED;
@@ -2451,6 +2458,24 @@ void GameData::GameDraw()
                 if(mapExpansionEnergised[tile.x][tile.y]==ExpandState::AVAILABLE && fogOfWar[tile.x][tile.y]!=-1)
                     DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
             }
+
+            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y]!=ExpandState::UNAVAILABLE)
+            {
+                DrawCircle(
+                    mouseIndex.x* pixelsPerTile + pixelsPerTile / 2,
+                    mouseIndex.y* pixelsPerTile + pixelsPerTile / 2,
+                    genericAttributes[wantToBuild]["size"],
+                    Fade(SKYBLUE, 0.5f));
+            }
+            else
+            {
+                DrawCircle(
+                    mouseIndex.x * pixelsPerTile + pixelsPerTile / 2,
+                    mouseIndex.y * pixelsPerTile + pixelsPerTile / 2,
+                    genericAttributes[wantToBuild]["size"],
+                    Fade(RED, 0.5f));
+            }
+
         case ActorType::HIVE:
         case ActorType::TUMOR:
             //draw blue circle of expansion

@@ -47,6 +47,7 @@ void Core::Update()
 		{
 			state = State::ONLINE;
 			markAreaExpand();
+			game->revealTerritory(positionIndex, sightRange, side);
 		}
 			
 		break;

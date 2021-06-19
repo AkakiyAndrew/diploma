@@ -100,6 +100,7 @@ void Turret::Update()
         {
             state = State::ONLINE;
             sprite = game->getUnitAnimation(type, state);
+            game->revealTerritory(positionIndex, sightRange, side);
         }
         break;
 
@@ -387,7 +388,7 @@ void Turret::Draw()
             DrawTriangle(position, pLeft, pRight, Fade(Color{240, 50,50,255}, 0.25));
         else
             if(state!=State::UNDER_CONSTRUCTION)
-                DrawTriangle(position, pLeft, pRight, Fade(YELLOW, 0.25));
+                DrawTriangle(position, pLeft, pRight, Fade(YELLOW, 0.05));
     }
 
     if (state == State::ATTACKING && attackProgressCounter > 55 && type == ActorType::AIRDEFENSE_TURRET)

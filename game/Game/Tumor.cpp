@@ -26,6 +26,7 @@ void Tumor::Update()
 			//if it ready - mark area around to expand and create initiate expansion tile
 			state = State::ONLINE;
 			markAreaExpand();
+			game->revealTerritory(positionIndex, sightRange, side);
 		}
 
 		break;

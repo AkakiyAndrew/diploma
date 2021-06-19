@@ -103,9 +103,6 @@
     <Image Include="textures\tileset\TREE.bmp">
       <Filter>Файлы ресурсов\Tiles</Filter>
     </Image>
-    <Image Include="textures\tileset\CREEP.png">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
     <Image Include="textures\sprites\antiAirTurret_attacking_0.png">
       <Filter>Файлы ресурсов\Sprites</Filter>
     </Image>

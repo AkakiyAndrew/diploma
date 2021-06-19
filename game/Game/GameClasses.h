@@ -150,6 +150,7 @@ public:
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
     void Hit(GameActor* target, int damage, ActorType hitBy); //return true, if actor destroyed by hit
+    void raiseDamageMap(ActorType type, int damage, TileIndex tile);
 
     void setTerrain(Terrain);
     bool isMapLoaded();
@@ -218,21 +219,6 @@ public:
 
         positionIndex = ptr->getTileIndex(pos);
 
-        switch (state)
-        {
-        case State::ONLINE:
-        case State::OFFLINE:
-        case State::GOES:
-            HP = maxHP;
-            break;
-
-        case State::UNDER_CONSTRUCTION:
-            HP = 0;
-            break;
-        default:
-            break;
-        }
-
         switch (type)
         {
         case ActorType::LIGHT_TURRET:
@@ -250,10 +236,25 @@ public:
             side = Side::INSECTS;
             break;
         }
+
+        switch (state)
+        {
+        case State::ONLINE:
+        case State::OFFLINE:
+        case State::GOES:
+            HP = maxHP;
+            ptr->revealTerritory(positionIndex, sightRange, side);
+            break;
+
+        case State::UNDER_CONSTRUCTION:
+            HP = 0;
+            break;
+        default:
+            break;
+        }
+
         this->ID = this->game->lastID;
         this->game->lastID++;
-
-        ptr->revealTerritory(positionIndex, sightRange, side);
 
         sprite = game->getUnitAnimation(type, state);
     }
