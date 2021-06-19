@@ -11,7 +11,7 @@ GameData::GameData()
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    palette = new Color[]{ DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, BLACK };
+    palette = new Color[]{ DARKBLUE, BLUE, YELLOW, GREEN, DARKGREEN, GRAY, DARKGRAY };
 
     //TILESET TEXTURES
 
@@ -1137,7 +1137,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]);
+                    mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
                     //add this checking.left for further checking
                     toCheck[i_last_added] = (checking.left);
                 }
@@ -1154,7 +1154,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]);
+                    mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.up.x][checking.up.y];
                     //add this checking.up for further checking
                     toCheck[i_last_added] = (checking.up);
                 }
@@ -1171,7 +1171,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]);
+                    mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
                     //add this checking.right for further checking
                     toCheck[i_last_added] = (checking.right);
                 }
@@ -1188,7 +1188,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]);
+                    mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
                     //add this checking.down for further checking
                     toCheck[i_last_added] = (checking.down);
                 }
@@ -1206,7 +1206,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]);
+                    mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
                     //add this checking.upLeft for further checking
                     toCheck[i_last_added] = (checking.upLeft);
                 }
@@ -1223,7 +1223,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]);
+                    mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
                     //add this checking.upRight for further checking
                     toCheck[i_last_added] = (checking.upRight);
                 }
@@ -1240,7 +1240,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]);
+                    mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
                     //add this checking.downLeft for further checking
                     toCheck[i_last_added] = (checking.downLeft);
                 }
@@ -1257,210 +1257,12 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                 {
                     i_last_added++;
                     //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]);
+                    mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
                     //add this checking.downRight for further checking
                     toCheck[i_last_added] = (checking.downRight);
                 }
             }
         }
-
-
-        ////up
-        //if (checking.up.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.up.x][checking.up.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.up.x][checking.up.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.up.x][checking.up.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.up);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.left.x][checking.left.y];
-        //                //add this checking.up for further checking
-        //                toCheck[i_last_added] = (checking.up);
-        //            }
-        //        }
-        //    }
-        //}
-        ////right
-        //if (checking.right.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.right.x][checking.right.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.right.x][checking.right.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.right.x][checking.right.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.right);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
-        //                //add this checking.right for further checking
-        //                toCheck[i_last_added] = (checking.right);
-        //            }
-        //        }
-        //    }
-        //}
-        ////down
-        //if (checking.down.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.down.x][checking.down.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.down.x][checking.down.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.down.x][checking.down.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.down);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
-        //                //add this checking.down for further checking
-        //                toCheck[i_last_added] = (checking.down);
-        //            }
-        //        }
-        //    }
-        //}
-        ////upLeft
-        //if (checking.upLeft.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.upLeft.x][checking.upLeft.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.upLeft.x][checking.upLeft.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.upLeft);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
-        //                //add this checking.upLeft for further checking
-        //                toCheck[i_last_added] = (checking.upLeft);
-        //            }
-        //        }
-        //    }
-        //}
-        ////upRight
-        //if (checking.upRight.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.upRight.x][checking.upRight.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.upRight.x][checking.upRight.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.upRight);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
-        //                //add this checking.upRight for further checking
-        //                toCheck[i_last_added] = (checking.upRight);
-        //            }
-        //        }
-        //    }
-        //}
-        ////downLeft
-        //if (checking.downLeft.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.downLeft.x][checking.downLeft.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.downLeft.x][checking.downLeft.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.downLeft);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
-        //                //add this checking.downLeft for further checking
-        //                toCheck[i_last_added] = (checking.downLeft);
-        //            }
-        //        }
-        //    }
-        //}
-        ////downRight
-        //if (checking.downRight.x != -1) //if index valid
-        //{
-        //    //if value not set:
-        //    if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f)
-        //    {
-        //        //if there's no fog of war:
-        //        if (mapFogOfWar[checking.downRight.x][checking.downRight.y] == -1)
-        //        {
-        //            i_last_added++;
-        //            mapHeat[checking.downRight.x][checking.downRight.y] = 1.f;
-        //            toCheck[i_last_added] = (checking.downRight);
-        //        }
-        //        else
-        //        {
-        //            //if there's no obstacle:
-        //            if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-        //            {
-        //                i_last_added++;
-        //                //TODO: ADD CONSIDERING MAP DAMAGE
-        //                //set value, according to terrain speed modification and damage map
-        //                mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
-        //                //add this checking.downRight for further checking
-        //                toCheck[i_last_added] = (checking.downRight);
-        //            }
-        //        }
-        //    }
-        //}
     }
 
     delete[] toCheck;
@@ -1481,14 +1283,15 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
         {
             neighbors = neighborsIndices[x][y];
             //TODO: remake for using gradient?
-            minimumHeat = mapHeat[x][y] +mapDamage[x][y];
+            //minimumHeat = mapHeat[x][y] + mapDamage[x][y];
+            minimumHeat = -1;
             //left
             if (neighbors.left.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x - 1][y] != -1.f) //check for obstruction
-                    if (mapHeat[x - 1][y] + mapDamage[x - 1][y] < minimumHeat)
+                    if (mapHeat[x - 1][y] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x - 1][y] + mapDamage[x - 1][y];
+                        minimumHeat = mapHeat[x - 1][y];
                         mapVector[x][y] = { -1, 0 };
                     }
             }
@@ -1496,9 +1299,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.right.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x + 1][y] != -1.f) //check for obstruction
-                    if (mapHeat[x + 1][y] + mapDamage[x + 1][y] < minimumHeat)
+                    if (mapHeat[x + 1][y] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x + 1][y] + mapDamage[x + 1][y];
+                        minimumHeat = mapHeat[x + 1][y];
                         mapVector[x][y] = { 1.f, 0.f };
                     }
             }
@@ -1506,9 +1309,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.up.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x][y - 1] != -1.f) //check for obstruction
-                    if (mapHeat[x][y - 1] + mapDamage[x][y - 1] < minimumHeat)
+                    if (mapHeat[x][y - 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x][y - 1] + mapDamage[x][y - 1];
+                        minimumHeat = mapHeat[x][y - 1];
                         mapVector[x][y] = { 0.f, -1.f };
                     }
             }
@@ -1516,9 +1319,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.down.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x][y + 1] != -1.f) //check for obstruction
-                    if (mapHeat[x][y + 1] + mapDamage[x][y + 1] < minimumHeat)
+                    if (mapHeat[x][y + 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x][y + 1] + mapDamage[x][y + 1];
+                        minimumHeat = mapHeat[x][y + 1];
                         mapVector[x][y] = { 0.f, 1.f };
                     }
             }
@@ -1527,9 +1330,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.upLeft.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x - 1][y - 1] != -1.f && (mapTerrainMod[x][y - 1] != -1.f || mapTerrainMod[x - 1][y] != -1.f)) //check for obstruction
-                    if (mapHeat[x - 1][y - 1] + mapDamage[x - 1][y - 1] < minimumHeat)
+                    if (mapHeat[x - 1][y - 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x - 1][y - 1] + mapDamage[x - 1][y - 1];
+                        minimumHeat = mapHeat[x - 1][y - 1];
                         mapVector[x][y] = { -1.f, -1.f };
                     }
             }
@@ -1537,9 +1340,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.upRight.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x + 1][y - 1] != -1.f && (mapTerrainMod[x][y - 1] != -1.f || mapTerrainMod[x + 1][y] != -1.f)) //check for obstruction
-                    if (mapHeat[x + 1][y - 1] + mapDamage[x + 1][y - 1] < minimumHeat)
+                    if (mapHeat[x + 1][y - 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x + 1][y - 1] + mapDamage[x + 1][y - 1];
+                        minimumHeat = mapHeat[x + 1][y - 1];
                         mapVector[x][y] = { 1.f, -1.f };
                     }
             }
@@ -1547,9 +1350,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.downLeft.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x - 1][y + 1] != -1.f && (mapTerrainMod[x][y + 1] != -1.f || mapTerrainMod[x - 1][y] != -1.f)) //check for obstruction
-                    if (mapHeat[x - 1][y + 1] + mapDamage[x - 1][y + 1] < minimumHeat)
+                    if (mapHeat[x - 1][y + 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x - 1][y + 1] + mapDamage[x - 1][y + 1];
+                        minimumHeat = mapHeat[x - 1][y + 1];
                         mapVector[x][y] = { -1.f, 1.f };
                     }
             }
@@ -1557,9 +1360,9 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
             if (neighbors.downRight.x != -1) //check for map borders
             {
                 if (mapTerrainMod[x + 1][y + 1] != -1.f && (mapTerrainMod[x][y + 1] != -1.f || mapTerrainMod[x + 1][y] != -1.f)) //check for obstruction
-                    if (mapHeat[x + 1][y + 1] + mapDamage[x + 1][y + 1] < minimumHeat)
+                    if (mapHeat[x + 1][y + 1] < minimumHeat || minimumHeat == -1)
                     {
-                        minimumHeat = mapHeat[x + 1][y + 1] + mapDamage[x + 1][y + 1];
+                        minimumHeat = mapHeat[x + 1][y + 1];
                         mapVector[x][y] = { 1.f, 1.f };
                     }
             }
@@ -2251,86 +2054,93 @@ void GameData::GameUpdate()
 
             for (TileIndex tile : buf)
                 mapExpansionEnergised[tile.x][tile.y] = ExpandState::AVAILABLE;
-
+            
         }
 
         //damage map fading
-        //if (timeCountSeconds % 2 == 0 && timeCount == 0)
-        //{
-        //    //iterate through all insects types
-        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
-        //    for (ActorType actorType : insectsTypes)
-        //    {
-        //        int** matrixBuf = mapsDamage[actorType];
-
-        //        for (int x = 0; x < mapWidth; x++)
-        //        {
-        //            for (int y = 0; y < mapHeight; y++)
-        //            {
-        //                if (matrixBuf[x][y] >= 5)
-        //                    matrixBuf[x][y] -= 5;
-        //                else
-        //                    matrixBuf[x][y] = 0;
-        //            }
-        //        }
-
-        //        //vector field recalculating
-        //        calculateVectorPathfinding(insectsDesirePosition, actorType);
-        //    }
-        //}
-
-        //damage map spread
-        //if (timeCountSeconds % 1 == 0 && timeCount == 0)
-        if(IsKeyPressed(KEY_H))
+        if (timeCountSeconds % 5 == 0 && timeCount == 0)
         {
             //iterate through all insects types
             std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
             for (ActorType actorType : insectsTypes)
             {
                 int** matrixBuf = mapsDamage[actorType];
-                int toTransfer;
-                NeighborsIndex neighbors;
 
                 for (int x = 0; x < mapWidth; x++)
                 {
                     for (int y = 0; y < mapHeight; y++)
                     {
-                        if (matrixBuf[x][y] >= 36) //if damage more than 36
-                        {
-                            neighbors = getNeighbors(x, y);
-                            toTransfer = matrixBuf[x][y] * 0.1;
-
-                            if (neighbors.left.x != -1)
-                            {
-                                matrixBuf[x][y] -= toTransfer;
-                                matrixBuf[x - 1][y] += toTransfer;
-                            }
-                            if (neighbors.up.x != -1)
-                            {
-                                matrixBuf[x][y] -= toTransfer;
-                                matrixBuf[x][y - 1] += toTransfer;
-                            }
-                            if (neighbors.right.x != -1)
-                            {
-                                matrixBuf[x][y] -= toTransfer;
-                                matrixBuf[x + 1][y] += toTransfer;
-                            }
-                            if (neighbors.down.x != -1)
-                            {
-                                matrixBuf[x][y] -= toTransfer;
-                                matrixBuf[x][y + 1] += toTransfer;
-                            }
-                        }
+                        if (matrixBuf[x][y] >= 1)
+                            matrixBuf[x][y] -= 1;
+                        /*else
+                            matrixBuf[x][y] = 0;*/
                     }
                 }
+
+                //vector field recalculating
+                calculateVectorPathfinding(insectsDesirePosition, actorType);
+            }
+        }
+
+        //damage map spread
+        
+        //if (timeCount % 15 == 0)
+        //{
+        //    //iterate through all insects types
+        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+        //    for (ActorType actorType : insectsTypes)
+        //    {
+        //        int** matrixBuf = mapsDamage[actorType];
+        //        int toTransfer;
+        //        NeighborsIndex neighbors;
+        //        for (int x = 0; x < mapWidth; x++)
+        //        {
+        //            for (int y = 0; y < mapHeight; y++)
+        //            {
+        //                if (matrixBuf[x][y] >= 10) //if damage more than 36
+        //                {
+        //                    neighbors = getNeighbors(x, y);
+        //                    toTransfer = matrixBuf[x][y] * 0.1;
+        //                    if (neighbors.left.x != -1)
+        //                    {
+        //                        matrixBuf[x][y] -= toTransfer;
+        //                        matrixBuf[x - 1][y] += toTransfer;
+        //                    }
+        //                    if (neighbors.up.x != -1)
+        //                    {
+        //                        matrixBuf[x][y] -= toTransfer;
+        //                        matrixBuf[x][y - 1] += toTransfer;
+        //                    }
+        //                    if (neighbors.right.x != -1)
+        //                    {
+        //                        matrixBuf[x][y] -= toTransfer;
+        //                        matrixBuf[x + 1][y] += toTransfer;
+        //                    }
+        //                    if (neighbors.down.x != -1)
+        //                    {
+        //                        matrixBuf[x][y] -= toTransfer;
+        //                        matrixBuf[x][y + 1] += toTransfer;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        //military targets recalculation
+        if (timeCountSeconds % 1 == 0 && timeCount == 0)
+        {
+            for (Militaty* unit : militaryUnitsList)
+            {
+                unit->SeekForEnemy();
             }
         }
 
         //RESOURCES GATHERING
-        if (timeCount % 15 == 0)
+        if (timeCount % 30 == 0)
         {
-            resourcesInsects += creepTilesCount / 25;
-            resourcesMachines += energisedTilesCount / 25;
+            resourcesInsects += creepTilesCount / 50;
+            resourcesMachines += energisedTilesCount / 50;
             if (resourcesMachines > 1000) resourcesMachines = 1000; //maximum of Energy
         }
 
