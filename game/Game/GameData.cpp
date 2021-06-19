@@ -1136,6 +1136,7 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     mapHeat[target.x][target.y] = 1.f; //initial target point
 
     float previous;
+    int bufHeat;
     std::list<TileIndex> toCheck = { target };
     std::vector<TileIndex> neighborsVector;
 
@@ -1145,7 +1146,6 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     {
         neighborsVector = getNeighborsAsVector((*iter).x, (*iter).y);
         previous = mapHeat[(*iter).x][(*iter).y];
-        
 
         for (TileIndex tile : neighborsVector)
         {
@@ -1168,6 +1168,20 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
                             //set value, according to terrain speed modification and damage map
                             mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]) + mapDamage[tile.x][tile.y];
                             //add this tile for further checking
+                            toCheck.push_back(tile);
+                        }
+                    }
+                }
+                else
+                {
+                    //if there's NO fog of war:
+                    if (mapFogOfWar[tile.x][tile.y] != -1)
+                    {
+                        //if value set - check, if it greater 
+                        bufHeat = previous + (1 / mapTerrainMod[tile.x][tile.y]) + mapDamage[tile.x][tile.y];
+                        if (mapHeat[tile.x][tile.y] > bufHeat)
+                        {
+                            mapHeat[tile.x][tile.y] = bufHeat;
                             toCheck.push_back(tile);
                         }
                     }
@@ -2060,37 +2074,21 @@ void GameData::GameUpdate()
                         for (TileIndex tile : bufTiles)
                         {
                             Vector2 vectorBuf = { tile.x * pixelsPerTile, tile.y * pixelsPerTile };
-                            //conditions for spawning Tumor:
 
-                            /*bool noTumorsAround = true;
-                            actorBuf = getActorsInRadius(vectorBuf, tumorRadius * pixelsPerTile);
-
-                            for (GameActor* actor : actorBuf)
+                            if (getActorInTile(tile.x, tile.y) == nullptr &&
+                                getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
+                                getTerrainType(tile.x, tile.y) != TerrainType::LAKE &&
+                                mapExpansionCreep[tile.x][tile.y] != ExpandState::EXPANDED &&
+                                mapExpansionCreep[tile.x][tile.y] != ExpandState::UNAVAILABLE &&
+                                maps[0][tile.x][tile.y] == 0 &&
+                                maps[1][tile.x][tile.y] == 0 &&
+                                maps[2][tile.x][tile.y] == 0)
                             {
-                                if (actor->type == ActorType::TUMOR)
-                                {
-                                    noTumorsAround = false;
-                                    break;
-                                }
-                            }*/
-
-                            /*if (noTumorsAround)
-                            {*/
-                                if (getActorInTile(tile.x, tile.y) == nullptr &&
-                                    getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
-                                    getTerrainType(tile.x, tile.y) != TerrainType::LAKE &&
-                                    mapExpansionCreep[tile.x][tile.y] != ExpandState::EXPANDED &&
-                                    mapExpansionCreep[tile.x][tile.y] != ExpandState::UNAVAILABLE &&
-                                    maps[0][tile.x][tile.y] == 0 &&
-                                    maps[1][tile.x][tile.y] == 0 &&
-                                    maps[2][tile.x][tile.y] == 0)
-                                {
-                                    addActor(ActorType::TUMOR, vectorBuf, State::ONLINE);
-                                    spendResources(tumorCost, Side::INSECTS);
-                                    builded = true;
-                                    break;
-                                }
-                            //}
+                                addActor(ActorType::TUMOR, vectorBuf, State::ONLINE);
+                                spendResources(tumorCost, Side::INSECTS);
+                                builded = true;
+                                break;
+                            }
                         }
                         if (builded)
                             break;
