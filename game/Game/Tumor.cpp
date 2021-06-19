@@ -20,7 +20,7 @@ void Tumor::Update()
 	case State::UNDER_CONSTRUCTION:
 		//building 
 		if (this->game->timeCount % 5 == 0)
-			RestoreHP(1);
+			RestoreHP(5);
 		if (HP == maxHP)
 		{
 			//if it ready - mark area around to expand and create initiate expansion tile

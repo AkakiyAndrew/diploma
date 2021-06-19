@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <list>
 #include <omp.h>
 #include <math.h>
 

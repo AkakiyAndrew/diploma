@@ -35,7 +35,8 @@ GameData::GameData()
     expansionInsectsTexture = LoadTexture("textures\\source\\creep_1.png");
     expansionMachinesAnimation = {
         new Texture2D[15],
-        15
+        //TODO: return to 15
+        1
     };
 
     for (int i = 0; i < expansionMachinesAnimation.framesAmount; i++)
@@ -241,7 +242,7 @@ GameData::GameData()
     //BUILDING ACTORS ATTRIBUTES
     buildingsAttributes[ActorType::TUMOR] = std::map<std::string, int>{
         {"expansionRange", 8},
-        {"expansionTime", 8 },
+        {"expansionTime", 12 },
     };
     buildingsAttributes[ActorType::HIVE] = std::map<std::string, int>{
         {"expansionRange", 8},
@@ -753,39 +754,78 @@ std::vector<TileIndex> GameData::tilesInsideCircleOrdered(TileIndex center, int 
 }
 std::vector<TileIndex> GameData::tilesInPerimeterCircleOrdered(TileIndex center, unsigned int radius)
 {
-    std::vector<TileIndex> result;
+    std::vector<TileIndex> buf;
+    int x_centre = center.x, y_centre = center.y;
+    int x = radius, y = 0;
 
-    int r = radius;
+    // Printing the initial point on the axes 
+    // after translation
 
-    for (int x = center.x + 1; x < center.x + r; x++)
+
+    // When radius is zero only a single
+    // point will be printed
+    if (radius > 0)
     {
-        for (int y = center.y; y > center.y - r; y--) //REVERSE int y = center.y - r; y < center.y + r; y++
+        /*buf.push_back(TileIndex{ x + x_centre, -y + y_centre });
+        buf.push_back(TileIndex{ y + x_centre,  x + y_centre });
+        buf.push_back(TileIndex{ -y + x_centre, x + y_centre });*/
+        buf.push_back(TileIndex{ x + x_centre, y_centre });  //right
+        buf.push_back(TileIndex{ x_centre, -x + y_centre }); //up
+        buf.push_back(TileIndex{ x_centre, x + y_centre });  //down
+        buf.push_back(TileIndex{ -x + x_centre,  y_centre });//left
+    }
+
+    // Initialising the value of P
+    int P = 1 - radius;
+    while (x > y)
+    {
+        y++;
+
+        // Mid-point is inside or on the perimeter
+        if (P <= 0)
+            P = P + 2 * y + 1;
+        // Mid-point is outside the perimeter
+        else
         {
-            if (CheckCollisionPointCircle(Vector2{ static_cast<float>(x), static_cast<float>(y) }, center, r))
-            {
-                //adding this and opposite tiles
-                result.push_back(TileIndex{ x,y }); // up-right
-                result.push_back(TileIndex{ center.x + (center.x - x), y }); //up-left
-                result.push_back(TileIndex{ x, center.y + (center.y - y) }); //down-right
-                result.push_back(TileIndex{ center.x + (center.x - x), center.y + (center.y - y) }); //down-left
-            }
+            x--;
+            P = P + 2 * y - 2 * x + 1;
+        }
+
+        // All the perimeter points have already been printed
+        if (x < y)
+            break;
+
+        // Printing the generated point and its reflection
+        // in the other octants after translation
+        buf.push_back(TileIndex{ x + x_centre, y + y_centre });
+        buf.push_back(TileIndex{ -x + x_centre, y + y_centre });
+        buf.push_back(TileIndex{ x + x_centre , -y + y_centre });
+        buf.push_back(TileIndex{ -x + x_centre , -y + y_centre });
+
+        // If the generated point is on the line x = y then 
+        // the perimeter points have already been printed
+        if (x != y)
+        {
+            buf.push_back(TileIndex{ y + x_centre , x + y_centre });
+            buf.push_back(TileIndex{ -y + x_centre , x + y_centre });
+            buf.push_back(TileIndex{ y + x_centre , -x + y_centre });
+            buf.push_back(TileIndex{ -y + x_centre , -x + y_centre });
         }
     }
-    result.push_back(TileIndex{ center.x, center.y - r }); //up
-    result.push_back(TileIndex{ center.x, center.y + r }); //down
-    result.push_back(TileIndex{ center.x + r, center.y }); //right
-    result.push_back(TileIndex{ center.x - r, center.y });//left
 
-    std::vector<TileIndex>::iterator iter;
-    for (iter = result.begin(); iter != result.end(); )
+    std::vector<TileIndex> result;
+
+    for (int i = 0; i < buf.size(); i++)
     {
-        if ((*iter).x < 0 ||
-            (*iter).x>this->mapWidth - 1 ||
-            (*iter).y < 0 ||
-            (*iter).y>this->mapHeight - 1)
-            iter = result.erase(iter);
-        else
-            iter++;
+        //checking to not cross the border, if all right - add TileIndex to result vector
+        if (!(buf[i].x < 0 ||
+            buf[i].x>this->mapWidth - 1 ||
+            buf[i].y < 0 ||
+            buf[i].y>this->mapHeight - 1))
+        {
+            result.push_back(buf[i]);
+        }
+        //TODO: consider using result.erase()
     }
 
     return result;
@@ -930,53 +970,53 @@ NeighborsIndex GameData::getNeighbors(int x, int y)
 std::vector<TileIndex> GameData::getNeighborsAsVector(int x, int y)
 {
     std::vector<TileIndex> result;
-    result.resize(9);
+    result.resize(8);
     NeighborsIndex neighbors = neighborsIndices[x][y];
 
     //this tile
-    result[0] = TileIndex{ x,y };
+    //result[0] = TileIndex{ x,y };
 
     //left
     if (neighbors.left.x != -1)
-        result[1] = neighbors.left;
+        result[0] = neighbors.left;
     else
-        result[1] = { -1,-1 };
+        result[0] = { -1,-1 };
     //up
     if (neighbors.up.x != -1)
-        result[2] = neighbors.up;
+        result[1] = neighbors.up;
     else
-        result[2] = { -1,-1 };
+        result[1] = { -1,-1 };
     //right
     if (neighbors.right.x != -1)
-        result[3] = neighbors.right;
+        result[2] = neighbors.right;
     else
-        result[3] = { -1,-1 };
+        result[2] = { -1,-1 };
     //down
     if (neighbors.down.x != -1)
-        result[4] = neighbors.down;
+        result[3] = neighbors.down;
     else
-        result[4] = { -1,-1 };
+        result[3] = { -1,-1 };
 
     //upLeft
     if (neighbors.upLeft.x != -1)
-        result[5] = neighbors.upLeft;
+        result[4] = neighbors.upLeft;
     else
-        result[5] = { -1,-1 };
+        result[4] = { -1,-1 };
     //upRight
     if (neighbors.upRight.x != -1)
-        result[6] = neighbors.upRight;
+        result[5] = neighbors.upRight;
     else
-        result[6] = { -1,-1 };
+        result[5] = { -1,-1 };
     //downLeft
     if (neighbors.downLeft.x != -1)
-        result[7] = neighbors.downLeft;
+        result[6] = neighbors.downLeft;
     else
-        result[7] = { -1,-1 };
+        result[6] = { -1,-1 };
     //downRight
     if (neighbors.downRight.x != -1)
-        result[8] = neighbors.downRight;
+        result[7] = neighbors.downRight;
     else
-        result[8] = { -1,-1 };
+        result[7] = { -1,-1 };
 
     return result;
 }
@@ -1095,177 +1135,219 @@ void GameData::calculateVectorPathfinding(TileIndex target, ActorType actorType)
     //HEATMAP CALCULATION
     mapHeat[target.x][target.y] = 1.f; //initial target point
 
-    //std::vector<TileIndex> toCheck = { target };
-    int i_checking = 0, i_max = mapHeight * mapHeight, i_last_added = 0; //to replace vector
-    TileIndex* toCheck = new TileIndex[i_max];
-    toCheck[0] = target;
+    float previous;
+    std::list<TileIndex> toCheck = { target };
+    std::vector<TileIndex> neighborsVector;
 
-    NeighborsIndex checking;
-    //std::vector<TileIndex> checking;
-    float previous = 1.f;
-    
-    for (int x = 0; x < mapWidth; x++)
+    std::list<TileIndex>::iterator iter;
+    //iter = toCheck.erase(iter);
+    for (iter = toCheck.begin(); iter != toCheck.end(); )
     {
-        for (int y = 0; y < mapHeight; y++)
+        neighborsVector = getNeighborsAsVector((*iter).x, (*iter).y);
+        previous = mapHeat[(*iter).x][(*iter).y];
+        
+
+        for (TileIndex tile : neighborsVector)
         {
-            if (mapFogOfWar[x][y] == -1 && !(target == TileIndex{x,y}))
+            if (tile.x != -1) //if index valid
             {
-                i_last_added++;
-                toCheck[i_last_added] = TileIndex{x, y};
-                mapHeat[x][y] = 1.f;
+                //if value not set:
+                if (mapHeat[tile.x][tile.y] == 0.f)
+                {
+                    //if there's fog of war:
+                    if (mapFogOfWar[tile.x][tile.y] == -1)
+                    {
+                        mapHeat[tile.x][tile.y] = 1.f;
+                        toCheck.push_back(tile);
+                    }
+                    else
+                    {
+                        //if there's no obstacle:
+                        if (mapTerrainMod[tile.x][tile.y] != -1)
+                        {
+                            //set value, according to terrain speed modification and damage map
+                            mapHeat[tile.x][tile.y] = previous + (1 / mapTerrainMod[tile.x][tile.y]) + mapDamage[tile.x][tile.y];
+                            //add this tile for further checking
+                            toCheck.push_back(tile);
+                        }
+                    }
+                }
             }
         }
+        iter++;
+        toCheck.pop_front();
     }
 
-    for (int i = 0; i < i_max; i++)
-    {
-        if (i <= i_last_added) //for "repair" crush on Degug configuration
-        {
-            previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
-            checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
-            //checking = getNeighborsAsVector(toCheck[i].x, toCheck[i].y);
-        }
-
-        //left
-        if (checking.left.x != -1) //if index valid
-        {
-            //if value not set and there's fog of war:
-            if (mapHeat[checking.left.x][checking.left.y] == 0.f && mapFogOfWar[checking.left.x][checking.left.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.left.x][checking.left.y] != -1)
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
-                    //add this checking.left for further checking
-                    toCheck[i_last_added] = (checking.left);
-                }
-            }
-        }
-        //up
-        if (checking.up.x != -1) //if index valid
-        {
-            //if value not set and there's fog of war:
-            if (mapHeat[checking.up.x][checking.up.y] == 0.f && mapFogOfWar[checking.up.x][checking.up.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.up.x][checking.up.y];
-                    //add this checking.up for further checking
-                    toCheck[i_last_added] = (checking.up);
-                }
-            }
-        }
-        //right
-        if (checking.right.x != -1) //if index valid
-        {
-            //if value not set and there's fog of war:
-            if (mapHeat[checking.right.x][checking.right.y] == 0.f && mapFogOfWar[checking.right.x][checking.right.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
-                    //add this checking.right for further checking
-                    toCheck[i_last_added] = (checking.right);
-                }
-            }
-        }
-        //down
-        if (checking.down.x != -1) //if index valid
-        {
-            //if value not set and there's fog of war:
-            if (mapHeat[checking.down.x][checking.down.y] == 0.f && mapFogOfWar[checking.down.x][checking.down.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
-                    //add this checking.down for further checking
-                    toCheck[i_last_added] = (checking.down);
-                }
-            }
-        }
-
-        //upLeft
-        if (checking.upLeft.x != -1) //if index valid
-        {
-            //if value not set and there's no fog of war:
-            if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f && mapFogOfWar[checking.upLeft.x][checking.upLeft.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
-                    //add this checking.upLeft for further checking
-                    toCheck[i_last_added] = (checking.upLeft);
-                }
-            }
-        }
-        //upRight
-        if (checking.upRight.x != -1) //if index valid
-        {
-            //if value not set and there's no fog of war:
-            if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f && mapFogOfWar[checking.upRight.x][checking.upRight.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
-                    //add this checking.upRight for further checking
-                    toCheck[i_last_added] = (checking.upRight);
-                }
-            }
-        }
-        //downLeft
-        if (checking.downLeft.x != -1) //if index valid
-        {
-            //if value not set and there's no fog of war:
-            if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f && mapFogOfWar[checking.downLeft.x][checking.downLeft.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
-                    //add this checking.downLeft for further checking
-                    toCheck[i_last_added] = (checking.downLeft);
-                }
-            }
-        }
-        //downRight
-        if (checking.downRight.x != -1) //if index valid
-        {
-            //if value not set and there's no fog of war:
-            if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f && mapFogOfWar[checking.downRight.x][checking.downRight.y] != -1)
-            {
-                //if there's no obstacle:
-                if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
-                {
-                    i_last_added++;
-                    //set value, according to terrain speed modification and damage map
-                    mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
-                    //add this checking.downRight for further checking
-                    toCheck[i_last_added] = (checking.downRight);
-                }
-            }
-        }
-    }
-
-    delete[] toCheck;
+    ////std::vector<TileIndex> toCheck = { target };
+    //int i_checking = 0, i_max = mapHeight * mapHeight, i_last_added = 0; //to replace vector
+    //TileIndex* toCheck = new TileIndex[i_max];
+    //toCheck[0] = target;
+    //NeighborsIndex checking;
+    ////std::vector<TileIndex> checking;
+    //float previous = 1.f;
+    //
+    //for (int x = 0; x < mapWidth; x++)
+    //{
+    //    for (int y = 0; y < mapHeight; y++)
+    //    {
+    //        if (mapFogOfWar[x][y] == -1 && !(target == TileIndex{x,y}))
+    //        {
+    //            i_last_added++;
+    //            toCheck[i_last_added] = TileIndex{x, y};
+    //            mapHeat[x][y] = 1.f;
+    //        }
+    //    }
+    //}
+    // 
+    //for (int i = 0; i < i_max; i++)
+    //{
+    //    if (i <= i_last_added) //for "repair" crush on Degug configuration
+    //    {
+    //        previous = mapHeat[toCheck[i].x][toCheck[i].y]; //previous - to calculate neighbors tiles
+    //        checking = neighborsIndices[toCheck[i].x][toCheck[i].y];
+    //        //checking = getNeighborsAsVector(toCheck[i].x, toCheck[i].y);
+    //    }
+    // 
+    //    //left
+    //    if (checking.left.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's fog of war:
+    //        if (mapHeat[checking.left.x][checking.left.y] == 0.f && mapFogOfWar[checking.left.x][checking.left.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.left.x][checking.left.y] != -1)
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.left.x][checking.left.y] = previous + (1 / mapTerrainMod[checking.left.x][checking.left.y]) + mapDamage[checking.left.x][checking.left.y];
+    //                //add this checking.left for further checking
+    //                toCheck[i_last_added] = (checking.left);
+    //            }
+    //        }
+    //    }
+    //    //up
+    //    if (checking.up.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's fog of war:
+    //        if (mapHeat[checking.up.x][checking.up.y] == 0.f && mapFogOfWar[checking.up.x][checking.up.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.up.x][checking.up.y] != -1)
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.up.x][checking.up.y] = previous + (1 / mapTerrainMod[checking.up.x][checking.up.y]) + mapDamage[checking.up.x][checking.up.y];
+    //                //add this checking.up for further checking
+    //                toCheck[i_last_added] = (checking.up);
+    //            }
+    //        }
+    //    }
+    //    //right
+    //    if (checking.right.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's fog of war:
+    //        if (mapHeat[checking.right.x][checking.right.y] == 0.f && mapFogOfWar[checking.right.x][checking.right.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.right.x][checking.right.y] != -1)
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.right.x][checking.right.y] = previous + (1 / mapTerrainMod[checking.right.x][checking.right.y]) + mapDamage[checking.right.x][checking.right.y];
+    //                //add this checking.right for further checking
+    //                toCheck[i_last_added] = (checking.right);
+    //            }
+    //        }
+    //    }
+    //    //down
+    //    if (checking.down.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's fog of war:
+    //        if (mapHeat[checking.down.x][checking.down.y] == 0.f && mapFogOfWar[checking.down.x][checking.down.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.down.x][checking.down.y] != -1)
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.down.x][checking.down.y] = previous + (1 / mapTerrainMod[checking.down.x][checking.down.y]) + mapDamage[checking.down.x][checking.down.y];
+    //                //add this checking.down for further checking
+    //                toCheck[i_last_added] = (checking.down);
+    //            }
+    //        }
+    //    }
+    // 
+    //    //upLeft
+    //    if (checking.upLeft.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's no fog of war:
+    //        if (mapHeat[checking.upLeft.x][checking.upLeft.y] == 0.f && mapFogOfWar[checking.upLeft.x][checking.upLeft.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.upLeft.x][checking.upLeft.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.upLeft.x][checking.upLeft.y] = previous + (1 / mapTerrainMod[checking.upLeft.x][checking.upLeft.y]) + mapDamage[checking.upLeft.x][checking.upLeft.y];
+    //                //add this checking.upLeft for further checking
+    //                toCheck[i_last_added] = (checking.upLeft);
+    //            }
+    //        }
+    //    }
+    //    //upRight
+    //    if (checking.upRight.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's no fog of war:
+    //        if (mapHeat[checking.upRight.x][checking.upRight.y] == 0.f && mapFogOfWar[checking.upRight.x][checking.upRight.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.upRight.x][checking.upRight.y] != -1 && (mapTerrainMod[checking.up.x][checking.up.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.upRight.x][checking.upRight.y] = previous + (1 / mapTerrainMod[checking.upRight.x][checking.upRight.y]) + mapDamage[checking.upRight.x][checking.upRight.y];
+    //                //add this checking.upRight for further checking
+    //                toCheck[i_last_added] = (checking.upRight);
+    //            }
+    //        }
+    //    }
+    //    //downLeft
+    //    if (checking.downLeft.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's no fog of war:
+    //        if (mapHeat[checking.downLeft.x][checking.downLeft.y] == 0.f && mapFogOfWar[checking.downLeft.x][checking.downLeft.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.downLeft.x][checking.downLeft.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.left.x][checking.left.y] != -1.f))
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.downLeft.x][checking.downLeft.y] = previous + (1 / mapTerrainMod[checking.downLeft.x][checking.downLeft.y]) + mapDamage[checking.downLeft.x][checking.downLeft.y];
+    //                //add this checking.downLeft for further checking
+    //                toCheck[i_last_added] = (checking.downLeft);
+    //            }
+    //        }
+    //    }
+    //    //downRight
+    //    if (checking.downRight.x != -1) //if index valid
+    //    {
+    //        //if value not set and there's no fog of war:
+    //        if (mapHeat[checking.downRight.x][checking.downRight.y] == 0.f && mapFogOfWar[checking.downRight.x][checking.downRight.y] != -1)
+    //        {
+    //            //if there's no obstacle:
+    //            if (mapTerrainMod[checking.downRight.x][checking.downRight.y] != -1 && (mapTerrainMod[checking.down.x][checking.down.y] != -1.f || mapTerrainMod[checking.right.x][checking.right.y] != -1.f))
+    //            {
+    //                i_last_added++;
+    //                //set value, according to terrain speed modification and damage map
+    //                mapHeat[checking.downRight.x][checking.downRight.y] = previous + (1 / mapTerrainMod[checking.downRight.x][checking.downRight.y]) + mapDamage[checking.downRight.x][checking.downRight.y];
+    //                //add this checking.downRight for further checking
+    //                toCheck[i_last_added] = (checking.downRight);
+    //            }
+    //        }
+    //    }
+    //}
+    // 
+    //delete[] toCheck;
 
     //VECTOR MAP CALCULATION
 
@@ -1441,7 +1523,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
             if (getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
                 getTerrainType(tile.x, tile.y) != TerrainType::LAKE)
             {
-                addActor(ActorType::HIVE, Vector2{tile.x*pixelsPerTile, tile.y * pixelsPerTile}, State::ONLINE);
+                addActor(ActorType::HIVE, Vector2{tile.x*pixelsPerTile + pixelsPerTile / 2, tile.y * pixelsPerTile + pixelsPerTile / 2 }, State::ONLINE);
                 break;
             }
         }
@@ -1471,14 +1553,13 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
 GameActor* GameData::getActorInTile(int x, int y)
 {
     GameActor* result = nullptr;
-    Vector2 pos;
+    TileIndex pos;
     for (GameActor* actor : unitsList)
     {
         if (actor != nullptr)
         {
-            pos = actor->getPosition();
-            Vector2 test = { pos.x / pixelsPerTile, pos.y / pixelsPerTile };
-            if (static_cast<int>(pos.x / pixelsPerTile) == x && static_cast<int>(pos.y / pixelsPerTile) == y)
+            pos = actor->getPositionIndex();
+            if (pos.x == x && pos.y == y)
             {
                 result = actor;
             }
@@ -1893,18 +1974,9 @@ void GameData::GameUpdate()
     if (IsKeyPressed(KEY_T))
     {
         insectsDesirePosition = mouseIndex;
-        calculateVectorPathfinding(
-            insectsDesirePosition,
-            ActorType::LIGHT_INSECT
-        );
-        calculateVectorPathfinding(
-            insectsDesirePosition,
-            ActorType::HEAVY_INSECT
-        );
-        calculateVectorPathfinding(
-            insectsDesirePosition,
-            ActorType::FLYING_INSECT
-        );
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::LIGHT_INSECT);
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::HEAVY_INSECT);
+        calculateVectorPathfinding(insectsDesirePosition, ActorType::FLYING_INSECT);
     }
 
     if (IsKeyPressed(KEY_F1))
@@ -1966,13 +2038,15 @@ void GameData::GameUpdate()
         }
 
         ////TUMOR SPAWNING
-        if (timeCountSeconds % 5 == 0 && timeCount == 0)
+        if (timeCountSeconds % 3 == 0 && timeCount == 0)
         {
             int tumorCost = genericAttributes[ActorType::TUMOR]["cost"];
             if (trySpendResources(tumorCost, Side::INSECTS) == tumorCost) //if have enough Food
             {
                 bool builded;
                 int** maps[] = { mapsDamage[ActorType::LIGHT_INSECT], mapsDamage[ActorType::HEAVY_INSECT],mapsDamage[ActorType::FLYING_INSECT] };
+                int tumorRadius = buildingsAttributes[ActorType::TUMOR]["expansionRange"];
+                std::vector<GameActor*> actorBuf;
 
                 std::vector<TileIndex> bufTiles;
 
@@ -1981,24 +2055,42 @@ void GameData::GameUpdate()
                     if (bulding->getState() != State::UNDER_CONSTRUCTION)
                     {
                         builded = false;
-                        bufTiles = tilesInPerimeterCircleOrdered(bulding->getPositionIndex(), buildingsAttributes[ActorType::TUMOR]["expansionRange"] + 1);
+                        bufTiles = tilesInPerimeterCircleOrdered(bulding->getPositionIndex(), tumorRadius + 1);
+
                         for (TileIndex tile : bufTiles)
                         {
+                            Vector2 vectorBuf = { tile.x * pixelsPerTile, tile.y * pixelsPerTile };
                             //conditions for spawning Tumor:
-                            if (getActorInTile(tile.x, tile.y) == nullptr &&
-                                getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
-                                getTerrainType(tile.x, tile.y) != TerrainType::LAKE &&
-                                mapExpansionCreep[tile.x][tile.y] != ExpandState::EXPANDED &&
-                                mapExpansionCreep[tile.x][tile.y] != ExpandState::UNAVAILABLE &&
-                                maps[0][tile.x][tile.y] == 0 &&
-                                maps[1][tile.x][tile.y] == 0 &&
-                                maps[2][tile.x][tile.y] == 0)
+
+                            /*bool noTumorsAround = true;
+                            actorBuf = getActorsInRadius(vectorBuf, tumorRadius * pixelsPerTile);
+
+                            for (GameActor* actor : actorBuf)
                             {
-                                addActor(ActorType::TUMOR, Vector2{ tile.x * pixelsPerTile, tile.y * pixelsPerTile }, State::ONLINE);
-                                spendResources(tumorCost, Side::INSECTS);
-                                builded = true;
-                                break;
-                            }
+                                if (actor->type == ActorType::TUMOR)
+                                {
+                                    noTumorsAround = false;
+                                    break;
+                                }
+                            }*/
+
+                            /*if (noTumorsAround)
+                            {*/
+                                if (getActorInTile(tile.x, tile.y) == nullptr &&
+                                    getTerrainType(tile.x, tile.y) != TerrainType::MOUNTAIN &&
+                                    getTerrainType(tile.x, tile.y) != TerrainType::LAKE &&
+                                    mapExpansionCreep[tile.x][tile.y] != ExpandState::EXPANDED &&
+                                    mapExpansionCreep[tile.x][tile.y] != ExpandState::UNAVAILABLE &&
+                                    maps[0][tile.x][tile.y] == 0 &&
+                                    maps[1][tile.x][tile.y] == 0 &&
+                                    maps[2][tile.x][tile.y] == 0)
+                                {
+                                    addActor(ActorType::TUMOR, vectorBuf, State::ONLINE);
+                                    spendResources(tumorCost, Side::INSECTS);
+                                    builded = true;
+                                    break;
+                                }
+                            //}
                         }
                         if (builded)
                             break;
@@ -2058,29 +2150,29 @@ void GameData::GameUpdate()
         }
 
         //damage map fading
-        if (timeCountSeconds % 5 == 0 && timeCount == 0)
-        {
-            //iterate through all insects types
-            std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
-            for (ActorType actorType : insectsTypes)
-            {
-                int** matrixBuf = mapsDamage[actorType];
-
-                for (int x = 0; x < mapWidth; x++)
-                {
-                    for (int y = 0; y < mapHeight; y++)
-                    {
-                        if (matrixBuf[x][y] >= 1)
-                            matrixBuf[x][y] -= 1;
-                        /*else
-                            matrixBuf[x][y] = 0;*/
-                    }
-                }
-
-                //vector field recalculating
-                calculateVectorPathfinding(insectsDesirePosition, actorType);
-            }
-        }
+        //if (timeCountSeconds % 5 == 0 && timeCount == 0)
+        //{
+        //    //iterate through all insects types
+        //    std::vector<ActorType> insectsTypes = { ActorType::LIGHT_INSECT,ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+        //    for (ActorType actorType : insectsTypes)
+        //    {
+        //        int** matrixBuf = mapsDamage[actorType];
+        // 
+        //        for (int x = 0; x < mapWidth; x++)
+        //        {
+        //            for (int y = 0; y < mapHeight; y++)
+        //            {
+        //                if (matrixBuf[x][y] >= 1)
+        //                    matrixBuf[x][y] -= 1;
+        //                /*else
+        //                    matrixBuf[x][y] = 0;*/
+        //            }
+        //        }
+        // 
+        //        //vector field recalculating
+        //        calculateVectorPathfinding(insectsDesirePosition, actorType);
+        //    }
+        //}
 
         //damage map spread
         
