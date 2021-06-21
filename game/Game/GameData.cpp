@@ -2338,8 +2338,10 @@ void GameData::GameUpdate()
         }
 
         //RESOURCES GATHERING
-        if (timeCount % 30 == 0)
+        if (timeCount % 30 == 1)
         {
+            resourcesMachines_previous = resourcesMachines;
+
             resourcesInsects += creepTilesCount / 50;
             resourcesMachines += energisedTilesCount / 50;
             if (resourcesMachines > 1000) resourcesMachines = 1000; //maximum of Energy
@@ -2621,6 +2623,15 @@ void GameData::GameDraw()
     DrawRectangle(screenSize.x / 3, screenSize.y - 70, screenSize.x / 3, 70, DARKGRAY);
     DrawRectangle(screenSize.x / 3+5, screenSize.y - 50, ((screenSize.x / 3) * static_cast<float>(resourcesMachines)/1000) - 10, 40, BLUE);
     DrawText(FormatText("Energy: %d/%d", resourcesMachines, 1000), (screenSize.x/7)*3, screenSize.y-35, 24, YELLOW);
+    int textWidth = MeasureText(FormatText("Energy: %d/%d", resourcesMachines, 1000), 24);
+    if (resourcesMachines - resourcesMachines_previous >= 0)
+    {
+        DrawText(FormatText(" + %d/s", (resourcesMachines - resourcesMachines_previous)*2), (screenSize.x / 7) * 3 + textWidth, screenSize.y - 35, 24, DARKGREEN);
+    }
+    else
+    {
+        DrawText(FormatText(" - %d/s", (resourcesMachines - resourcesMachines_previous) * 2), (screenSize.x / 7) * 3 + textWidth, screenSize.y - 35, 24, RED);
+    }
 
     DrawFPS(20, 50);
 }

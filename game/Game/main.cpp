@@ -20,7 +20,7 @@ int main(void)
     const int screenWidth = 1700;
     const int screenHeight = 600;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] map generation");
+    InitWindow(screenWidth, screenHeight, "diploma game");
     SetTargetFPS(60);
     SetExitKey(KEY_HOME); //releasing ESC-key for in-gameplay menu
 
@@ -31,6 +31,7 @@ int main(void)
     TerrainGenerator terrain{};
 
     GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_FOCUSED, 0x282828ff);
 
     // Main game loop
     while (!gameClosed)        // Detect window close button
