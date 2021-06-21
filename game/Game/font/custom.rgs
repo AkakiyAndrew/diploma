@@ -1,0 +1,7 @@
+#
+# rgs style text file (v3.1) - raygui style file generated using rGuiStyler
+#
+# Info:  p <controlId> <propertyId> <propertyValue>  // Property description
+#
+p 00 16 0x0000000e    DEFAULT_EXT00 
+p 00 17 0x00000002    DEFAULT_EXT01 

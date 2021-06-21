@@ -2604,6 +2604,7 @@ void GameData::GameDraw()
     }
 
     EndMode2D();
+
     DrawText(FormatText("Camera zoom: %.2f", camera.zoom), 20, 20, 20, RED);
     DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 80, 20, RED);
     DrawText(FormatText("Mouse tile index: %d, %d", mouseIndex.x, mouseIndex.y), 20, 140, 20, RED);
@@ -2615,6 +2616,11 @@ void GameData::GameDraw()
 
     DrawText(TextFormat("Creep: %d, food: %d", creepTilesCount, resourcesInsects), 20, 320, 20, RED);
     DrawText(TextFormat("Zerolayer: %d, energy: %d", energisedTilesCount, resourcesMachines), 20, 380, 20, RED);
+
+    //ENERGY BAR
+    DrawRectangle(screenSize.x / 3, screenSize.y - 70, screenSize.x / 3, 70, DARKGRAY);
+    DrawRectangle(screenSize.x / 3+5, screenSize.y - 50, ((screenSize.x / 3) * static_cast<float>(resourcesMachines)/1000) - 10, 40, BLUE);
+    DrawText(FormatText("Energy: %d/%d", resourcesMachines, 1000), (screenSize.x/7)*3, screenSize.y-35, 24, YELLOW);
 
     DrawFPS(20, 50);
 }

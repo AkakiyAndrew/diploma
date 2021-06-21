@@ -61,7 +61,7 @@ private:
 
     //RESOURCES
     unsigned resourcesInsects = 0;
-    unsigned resourcesMachines = 1000;
+    unsigned resourcesMachines = 200;
 
     //FOG OF WAR
     std::map<Side, int**> mapsFogOfWar;

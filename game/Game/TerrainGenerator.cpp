@@ -5,6 +5,8 @@
 
 TerrainGenerator::TerrainGenerator()
 {
+    //GuiLoadStyle("fonts\\custom.rgs");
+    
     closed = false;
 
     levelNames = new const char* [] { "LAKE", "SWAMP", "SAND", "PLAIN", "TREE", "STONE", "MOUNTAIN" };
@@ -21,7 +23,7 @@ TerrainGenerator::TerrainGenerator()
 void TerrainGenerator::DrawInterface()
 {
     closed = GuiButton(Rectangle{ 20.f, 20.f, 100.f, 50.f }, "Back") || IsKeyPressed(KEY_ESCAPE);
-
+    
     if (isGenerated())
     {
         DrawTextureEx(
