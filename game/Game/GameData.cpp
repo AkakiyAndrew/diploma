@@ -2127,7 +2127,9 @@ void GameData::GameUpdate()
     }
 
     //ACTORS BUILDING
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL && mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE)
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL && 
+        mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE &&
+        getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr)
     {
         Vector2 position = { mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 };
         addActor(wantToBuild, position, State::ONLINE);
@@ -2473,15 +2475,28 @@ void GameData::GameDraw()
 
 #endif
 
-    //for (TileIndex tile : tilesInPerimeterCircleOrdered(mouseIndex, buildingsAttributes[ActorType::TUMOR]["expansionRange"] + 1))
-    //{
-    //    DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
-    //}
+    //UNIT DRAWING
+    TileIndex buf_position;
+    int** mapFogOfWar = mapsFogOfWar[visionSide];
+
+    for (GameActor* actor : this->unitsList)
+    {
+        if (actor != nullptr)
+        {
+            buf_position = actor->getPositionIndex();
+            if (buf_position.x >= renderBorders[1] &&
+                buf_position.x < renderBorders[3] &&
+                buf_position.y >= renderBorders[0] &&
+                buf_position.y < renderBorders[2] &&
+                mapFogOfWar[buf_position.x][buf_position.y] != -1)
+            {
+                actor->Draw();
+            }
+        }
+    }
 
     if (this->wantToBuild != ActorType::ACTOR_NULL)
     {
-        //draw hologram of chosen actor in any case
-
         Texture2D bufTexture;
         int size;
         Color tint;
@@ -2515,7 +2530,7 @@ void GameData::GameDraw()
             bufTexture = getUnitAnimation(ActorType::TURRET_CHASIS, State::CHANGING_MODE).frames[3];
             size = genericAttributes[wantToBuild]["size"];
             
-            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE)
+            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE && getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr)
                 tint = GREEN;
             else
                 tint = RED;
@@ -2559,7 +2574,7 @@ void GameData::GameDraw()
                     DrawRectangle(tile.x * pixelsPerTile, tile.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(SKYBLUE, 0.5f));
             }
 
-            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y]!=ExpandState::UNAVAILABLE)
+            if (mapExpansionEnergised[mouseIndex.x][mouseIndex.y]!=ExpandState::UNAVAILABLE && getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr)
             {
                 DrawCircle(
                     mouseIndex.x* pixelsPerTile + pixelsPerTile / 2,
@@ -2586,26 +2601,6 @@ void GameData::GameDraw()
     if (wantToRemove)
     {
         DrawRectangle(mouseIndex.x * pixelsPerTile, mouseIndex.y * pixelsPerTile, pixelsPerTile, pixelsPerTile, Fade(RED, 0.3f));
-    }
-
-    TileIndex buf_position;
-    int** mapFogOfWar = mapsFogOfWar[visionSide];
-
-    for (GameActor* actor : this->unitsList)
-    {
-        //TODO: consider fog of war
-        if (actor != nullptr)
-        {
-            buf_position = actor->getPositionIndex();
-            if (buf_position.x >= renderBorders[1] &&
-                buf_position.x < renderBorders[3] &&
-                buf_position.y >= renderBorders[0] &&
-                buf_position.y < renderBorders[2] &&
-                mapFogOfWar[buf_position.x][buf_position.y] != -1)
-            {
-                actor->Draw();
-            }
-        }
     }
 
     EndMode2D();

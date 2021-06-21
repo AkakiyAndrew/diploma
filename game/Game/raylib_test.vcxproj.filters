@@ -82,27 +82,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="textures\tileset\LAKE.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\MOUNTAIN.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\PLAIN.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\SAND.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\STONE.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\SWAMP.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
-    <Image Include="textures\tileset\TREE.bmp">
-      <Filter>Файлы ресурсов\Tiles</Filter>
-    </Image>
     <Image Include="textures\sprites\antiAirTurret_attacking_0.png">
       <Filter>Файлы ресурсов\Sprites</Filter>
     </Image>
@@ -177,6 +156,27 @@
     </Image>
     <Image Include="textures\sprites\turretChasis_goes_2.png">
       <Filter>Файлы ресурсов\Sprites</Filter>
+    </Image>
+    <Image Include="textures\tileset\LAKE.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\MOUNTAIN.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\PLAIN.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\SAND.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\STONE.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\SWAMP.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
+    </Image>
+    <Image Include="textures\tileset\TREE.png">
+      <Filter>Файлы ресурсов\Tiles</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

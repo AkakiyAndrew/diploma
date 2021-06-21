@@ -196,13 +196,13 @@
     <Image Include="textures\sprites\turretChasis_goes_0.png" />
     <Image Include="textures\sprites\turretChasis_goes_1.png" />
     <Image Include="textures\sprites\turretChasis_goes_2.png" />
-    <Image Include="textures\tileset\LAKE.bmp" />
-    <Image Include="textures\tileset\MOUNTAIN.bmp" />
-    <Image Include="textures\tileset\PLAIN.bmp" />
-    <Image Include="textures\tileset\SAND.bmp" />
-    <Image Include="textures\tileset\STONE.bmp" />
-    <Image Include="textures\tileset\SWAMP.bmp" />
-    <Image Include="textures\tileset\TREE.bmp" />
+    <Image Include="textures\tileset\LAKE.png" />
+    <Image Include="textures\tileset\MOUNTAIN.png" />
+    <Image Include="textures\tileset\PLAIN.png" />
+    <Image Include="textures\tileset\SAND.png" />
+    <Image Include="textures\tileset\STONE.png" />
+    <Image Include="textures\tileset\SWAMP.png" />
+    <Image Include="textures\tileset\TREE.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
