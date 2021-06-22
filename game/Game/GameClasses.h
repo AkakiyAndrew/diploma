@@ -80,8 +80,8 @@ private:
     int damageTaken[3] = { 0,0,0 }; //amount of damage, taken by Insects (NO NEED?)
     int spawnTime = 15; //seconds between spawning new insects;
     
-    int layers = 1;
-    uint16_t neurons[3] = { 16, 32, 10 };
+    int layers = 3;
+    uint16_t neurons[3] = { 3, 16, 3 };
 
     NeuralNet *net;
 

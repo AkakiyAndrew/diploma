@@ -5,6 +5,14 @@
 GameData::GameData()
 {
     net = new NeuralNet(layers, neurons);
+    //normalizing turret ratio
+    /*double maxTurretNum = 1;
+    for (int i = 0; i < 3; i++)
+        if (turretsCount[i] > maxTurretNum)
+            maxTurretNum = turretsCount[i];
+
+    double turretsRatio[3] = { turretsCount[0] / maxTurretNum, turretsCount[1] / maxTurretNum, turretsCount[2] / maxTurretNum };
+    net->Forward(3, turretsRatio);*/
 
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
 
@@ -206,7 +214,7 @@ GameData::GameData()
     };
     genericAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"maxHP", 200},
-        {"size", 16},
+        {"size", 12},
         {"cost", 50},
         {"sightRange", 12},
         {"armor", 5},
@@ -263,7 +271,7 @@ GameData::GameData()
         {"seekRange", 8 * pixelsPerTile},
         {"attackRange", 2 * pixelsPerTile},
         {"speed", 2},
-        {"damage", 5},
+        {"damage", 10},
         {"rotationSpeed", 8},
         {"cooldownDuration", 15}, //ticks to reload
     };
@@ -386,6 +394,13 @@ void GameData::clearMap()
     basePtr = nullptr;
     //creepTilesCount = 0;
     //energisedTilesCount = 0;
+
+    weights[0] = 0.33; weights[1] = 0.33; weights[2] = 0.33;
+    battleEfficiency[0] = 1; battleEfficiency[1] = 1; battleEfficiency[2] = 1;
+    battleEfficiency_previous[0] = { 1 }; battleEfficiency_previous[1] = { 1 }; battleEfficiency_previous[2] = { 1 };
+    unitsSpawned[0] = 0; unitsSpawned[2] = 0; unitsSpawned[2] = 0;
+    damageDealt[0] = 0; damageDealt[1] = 0; damageDealt[2] = 0;
+    damageTaken[0] = 0; damageTaken[1] = 0; damageTaken[2] = 0;
 }
 
 TerrainType GameData::getTerrainType(int x, int y)
@@ -1880,21 +1895,6 @@ bool GameData::Hit(GameActor* target, int damage, ActorType hitBy)
             break;
         }
 
-        switch (hitBy)
-        {
-        case ActorType::LIGHT_INSECT:
-            damageDealt[0] += damage;
-            break;
-        case ActorType::HEAVY_INSECT:
-            damageDealt[1] += damage;
-            break;
-        case ActorType::FLYING_INSECT:
-            damageDealt[2] += damage;
-            break;
-        }
-    }
-    else
-    {
         switch (target->type)
         {
         case ActorType::LIGHT_INSECT:
@@ -1905,6 +1905,21 @@ bool GameData::Hit(GameActor* target, int damage, ActorType hitBy)
             break;
         case ActorType::FLYING_INSECT:
             damageTaken[2] += damage;
+            break;
+        }
+    }
+    else
+    {
+        switch (hitBy)
+        {
+        case ActorType::LIGHT_INSECT:
+            damageDealt[0] += damage;
+            break;
+        case ActorType::HEAVY_INSECT:
+            damageDealt[1] += damage;
+            break;
+        case ActorType::FLYING_INSECT:
+            damageDealt[2] += damage;
             break;
         }
     }
@@ -2079,40 +2094,75 @@ void GameData::calculateInsectsWeights()
     for (int i = 0; i < 3; i++)
     {
         if (unitsSpawned[i] != 0)
-            battleEfficiency[i] = damageDealt[i] / unitsSpawned[i];
+            battleEfficiency[i] = (damageDealt[i] *2 / (1+damageTaken[i])) / unitsSpawned[i];
         else //if no unit spawned - use previous 
             battleEfficiency[i] = battleEfficiency_previous[i];
+        /*if (battleEfficiency[i] == 0)
+            battleEfficiency[i] = 1;*/
     }
 
     //LEARNING
-    double whatNeedToBe[3];
-
-
-    //OUTPUT
+    //normalizing turret ratio
     double maxTurretNum = 1;
     for (int i = 0; i < 3; i++)
         if (turretsCount[i] > maxTurretNum)
             maxTurretNum = turretsCount[i];
-    
-    //normalizing turret ratio
-    double turretsRatio[3] = {turretsCount[0]/ maxTurretNum, turretsCount[1] / maxTurretNum, turretsCount[2] / maxTurretNum };
+
+    double turretsRatio[3] = { turretsCount[0] / maxTurretNum, turretsCount[1] / maxTurretNum, turretsCount[2] / maxTurretNum };
+    double whatNeedToBe[3] = { weights[0], weights[1], weights[2] };
+    double diff; 
+    double diffWeight;
+    for (int i = 0; i < 3; i++)
+    {
+        diff = (battleEfficiency[i] - battleEfficiency_previous[i]) / (1 + max(battleEfficiency[i], battleEfficiency_previous[i]));
+        diffWeight = weights[i] * diff;
+        
+        //difference distribution
+        switch (i)
+        {
+        case 0:
+            whatNeedToBe[0] += diffWeight;
+            whatNeedToBe[1] -= diffWeight / 2;
+            whatNeedToBe[2] -= diffWeight / 2;
+            break;
+        case 1:
+            whatNeedToBe[0] -= diffWeight / 2;
+            whatNeedToBe[1] += diffWeight;
+            whatNeedToBe[2] -= diffWeight / 2;
+            break;
+        case 2:
+            whatNeedToBe[0] -= diffWeight / 2;
+            whatNeedToBe[1] -= diffWeight / 2;
+            whatNeedToBe[2] += diffWeight;
+            break;
+        }
+    }
+    net->learnBackpropagation(turretsRatio, whatNeedToBe, 0.5, 200);
+
+    //OUTPUT
     double output[3] = { 0 };
-    net->Forward(3, turretsRatio); // проверяем работу необученной сети
-    net->getResult(10, output);
+    net->Forward(3, turretsRatio);
+    net->getResult(3, output);
 
     //normalizing output weights
-    double maxOutput = 0.0001;
-    for (int i = 0; i < 3; i++)
-        if (output[i] > maxOutput)
-            maxOutput = output[i];
+    //double maxOutput = 0.0001;
+    //for (int i = 0; i < 3; i++)
+    //    if (output[i] > maxOutput)
+    //        maxOutput = output[i];
 
-    weights[0] = { output[0] / maxOutput };
-    weights[1] = { output[1] / maxOutput };
-    weights[2] = { output[2] / maxOutput };
+    //weights[0] = { output[0] / maxOutput };
+    //weights[1] = { output[1] / maxOutput };
+    //weights[2] = { output[2] / maxOutput };
+
+    weights[0] = { output[0] };
+    weights[1] = { output[1] };
+    weights[2] = { output[2] };
 
     for (int i = 0; i < 3; i++)
     {
         unitsSpawned[i] = 0;
+        damageDealt[i] = 0;
+        damageTaken[i] = 0;
     }
 }
 
@@ -2250,13 +2300,17 @@ void GameData::GameUpdate()
         else
             gamePaused = true;
 
+    //NEURAL RE-CALCULATION
+    if (IsKeyPressed(KEY_Y))
+        calculateInsectsWeights();
+
+    //ACTORS BUILDING
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
     {
         //right-click to clear
         wantToBuild = ActorType::ACTOR_NULL;
     }
-
-    //ACTORS BUILDING
+    
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL && 
         mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE &&
         getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr)
@@ -2738,16 +2792,24 @@ void GameData::GameDraw()
     EndMode2D();
 
     DrawText(FormatText("Camera zoom: %.2f", camera.zoom), 20, 20, 20, RED);
-    DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 80, 20, RED);
+    DrawText(FormatText("Tiles rendering: %d", (renderBorders[2] - renderBorders[0])* (renderBorders[3] - renderBorders[1])), 20, 50, 20, RED);
     DrawText(FormatText("Mouse tile index: %d, %d", mouseIndex.x, mouseIndex.y), 20, 140, 20, RED);
-    DrawText(FormatText("Desire position: %d, %d", insectsDesirePosition.x, insectsDesirePosition.y), 20, 200, 20, RED);
+    DrawText(FormatText("Desire position: %d, %d", insectsDesirePosition.x, insectsDesirePosition.y), 20, 80, 20, RED);
     if(visionSide==Side::INSECTS)
-        DrawText("Vision side: INSECTS", 20, 260, 20, RED);
+        DrawText("Vision side: INSECTS", 20, 110, 20, RED);
     else
-        DrawText("Vision side: MACHINES", 20, 260, 20, RED);
+        DrawText("Vision side: MACHINES", 20, 110, 20, RED);
 
-    DrawText(TextFormat("Creep: %d, food: %d", creepTilesCount, resourcesInsects), 20, 320, 20, RED);
-    DrawText(TextFormat("Zerolayer: %d, energy: %d", energisedTilesCount, resourcesMachines), 20, 380, 20, RED);
+    DrawText(TextFormat("Creep: %d, food: %d", creepTilesCount, resourcesInsects), 20, 170, 20, RED);
+    DrawText(TextFormat("Zerolayer: %d, energy: %d", energisedTilesCount, resourcesMachines), 20, 200, 20, RED);
+
+    //NEURO STUFF
+    DrawText(TextFormat("Units spawned: light - %d, heavy - %d, air - %d", unitsSpawned[0], unitsSpawned[1], unitsSpawned[2]), 20, 230, 20, RED);
+    DrawText(TextFormat("Weights: light - %.2f, heavy - %.2f, air - %.2f", weights[0], weights[1], weights[2]), 20, 260, 20, RED);
+    DrawText(TextFormat("Efficiency: light - %.2f, heavy - %.2f, air - %.2f", battleEfficiency[0], battleEfficiency[1], battleEfficiency[2]), 20, 290, 20, RED);
+    DrawText(TextFormat("Previous efficiency: light - %.2f, heavy - %.2f, air - %.2f", battleEfficiency_previous[0], battleEfficiency_previous[1], battleEfficiency_previous[2]), 20, 320, 20, RED);
+    DrawText(TextFormat("Damage dealt: light - %d, heavy - %d, air - %d", damageDealt[0], damageDealt[1], damageDealt[2]), 20, 350, 20, RED);
+    DrawText(TextFormat("Damage taken: light - %d, heavy - %d, air - %d", damageTaken[0], damageTaken[1], damageTaken[2]), 20, 380, 20, RED);
 
     //ENERGY BAR
     DrawRectangle(screenSize.x / 3, screenSize.y - 70, screenSize.x / 3, 70, DARKGRAY);
@@ -2763,7 +2825,7 @@ void GameData::GameDraw()
         DrawText(FormatText(" - %d/s", (resourcesMachines - resourcesMachines_previous) * 2), (screenSize.x / 7) * 3 + textWidth, screenSize.y - 35, 24, RED);
     }
 
-    DrawFPS(20, 50);
+    DrawFPS(20, 5);
 }
 
 GameData::~GameData()
