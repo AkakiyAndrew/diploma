@@ -4,6 +4,8 @@
 
 GameData::GameData()
 {
+    net = new NeuralNet(layers, neurons);
+
     screenSize = Vector2{ static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) };
 
     camera.target = { screenSize.x / 2, screenSize.y / 2 };
@@ -263,7 +265,7 @@ GameData::GameData()
         {"speed", 2},
         {"damage", 5},
         {"rotationSpeed", 8},
-        {"cooldownDuration", 30}, //ticks to reload
+        {"cooldownDuration", 15}, //ticks to reload
     };
     militaryAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
         {"seekRange", 8 * pixelsPerTile},
@@ -285,9 +287,9 @@ GameData::GameData()
         {"seekRange", 10 * pixelsPerTile},
         {"attackRange", 4 * pixelsPerTile},
         {"speed", 1},
-        {"damage", 15},
+        {"damage", 5},
         {"rotationSpeed", 6},
-        {"cooldownDuration", 15}, //ticks to reload
+        {"cooldownDuration", 5}, //ticks to reload
     };
     militaryAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>{
         {"seekRange", 12 * pixelsPerTile},
@@ -340,19 +342,19 @@ GameData::GameData()
     turretsAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>
     {
         {"maxCharge", 70},
-        {"chargeRate", 2},
+        {"chargeRate", 1},
         {"energyPerShot", 3},
     };
     turretsAttributes[ActorType::HEAVY_TURRET] = std::map<std::string, int>
     {
         {"maxCharge", 100},
-        {"chargeRate", 2},
+        {"chargeRate", 1},
         {"energyPerShot", 20},
     };
     turretsAttributes[ActorType::AIRDEFENSE_TURRET] = std::map<std::string, int>
     {
         {"maxCharge", 50},
-        {"chargeRate", 2},
+        {"chargeRate", 1},
         {"energyPerShot", 7},
     };
 
@@ -1594,6 +1596,20 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         unitsList.push_back(buf_turret);
         militaryUnitsList.push_back(buf_turret);
         turretUnitsList.push_back(buf_turret);
+
+        switch (type)
+        {
+        case ActorType::LIGHT_TURRET:
+            turretsCount[0] += 1;
+            break;
+        case ActorType::HEAVY_TURRET:
+            turretsCount[1] += 1;
+            break;
+        case ActorType::AIRDEFENSE_TURRET:
+            turretsCount[2] += 1;
+            break;
+        }
+
         break;
     case ActorType::LIGHT_INSECT:
     case ActorType::HEAVY_INSECT:
@@ -1606,6 +1622,19 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
 
         unitsList.push_back(buf_military);
         militaryUnitsList.push_back(buf_military);
+
+        switch (type)
+        {
+        case ActorType::LIGHT_INSECT:
+            unitsSpawned[0] += 1;
+            break;
+        case ActorType::HEAVY_INSECT:
+            unitsSpawned[1] += 1;
+            break;
+        case ActorType::FLYING_INSECT:
+            unitsSpawned[2] += 1;
+            break;
+        }
         break;
     case ActorType::CORE:
         buf_constructor = new Core(
@@ -1794,10 +1823,33 @@ void GameData::removeActor(unsigned int ID)
     }
     
 
-    if(buf!=nullptr)
+    if (buf != nullptr)
+    {
+        switch (buf->type)
+        {
+        /*case ActorType::LIGHT_INSECT:
+            unitsSpawned[0] -= 1;
+            break;
+        case ActorType::HEAVY_INSECT:
+            unitsSpawned[1] -= 1;
+            break;
+        case ActorType::FLYING_INSECT:
+            unitsSpawned[2] -= 1;
+            break;*/
+        case ActorType::LIGHT_TURRET:
+            turretsCount[0] -= 1;
+            break;
+        case ActorType::HEAVY_TURRET:
+            turretsCount[1] -= 1;
+            break;
+        case ActorType::AIRDEFENSE_TURRET:
+            turretsCount[2] -= 1;
+            break;
+        }
         delete buf;
+    }
 }
-void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
+bool GameData::Hit(GameActor* target, int damage, ActorType hitBy)
 {
     bool result = false;
     damage -= target->armor;
@@ -1807,6 +1859,55 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
     target->inBattleCounter = 60;
 
     //TODO: consider victory 
+
+    if (target->side == Side::INSECTS)
+    {
+        //affect damage map if it is Insect 
+        switch (target->type)
+        {
+        case ActorType::LIGHT_INSECT:
+        case ActorType::HEAVY_INSECT:
+        case ActorType::FLYING_INSECT:
+            raiseDamageMap(target->type, damage, target->getPositionIndex());
+            break;
+
+        default:
+            std::vector<ActorType> types = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
+            for (ActorType type : types)
+            {
+                raiseDamageMap(type, damage, target->getPositionIndex());
+            }
+            break;
+        }
+
+        switch (hitBy)
+        {
+        case ActorType::LIGHT_INSECT:
+            damageDealt[0] += damage;
+            break;
+        case ActorType::HEAVY_INSECT:
+            damageDealt[1] += damage;
+            break;
+        case ActorType::FLYING_INSECT:
+            damageDealt[2] += damage;
+            break;
+        }
+    }
+    else
+    {
+        switch (target->type)
+        {
+        case ActorType::LIGHT_INSECT:
+            damageTaken[0] += damage;
+            break;
+        case ActorType::HEAVY_INSECT:
+            damageTaken[1] += damage;
+            break;
+        case ActorType::FLYING_INSECT:
+            damageTaken[2] += damage;
+            break;
+        }
+    }
 
     if (target->getHP() <= 0)
     {
@@ -1824,32 +1925,14 @@ void GameData::Hit(GameActor* target, int damage, ActorType hitBy)
                 constructor->SeekForTarget();
             }
         }
-        else
-        {
-            //affect damage map if it is Insect 
-            switch (target->type)
-            {
-            case ActorType::LIGHT_INSECT:
-            case ActorType::HEAVY_INSECT:
-            case ActorType::FLYING_INSECT:
-                raiseDamageMap(target->type, damage, target->getPositionIndex());
-                break;
-
-            default:
-                std::vector<ActorType> types = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
-                for (ActorType type : types)
-                {
-                    raiseDamageMap(type, damage, target->getPositionIndex());
-                }
-                break;
-            }
-        }
 
         removeActor(target->ID);
-        recalculateMilitaryTargets(opposite);
+        //recalculateMilitaryTargets(opposite);
 
         result = true;
     }
+
+    return result;
 }
 void GameData::raiseDamageMap(ActorType type, int damage, TileIndex tile)
 {
@@ -1983,6 +2066,53 @@ void GameData::spendResources(int amount, Side side)
     if (side == Side::MACHINES)
     {
         resourcesMachines -= amount;
+    }
+}
+
+void GameData::calculateInsectsWeights()
+{
+    //EFFICIENCY
+    battleEfficiency_previous[0] = battleEfficiency[0];
+    battleEfficiency_previous[1] = battleEfficiency[1];
+    battleEfficiency_previous[2] = battleEfficiency[2];
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (unitsSpawned[i] != 0)
+            battleEfficiency[i] = damageDealt[i] / unitsSpawned[i];
+        else //if no unit spawned - use previous 
+            battleEfficiency[i] = battleEfficiency_previous[i];
+    }
+
+    //LEARNING
+    double whatNeedToBe[3];
+
+
+    //OUTPUT
+    double maxTurretNum = 1;
+    for (int i = 0; i < 3; i++)
+        if (turretsCount[i] > maxTurretNum)
+            maxTurretNum = turretsCount[i];
+    
+    //normalizing turret ratio
+    double turretsRatio[3] = {turretsCount[0]/ maxTurretNum, turretsCount[1] / maxTurretNum, turretsCount[2] / maxTurretNum };
+    double output[3] = { 0 };
+    net->Forward(3, turretsRatio); // проверяем работу необученной сети
+    net->getResult(10, output);
+
+    //normalizing output weights
+    double maxOutput = 0.0001;
+    for (int i = 0; i < 3; i++)
+        if (output[i] > maxOutput)
+            maxOutput = output[i];
+
+    weights[0] = { output[0] / maxOutput };
+    weights[1] = { output[1] / maxOutput };
+    weights[2] = { output[2] / maxOutput };
+
+    for (int i = 0; i < 3; i++)
+    {
+        unitsSpawned[i] = 0;
     }
 }
 
@@ -2624,9 +2754,9 @@ void GameData::GameDraw()
     DrawRectangle(screenSize.x / 3+5, screenSize.y - 50, ((screenSize.x / 3) * static_cast<float>(resourcesMachines)/1000) - 10, 40, BLUE);
     DrawText(FormatText("Energy: %d/%d", resourcesMachines, 1000), (screenSize.x/7)*3, screenSize.y-35, 24, YELLOW);
     int textWidth = MeasureText(FormatText("Energy: %d/%d", resourcesMachines, 1000), 24);
-    if (resourcesMachines - resourcesMachines_previous >= 0)
+    if (static_cast<int>(resourcesMachines) - static_cast<int>(resourcesMachines_previous) >= 0)
     {
-        DrawText(FormatText(" + %d/s", (resourcesMachines - resourcesMachines_previous)*2), (screenSize.x / 7) * 3 + textWidth, screenSize.y - 35, 24, DARKGREEN);
+        DrawText(FormatText(" + %d/s", (resourcesMachines - resourcesMachines_previous)*2), (screenSize.x / 7) * 3 + textWidth, screenSize.y - 35, 24, GREEN);
     }
     else
     {

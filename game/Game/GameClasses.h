@@ -61,12 +61,31 @@ private:
 
     //RESOURCES
     unsigned resourcesInsects = 0;
-    unsigned resourcesMachines = 200;
+    unsigned resourcesMachines = 1000;
     unsigned resourcesMachines_previous = resourcesMachines;
 
     //FOG OF WAR
     std::map<Side, int**> mapsFogOfWar;
     TileIndex insectsDesirePosition = {0,0};
+
+    //NEURAL STUFF
+    bool spawningUnits = false;
+
+    double turretsCount[3] = { 0,0,0 }; //turrets count of each type 
+    double weights[3] = { 0.33, 0.33, 0.33 }; //Insects resources distribution weights
+    double battleEfficiency[3] = {1,1,1}; //factors of efficiency every Insect`s unit
+    double battleEfficiency_previous[3] = { battleEfficiency[0],battleEfficiency[1],battleEfficiency[2] };//previous factors of efficiency, for comparision
+    int unitsSpawned[3] = { 0,0,0 };
+    int damageDealt[3] = { 0,0,0 }; //amount of damage, dealt by Insects
+    int damageTaken[3] = { 0,0,0 }; //amount of damage, taken by Insects (NO NEED?)
+    int spawnTime = 15; //seconds between spawning new insects;
+    
+    int layers = 1;
+    uint16_t neurons[3] = { 16, 32, 10 };
+
+    NeuralNet *net;
+
+    void calculateInsectsWeights();
 
 public:
     unsigned short timeCount; //for Update()
@@ -150,7 +169,7 @@ public:
 
     void addActor(ActorType type, Vector2 position, State state); //add actor on map, on full health or not - depends on "state" and debug mod on/off
     void removeActor(unsigned int ID);
-    void Hit(GameActor* target, int damage, ActorType hitBy); //return true, if actor destroyed by hit
+    bool Hit(GameActor* target, int damage, ActorType hitBy); //return true, if actor destroyed by hit
     void raiseDamageMap(ActorType type, int damage, TileIndex tile);
 
     void setTerrain(Terrain);

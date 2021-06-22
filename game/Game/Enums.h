@@ -8,6 +8,7 @@
 #include <list>
 #include <omp.h>
 #include <math.h>
+#include "neuro.h"
 
 enum class Side
 {

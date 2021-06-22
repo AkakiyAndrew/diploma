@@ -160,6 +160,7 @@
     <ClCompile Include="Insect.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Military.cpp" />
+    <ClCompile Include="neuro.cpp" />
     <ClCompile Include="TerrainGenerator.cpp" />
     <ClCompile Include="Tumor.cpp" />
     <ClCompile Include="Turret.cpp" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="Enums.h" />
     <ClInclude Include="GameClasses.h" />
+    <ClInclude Include="neuro.h" />
     <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>

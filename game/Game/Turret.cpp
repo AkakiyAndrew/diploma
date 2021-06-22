@@ -30,8 +30,9 @@ void Turret::Recharge()
 void Turret::Attack()
 {
     //TODO::make different attacks for all turrets
-    if(type==ActorType::HEAVY_TURRET)
-        game->Hit(target, damage, type);
+    if (type == ActorType::HEAVY_TURRET)
+        if (game->Hit(target, damage, type))
+            target = nullptr;
 
     if (type == ActorType::LIGHT_TURRET) //attacks units in front of turret (triangle-AoE)
     {
@@ -46,7 +47,7 @@ void Turret::Attack()
             targetPosition.y + s * (position.x - targetPosition.x)
         };
 
-        std::vector <GameActor*> buf_targets = game->getActorsInRadius(position, Vector2Distance(position, target->getPosition()));
+        std::vector <GameActor*> buf_targets = game->getActorsInRadius(position, attackRange /*Vector2Distance(position, target->getPosition())*/);
         //TODO: seek for enemy that can be hited
         for (GameActor* actor : buf_targets)
         {
@@ -54,7 +55,8 @@ void Turret::Attack()
                 actor->side != side &&
                 CheckCollisionPointTriangle(actor->getPosition(), position, pLeft, pRight))
             {
-                game->Hit(actor, damage, type);
+                if(game->Hit(actor, damage, type))
+                    target = nullptr;
             }
         }
     }
@@ -66,7 +68,8 @@ void Turret::Attack()
         {
             if (actor->type == ActorType::FLYING_INSECT)
             {
-                game->Hit(actor, damage, type);
+                if (game->Hit(actor, damage, type))
+                    target = nullptr;
             }
         }
     }

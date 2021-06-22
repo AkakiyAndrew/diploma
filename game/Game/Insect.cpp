@@ -197,7 +197,8 @@ void Insect::Move()
 
 void Insect::Attack()
 {
-    game->Hit(target, damage, type);
+    if(game->Hit(target, damage, type))
+        target = nullptr;
     cooldownRemain = cooldownDuration;
 }
 
