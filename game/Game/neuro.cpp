@@ -9,15 +9,15 @@ NeuralNet::NeuralNet(uint8_t L, uint16_t* n)
 	for (uint8_t l = 0; l < L; l++)this->neuronsInLayers[l] = n[l];
 }
 
-double NeuralNet::debug_getNeurons(uint16_t neu, uint16_t state, uint16_t layer)
-{
-	return this->neurons[neu][state][layer];
-}
-
-double NeuralNet::debug_getWeights(uint16_t n1, uint16_t n2, uint8_t L)
-{
-	return this->weights[n1][n2][L];
-}
+//double NeuralNet::debug_getNeurons(uint16_t neu, uint16_t state, uint16_t layer)
+//{
+//	return this->neurons[neu][state][layer];
+//}
+//
+//double NeuralNet::debug_getWeights(uint16_t n1, uint16_t n2, uint8_t L)
+//{
+//	return this->weights[n1][n2][L];
+//}
 
 void NeuralNet::Forward(uint16_t size, double* data)
 {
@@ -51,7 +51,8 @@ void NeuralNet::getResult(uint16_t size, double* data)
 
 void NeuralNet::learnBackpropagation(double* data, double* ans, double acs, double k)
 {
-	//k - количество эпох обучени€ acs- скорость обучени€
+	//k - epochs
+	//acs - learning rate
 	for (uint32_t e = 0; e < k; e++)
 	{
 		double* errors = new double[neuronsInLayers[numLayers - 1]];

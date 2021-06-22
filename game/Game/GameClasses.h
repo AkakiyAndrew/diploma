@@ -11,6 +11,7 @@ class Connectable;
 class Militaty;
 class Turret;
 class Base;
+class Hive;
 
 class GameData
 {
@@ -34,7 +35,7 @@ private:
     std::vector<Militaty*> militaryUnitsList;
     std::vector<Turret*> turretUnitsList;
     GameActor* basePtr = nullptr;
-    GameActor* hivePtr = nullptr;
+    Hive* hivePtr = nullptr;
 
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
@@ -72,7 +73,6 @@ private:
     bool spawningUnits = false;
 
     double turretsCount[3] = { 0,0,0 }; //turrets count of each type 
-    double weights[3] = { 0.33, 0.33, 0.33 }; //Insects resources distribution weights
     double battleEfficiency[3] = {1,1,1}; //factors of efficiency every Insect`s unit
     double battleEfficiency_previous[3] = { battleEfficiency[0],battleEfficiency[1],battleEfficiency[2] };//previous factors of efficiency, for comparision
     int unitsSpawned[3] = { 0,0,0 };
@@ -108,8 +108,10 @@ public:
     Animation getUnitAnimation(ActorType type, State state) { return unitAnimations[type][state]; }
 
     //ECONOMICS
-    //returns amount of resources, that can be used
+    //returns amount of resources, that actually can be used
     int trySpendResources(int amount, Side side);
+    //returns current amount of resources
+    int getAmountOfResources(Side side);
     //actual spend of resources
     void spendResources(int amount, Side side);
     //num of creep-covered tiles
@@ -119,6 +121,9 @@ public:
 
     unsigned char** mapExpansionCreep = nullptr;
     unsigned char** mapExpansionEnergised = nullptr;
+
+    //Insects resources distribution weights
+    double weights[3] = { 0.33, 0.33, 0.33 }; 
 
     //return num of adjoined expansion tiles 
     int numOfExpansionTileAdjoin(int x, int y, Side side);

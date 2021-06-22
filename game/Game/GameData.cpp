@@ -229,21 +229,21 @@ GameData::GameData()
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
         {"maxHP", 30},
         {"size", 4},
-        {"cost", 10},
+        {"cost", 20},
         {"sightRange", 4},
         {"armor", 1},
     };
     genericAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
         {"maxHP", 100},
         {"size", 8},
-        {"cost", 30},
+        {"cost", 100},
         {"sightRange", 3},
         {"armor", 10},
     };
     genericAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
         {"maxHP", 70},
         {"size", 6},
-        {"cost", 20},
+        {"cost", 60},
         {"sightRange", 5},
         {"armor", 2},
     };
@@ -1604,7 +1604,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     case ActorType::AIRDEFENSE_TURRET:
         buf_turret = new Turret(
             this,
-            wantToBuild,
+            type,
             position,
             State::UNDER_CONSTRUCTION);
 
@@ -1631,7 +1631,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
     case ActorType::FLYING_INSECT:
         buf_military = new Insect(
             this,
-            wantToBuild,
+            type,
             position,
             State::GOES);
 
@@ -2083,6 +2083,17 @@ void GameData::spendResources(int amount, Side side)
         resourcesMachines -= amount;
     }
 }
+int GameData::getAmountOfResources(Side side)
+{
+    if (side == Side::INSECTS)
+    {
+        return static_cast<int>(resourcesInsects);
+    }
+    if (side == Side::MACHINES)
+    {
+        return static_cast<int>(resourcesMachines);
+    }
+}
 
 void GameData::calculateInsectsWeights()
 {
@@ -2312,8 +2323,8 @@ void GameData::GameUpdate()
     }
     
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL && 
-        mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE &&
-        getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr)
+        mapExpansionEnergised[mouseIndex.x][mouseIndex.y] != ExpandState::UNAVAILABLE /*&&
+        getActorInTile(mouseIndex.x, mouseIndex.y) == nullptr*/)
     {
         Vector2 position = { mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 };
         addActor(wantToBuild, position, State::ONLINE);
@@ -2346,7 +2357,7 @@ void GameData::GameUpdate()
             }
         }
 
-        ////TUMOR SPAWNING
+        //TUMOR SPAWNING
         if (timeCountSeconds % 3 == 0 && timeCount == 0)
         {
             int tumorCost = genericAttributes[ActorType::TUMOR]["cost"];
@@ -2391,6 +2402,18 @@ void GameData::GameUpdate()
                 }
             }
         }
+
+        //INSECTS SPAWNING
+        if ((timeCountSeconds % 10 == 0 && timeCount == 0 && spawningUnits) || IsKeyPressed(KEY_U))
+        {
+            hivePtr->SpawnUnits();
+        }
+
+        if (IsKeyPressed(KEY_H))
+            if (spawningUnits)
+                spawningUnits = false;
+            else
+                spawningUnits = true;
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && wantToRemove)
         {
@@ -2810,6 +2833,12 @@ void GameData::GameDraw()
     DrawText(TextFormat("Previous efficiency: light - %.2f, heavy - %.2f, air - %.2f", battleEfficiency_previous[0], battleEfficiency_previous[1], battleEfficiency_previous[2]), 20, 320, 20, RED);
     DrawText(TextFormat("Damage dealt: light - %d, heavy - %d, air - %d", damageDealt[0], damageDealt[1], damageDealt[2]), 20, 350, 20, RED);
     DrawText(TextFormat("Damage taken: light - %d, heavy - %d, air - %d", damageTaken[0], damageTaken[1], damageTaken[2]), 20, 380, 20, RED);
+    if (spawningUnits)
+        DrawText("Unit autospawn: enabled", 20, 410, 20, RED);
+    else
+        DrawText("Unit autospawn: disabled", 20, 440, 20, RED);
+    
+
 
     //ENERGY BAR
     DrawRectangle(screenSize.x / 3, screenSize.y - 70, screenSize.x / 3, 70, DARKGRAY);

@@ -2,13 +2,12 @@
 
 #include "Enums.h"
 
-
 class NeuralNet
 {
 public:
     NeuralNet(uint8_t L, uint16_t* n);
-    double debug_getNeurons(uint16_t neu, uint16_t state, uint16_t layer);
-    double debug_getWeights(uint16_t n1, uint16_t n2, uint8_t L);
+    //double debug_getNeurons(uint16_t neu, uint16_t state, uint16_t layer);
+    //double debug_getWeights(uint16_t n1, uint16_t n2, uint8_t L);
     void Forward(uint16_t size, double* data);
     void getResult(uint16_t size, double* data);
     void learnBackpropagation(double* data, double* ans, double acs, double k);
