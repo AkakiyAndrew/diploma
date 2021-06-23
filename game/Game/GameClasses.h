@@ -85,8 +85,6 @@ private:
 
     NeuralNet *net;
 
-    void calculateInsectsWeights();
-
 public:
     unsigned short timeCount; //for Update()
     unsigned short timeCountSeconds;
@@ -124,6 +122,7 @@ public:
 
     //Insects resources distribution weights
     double weights[3] = { 0.33, 0.33, 0.33 }; 
+    void calculateInsectsWeights();
 
     //return num of adjoined expansion tiles 
     int numOfExpansionTileAdjoin(int x, int y, Side side);

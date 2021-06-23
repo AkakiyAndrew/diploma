@@ -371,7 +371,7 @@ void Turret::Draw()
         WHITE);
     
     //if culminating attack animation
-    if (state == State::ATTACKING && attackProgressCounter>50 && type == ActorType::HEAVY_TURRET)
+    if (state == State::ATTACKING && attackProgressCounter>50 && type == ActorType::HEAVY_TURRET && target!=nullptr)
         DrawLineEx(position, target->getPosition(), 1, RED); //laser beam
 
     if (type == ActorType::LIGHT_TURRET)

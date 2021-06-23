@@ -24,6 +24,8 @@ void Hive::Update()
 
 void Hive::SpawnUnits()
 {	
+	game->calculateInsectsWeights();
+
 	std::vector<ActorType> unitTypes = { ActorType::LIGHT_INSECT, ActorType::HEAVY_INSECT, ActorType::FLYING_INSECT };
 	int currentWeight = 0;
 	int foodAmount = game->getAmountOfResources(side);

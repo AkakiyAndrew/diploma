@@ -2313,7 +2313,9 @@ void GameData::GameUpdate()
 
     //NEURAL RE-CALCULATION
     if (IsKeyPressed(KEY_Y))
+    {
         calculateInsectsWeights();
+    }
 
     //ACTORS BUILDING
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && wantToBuild != ActorType::ACTOR_NULL)
