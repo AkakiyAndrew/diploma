@@ -43,7 +43,7 @@ void TerrainGenerator::DrawInterface()
     }
 
     //REPLACE IN CONSTRUCTOR PARAMETERS(??)
-    Vector2 guiZeroPoint = { GetScreenWidth()*0.75, 0 };
+    Vector2 guiZeroPoint = { GetScreenWidth()*0.65, 0 };
 
     //drawing levels sliders and retriving values from them
     Rectangle position;
