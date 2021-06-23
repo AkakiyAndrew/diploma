@@ -43,13 +43,13 @@ int main(void)
         {
             //TODO: same zeropoint-based visualisation
         case GameState::MAIN_MENU:
-            if (GuiButton(Rectangle{ screenWidth /2.f, 200, 100,50}, "Play") && gameData.isMapLoaded())
+            if (GuiButton(Rectangle{ screenWidth /2.f - 200, 200, 100,50}, "Play") && gameData.isMapLoaded())
                 state = GameState::GAMEPLAY;
             
-            if (GuiButton(Rectangle{ screenWidth / 2.f - 50, 300, 200,50 }, "Generate terrain"))
+            if (GuiButton(Rectangle{ screenWidth / 2.f - 250, 300, 200,50 }, "Generate terrain"))
                 state = GameState::TERRAIN_GENERATOR;
 
-            if (GuiButton(Rectangle{ screenWidth / 2.f, 400, 100,50 }, "Exit"))
+            if (GuiButton(Rectangle{ screenWidth / 2.f - 200, 400, 100,50 }, "Exit"))
                 gameClosed = true;
 
             break;
