@@ -2140,7 +2140,7 @@ void GameData::calculateInsectsWeights()
     for (int i = 0; i < 3; i++)
     {
         if (unitsSpawned[i] != 0)
-            battleEfficiency[i] = (damageDealt[i] *2 / (1+damageTaken[i])) / unitsSpawned[i];
+            battleEfficiency[i] = (static_cast<double>(damageDealt[i]) * 2 / (1 + static_cast<double>(damageTaken[i]))) / static_cast<double>(unitsSpawned[i]);
         else //if no unit spawned - use previous 
             battleEfficiency[i] = battleEfficiency_previous[i];
         if (battleEfficiency[i] == 0)
