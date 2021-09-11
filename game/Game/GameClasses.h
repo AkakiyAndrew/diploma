@@ -16,7 +16,7 @@ class Hive;
 class GameData
 {
 private:
-    //TODO: make this array two-dimensional
+    //TODO: make this array two-dimensional?
     TerrainType* mapTerrain = nullptr;
     Image* tileset;
     Texture2D tilesetTex[8];
@@ -37,6 +37,7 @@ private:
     GameActor* basePtr = nullptr;
     Hive* hivePtr = nullptr;
 
+    //INTERFACE
     int mapHeight; // num of tile rows
     int mapWidth; // num of tile columns
     
@@ -51,8 +52,6 @@ private:
 
     ActorType wantToBuild = ActorType::ACTOR_NULL;
     bool wantToRemove = false;
-
-    //INTERFACE
     bool showingCreepStates = false;
     Side visionSide = Side::MACHINES;
     bool gameOver = false;
@@ -179,6 +178,7 @@ public:
     void setTerrain(Terrain);
     bool isMapLoaded();
     void clearMap();
+    void updateMapPreview();
 
     TileIndex getInsectsDesirePosition() { return insectsDesirePosition; };
     

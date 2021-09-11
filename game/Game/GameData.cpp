@@ -41,7 +41,7 @@ GameData::GameData()
     }
 
     //EXPANSION TEXTURES
-    expansionInsectsTexture = LoadTexture("textures\\source\\creep_1.png");
+    expansionInsectsTexture = LoadTexture("textures\\tileset\\CREEP.png");
     expansionMachinesAnimation = {
         new Texture2D[15],
         //TODO: return to 15
@@ -227,21 +227,21 @@ GameData::GameData()
         {"armor", 5},
     };
     genericAttributes[ActorType::LIGHT_INSECT] = std::map<std::string, int>{
-        {"maxHP", 30},
+        {"maxHP", 15},
         {"size", 4},
         {"cost", 20},
         {"sightRange", 4},
         {"armor", 1},
     };
     genericAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
-        {"maxHP", 100},
+        {"maxHP", 70},
         {"size", 8},
         {"cost", 100},
         {"sightRange", 3},
         {"armor", 10},
     };
     genericAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
-        {"maxHP", 70},
+        {"maxHP", 50},
         {"size", 6},
         {"cost", 60},
         {"sightRange", 5},
@@ -273,7 +273,7 @@ GameData::GameData()
         {"speed", 2},
         {"damage", 10},
         {"rotationSpeed", 8},
-        {"cooldownDuration", 15}, //ticks to reload
+        {"cooldownDuration", 30}, //ticks to reload
     };
     militaryAttributes[ActorType::HEAVY_INSECT] = std::map<std::string, int>{
         {"seekRange", 8 * pixelsPerTile},
@@ -281,7 +281,7 @@ GameData::GameData()
         {"speed", 1},
         {"damage", 30},
         {"rotationSpeed", 4},
-        {"cooldownDuration", 60}, //ticks to reload
+        {"cooldownDuration", 90}, //ticks to reload
     };
     militaryAttributes[ActorType::FLYING_INSECT] = std::map<std::string, int>{
         {"seekRange", 8 * pixelsPerTile},
@@ -289,7 +289,7 @@ GameData::GameData()
         {"speed", 2},
         {"damage", 15},
         {"rotationSpeed", 8},
-        {"cooldownDuration", 45}, //ticks to reload
+        {"cooldownDuration", 60}, //ticks to reload
     };
     militaryAttributes[ActorType::LIGHT_TURRET] = std::map<std::string, int>{
         {"seekRange", 10 * pixelsPerTile},
@@ -401,6 +401,88 @@ void GameData::clearMap()
     unitsSpawned[0] = 0; unitsSpawned[2] = 0; unitsSpawned[2] = 0;
     damageDealt[0] = 0; damageDealt[1] = 0; damageDealt[2] = 0;
     damageTaken[0] = 0; damageTaken[1] = 0; damageTaken[2] = 0;
+}
+
+void GameData::updateMapPreview()
+{
+#ifndef TILE_DRAWING
+    unsigned short* colorPixels = new unsigned short[mapSize.x * mapSize.y];
+
+    Image buf = {
+        colorPixels,
+        mapSize.x,
+        mapSize.y,
+        1,
+        UNCOMPRESSED_R5G6B5
+    };
+
+    int index;
+
+    //TODO: check blending principle for generating texture
+#pragma omp parallel for private(index)
+    for (int i = 0; i < mapHeight; i++)
+    {
+        for (int j = 0; j < mapWidth; j++)
+        {
+            index = mapWidth * i + j;
+            ImageDraw(
+                &buf,
+                tileset[static_cast<int>(mapTerrain[index])],
+                Rectangle{ 0,0, pixelsPerTile, pixelsPerTile },
+                Rectangle{ j * pixelsPerTile, i * pixelsPerTile, pixelsPerTile, pixelsPerTile },
+                WHITE);
+        }
+    }
+#else
+    Color* colorPixels = new Color[mapHeight * mapWidth];
+
+    Image buf = {
+        colorPixels,
+        mapWidth,
+        mapHeight,
+        1,
+        UNCOMPRESSED_R8G8B8A8
+    };
+
+    int index;
+    int** fogOfWar = mapsFogOfWar[visionSide];
+
+//#pragma omp parallel for private(index)
+    for (int x = 0; x < mapWidth; x++) //for (int i = 0; i < mapHeight * mapWidth; i++)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            index = mapWidth * y + x;
+
+            if (fogOfWar[x][y] != -1) 
+            {
+                if (mapExpansionCreep[x][y] == ExpandState::EXPANDED || mapExpansionCreep[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                {
+                    colorPixels[index] = DARKPURPLE;
+                }
+                else
+                {
+                    if (mapExpansionEnergised[x][y] == ExpandState::EXPANDED || mapExpansionEnergised[x][y] == ExpandState::EXPANDED_WITHOUT_SOURCE)
+                    {
+                        colorPixels[index] = DARKBLUE;
+                    }
+                    else
+                    {
+                        colorPixels[index] = palette[static_cast<int>(mapTerrain[index])];
+                    }
+                }
+            }
+            else 
+            {
+                //if there no vision
+                colorPixels[index] = BLACK;
+            }
+        }
+    }
+#endif
+
+    terrainTexture = LoadTextureFromImage(buf);
+    UnloadImage(buf);
 }
 
 TerrainType GameData::getTerrainType(int x, int y)
@@ -653,60 +735,12 @@ void GameData::setTerrain(Terrain terr)
         }
     }
 
-#ifndef TILE_DRAWING
-    unsigned short* colorPixels = new unsigned short[mapSize.x * mapSize.y];
+    updateMapPreview();
 
-    Image buf = {
-        colorPixels,
-        mapSize.x,
-        mapSize.y,
-        1,
-        UNCOMPRESSED_R5G6B5
-    };
-
-    int index;
-
-    //TODO: check blending principle for generating texture
-#pragma omp parallel for private(index)
-    for (int i = 0; i < mapHeight; i++)
-    {
-        for (int j = 0; j < mapWidth; j++)
-        {
-            index = mapWidth * i + j;
-            ImageDraw(
-                &buf,
-                tileset[static_cast<int>(mapTerrain[index])],
-                Rectangle{ 0,0, pixelsPerTile, pixelsPerTile },
-                Rectangle{ j * pixelsPerTile, i * pixelsPerTile, pixelsPerTile, pixelsPerTile },
-                WHITE);
-        }
-    }
-#else
-    Color* colorPixels = new Color[mapHeight * mapWidth];
-
-    Image buf = {
-        colorPixels,
-        mapWidth,
-        mapHeight,
-        1,
-        UNCOMPRESSED_R8G8B8A8
-    };
-
-#pragma omp parallel for
-    for (int i = 0; i < mapHeight * mapWidth; i++)
-    {
-        colorPixels[i] = palette[static_cast<int>(mapTerrain[i])];
-    }
-
-#endif
-
-    terrainTexture = LoadTextureFromImage(buf);
-    UnloadImage(buf);
-
-    calculateVectorPathfinding(
-        TileIndex{ 0,0 },
-        ActorType::LIGHT_INSECT
-    );
+    //calculateVectorPathfinding(
+    //    TileIndex{ 0,0 },
+    //    ActorType::LIGHT_INSECT
+    //);
 }
 
 std::vector<TileIndex> GameData::tilesInsideCircle(Vector2 center, unsigned int radius)
@@ -1672,6 +1706,7 @@ void GameData::addActor(ActorType type, Vector2 position, State state)
         basePtr = buf_constructor;
         constructorList.push_back(buf_constructor);
         insectsDesirePosition = basePtr->getPositionIndex(); //once base placed, game begins
+        updateMapPreview();
 
         //SPAWNING HIVE
         mapCenter = { mapWidth / 2, mapHeight / 2 };
@@ -2108,8 +2143,8 @@ void GameData::calculateInsectsWeights()
             battleEfficiency[i] = (damageDealt[i] *2 / (1+damageTaken[i])) / unitsSpawned[i];
         else //if no unit spawned - use previous 
             battleEfficiency[i] = battleEfficiency_previous[i];
-        /*if (battleEfficiency[i] == 0)
-            battleEfficiency[i] = 1;*/
+        if (battleEfficiency[i] == 0)
+            battleEfficiency[i] = 1;
     }
 
     //LEARNING
@@ -2330,6 +2365,12 @@ void GameData::GameUpdate()
     {
         Vector2 position = { mouseIndex.x * pixelsPerTile + pixelsPerTile / 2, mouseIndex.y * pixelsPerTile + pixelsPerTile / 2 };
         addActor(wantToBuild, position, State::ONLINE);
+    }
+
+    //PREVIEW AND MINIMAP UPDATE
+    if (timeCount == 0)
+    {
+        updateMapPreview();
     }
 
     if (!gamePaused && basePtr!=nullptr) //game starts only when base placed
